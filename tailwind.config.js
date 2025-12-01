@@ -22,6 +22,8 @@ export default {
         'primary-light': '#7DD4E3',
         dark: '#121212',
         'dark-light': '#1A1A1A',
+        'dark-card': '#252525',
+        'dark-card-hover': '#2a2a2a',
         'light-accent': '#E0F7FA',
         'light-secondary': '#B2EBF2',
         brand: "hsl(var(--brand))",

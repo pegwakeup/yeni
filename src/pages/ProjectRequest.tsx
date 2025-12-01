@@ -4,8 +4,7 @@ import {
   Code2,
   Palette,
   LineChart,
-  Zap,
-  ArrowUpRight,
+  ArrowRight,
   ArrowLeft,
   Upload,
   Building2,
@@ -16,15 +15,14 @@ import {
   Info,
   X,
   Send,
-  PartyPopper,
-  CheckCircle as CheckCircleIcon,
-  FileText,
   Calendar,
-  MessageSquare,
   Video,
+  Clock,
+  Sparkles,
+  MessageCircle,
+  FileText,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { useNavigate } from 'react-router-dom';
 import { createProjectRequest } from '../lib/api/projectRequests';
 import { usePrivacyTerms } from '../components/ui/modals/privacy-terms-provider';
 import { useTranslation } from '../hooks/useTranslation';
@@ -59,7 +57,7 @@ interface FormData {
 }
 
 /* -----------------------------
-   Hizmet Kategorileri ve İçerik
+   Hizmet Kategorileri
 ------------------------------ */
 const getServices = (t: (key: string, defaultVal?: string) => string) => ({
   software: {
@@ -83,7 +81,7 @@ const getServices = (t: (key: string, defaultVal?: string) => string) => ({
     ],
   },
   'digital-strategy': {
-    label: t('project_request.services.strategy.label', 'Dijital Pazarlama ve Strateji'),
+    label: t('project_request.services.strategy.label', 'Dijital Pazarlama'),
     icon: LineChart,
     subServices: [
       t('project_request.services.strategy.seo', 'SEO ve Dijital Reklam Yönetimi'),
@@ -94,42 +92,42 @@ const getServices = (t: (key: string, defaultVal?: string) => string) => ({
 });
 
 /* -----------------------------
-   Çözüm Türleri ve Zaman Çizelgesi
+   Çözüm Türleri
 ------------------------------ */
 const getSolutionTypes = (t: (key: string, defaultVal?: string) => string) => [
   {
     id: 'one-time',
-    title: t('project_request.solutions.one_time.title', 'Tek Seferlik Projeler'),
-    description:
-      t('project_request.solutions.one_time.desc', 'İhtiyacınızı dinliyor, uygun ekibi kuruyor ve işinizi tamamlıyoruz.'),
+    title: t('project_request.solutions.one_time.title', 'Tek Seferlik Proje'),
+    description: t('project_request.solutions.one_time.desc', 'İhtiyacınıza özel ekip kuruyoruz.'),
+    icon: Sparkles,
   },
   {
     id: 'additional-support',
-    title: t('project_request.solutions.support.title', 'Ek Freelancer Desteği'),
-    description:
-      t('project_request.solutions.support.desc', 'Mevcut ekibinizin kapasitesini artırmak için freelancerlarımızı devreye alıyoruz.'),
+    title: t('project_request.solutions.support.title', 'Ekip Desteği'),
+    description: t('project_request.solutions.support.desc', 'Mevcut ekibinizi güçlendiriyoruz.'),
+    icon: User,
   },
   {
     id: 'regular-service',
-    title: t('project_request.solutions.regular.title', 'Yıllık ve Aylık Düzenli İşler'),
-    description:
-      t('project_request.solutions.regular.desc', 'Sürekli destek gerektiren işleriniz için düzenli hizmet paketlerimizle yanınızdayız.'),
+    title: t('project_request.solutions.regular.title', 'Düzenli Hizmet'),
+    description: t('project_request.solutions.regular.desc', 'Aylık/yıllık sürekli destek.'),
+    icon: Clock,
   },
   {
     id: 'other',
-    title: t('project_request.solutions.other.title', 'Farklı Bir Çözüme İhtiyacım Var'),
-    description:
-      t('project_request.solutions.other.desc', 'Özel ihtiyaçlarınızı bizimle paylaşın, size uygun çözümü birlikte geliştirelim.'),
+    title: t('project_request.solutions.other.title', 'Özel Çözüm'),
+    description: t('project_request.solutions.other.desc', 'Size özel bir çözüm geliştirelim.'),
+    icon: MessageCircle,
   },
 ];
 
 const getDurations = (t: (key: string, defaultVal?: string) => string) => [
-  { id: '1-week', label: t('project_request.durations.1_week', '1 haftadan kısa sürede') },
-  { id: '1-4-weeks', label: t('project_request.durations.1_4_weeks', '1 ila 4 hafta') },
-  { id: '1-3-months', label: t('project_request.durations.1_3_months', '1 ila 3 ay') },
-  { id: '3-6-months', label: t('project_request.durations.3_6_months', '3 ila 6 ay') },
-  { id: '6-months-plus', label: t('project_request.durations.6_months_plus', '6 aydan uzun') },
-  { id: 'undecided', label: t('project_request.durations.undecided', 'Daha sonra karar vereceğim') },
+  { id: '1-week', label: t('project_request.durations.1_week', '< 1 hafta'), short: '< 1 Hafta' },
+  { id: '1-4-weeks', label: t('project_request.durations.1_4_weeks', '1-4 hafta'), short: '1-4 Hafta' },
+  { id: '1-3-months', label: t('project_request.durations.1_3_months', '1-3 ay'), short: '1-3 Ay' },
+  { id: '3-6-months', label: t('project_request.durations.3_6_months', '3-6 ay'), short: '3-6 Ay' },
+  { id: '6-months-plus', label: t('project_request.durations.6_months_plus', '6+ ay'), short: '6+ Ay' },
+  { id: 'undecided', label: t('project_request.durations.undecided', 'Belirsiz'), short: 'Belirsiz' },
 ];
 
 /* -----------------------------
@@ -147,70 +145,30 @@ const initialFormData: FormData = {
 };
 
 /* -----------------------------
-   Seçim Modu (Form veya Randevu)
+   Adım Başlıkları
 ------------------------------ */
-type RequestMode = 'selection' | 'form' | 'calendly';
-
-/* -----------------------------
-   İlerleyiş (Adım) Göstergesi
------------------------------- */
-const FormSteps = ({ currentStep, t }: { currentStep: FormStep, t: (key: string, defaultVal?: string) => string }) => (
-  <div className="mb-4 sm:mb-6">
-    <div className="flex items-center justify-between relative px-1 sm:px-0">
-      {/* Ana çizgi */}
-      <div className="absolute left-0 right-0 top-1/2 h-0.5 bg-slate-200 dark:bg-white/10 -translate-y-1/2" />
-      {/* Dolu çizgi */}
-      <div
-        className="absolute left-0 right-0 top-1/2 h-0.5 bg-primary -translate-y-1/2 transition-all duration-300"
-        style={{ width: `${((currentStep - 1) / 4) * 100}%` }}
-      />
-      {[1, 2, 3, 4, 5].map((step) => (
-        <div key={step} className="relative z-10">
-          <div
-            className={`w-6 h-6 sm:w-8 sm:h-8 lg:w-10 lg:h-10 rounded-full flex items-center justify-center text-[10px] sm:text-xs lg:text-sm font-medium transition-all duration-300 ${
-              currentStep === step
-                ? 'bg-primary text-white scale-110 shadow-lg shadow-primary/25'
-                : currentStep > step
-                ? 'bg-primary text-white'
-                : 'bg-slate-100 dark:bg-white/10 text-slate-400 dark:text-gray-400 border border-slate-200 dark:border-transparent'
-            }`}
-          >
-            {step}
-          </div>
-          <div
-            className={`absolute -bottom-4 sm:-bottom-5 left-1/2 -translate-x-1/2 whitespace-nowrap text-[7px] sm:text-[10px] lg:text-xs font-medium transition-all duration-300 hidden sm:block ${
-              currentStep === step ? 'text-primary' : 'text-slate-400 dark:text-gray-400'
-            }`}
-          >
-            {step === 1
-              ? t('project_request.steps.services', 'Hizmet Alanları')
-              : step === 2
-              ? t('project_request.steps.solution', 'Çözüm Türü')
-              : step === 3
-              ? t('project_request.steps.timeline', 'Zaman Çizelgesi')
-              : step === 4
-              ? t('project_request.steps.brief', 'Açıklama & Brief')
-              : t('project_request.steps.contact', 'İletişim & Onay')}
-          </div>
-        </div>
-      ))}
-    </div>
-  </div>
-);
+const stepTitles = [
+  { num: 1, title: 'Hizmet', icon: Palette },
+  { num: 2, title: 'Çözüm', icon: Sparkles },
+  { num: 3, title: 'Süre', icon: Clock },
+  { num: 4, title: 'Detay', icon: MessageCircle },
+  { num: 5, title: 'İletişim', icon: User },
+];
 
 /* -----------------------------
    Ana Bileşen: ProjectRequest
 ------------------------------ */
+type RequestType = 'selection' | 'form';
+
 const ProjectRequest = () => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const { openPrivacyPolicy, openTerms } = usePrivacyTerms();
 
   const services = React.useMemo(() => getServices(t), [t]);
   const solutionTypes = React.useMemo(() => getSolutionTypes(t), [t]);
   const durations = React.useMemo(() => getDurations(t), [t]);
 
-  const [requestMode, setRequestMode] = useState<RequestMode>('selection');
+  const [requestType, setRequestType] = useState<RequestType>('selection');
   const [isCalendlyModalOpen, setIsCalendlyModalOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState<FormStep>(1);
   const [formData, setFormData] = useState<FormData>(initialFormData);
@@ -227,9 +185,6 @@ const ProjectRequest = () => {
   const [success, setSuccess] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
 
-  /* -----------------------------
-     Kategori ve Alt Hizmet Seçimi
-  ------------------------------ */
   const handleServiceToggle = (category: ServiceCategory) => {
     setFormData((prev) => ({
       ...prev,
@@ -248,9 +203,6 @@ const ProjectRequest = () => {
     }));
   };
 
-  /* -----------------------------
-     Brief Dosyası Yükleme
-  ------------------------------ */
   const handleBriefUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -261,9 +213,6 @@ const ProjectRequest = () => {
     setBriefFile(file);
   };
 
-  /* -----------------------------
-     Form Gönderme
-  ------------------------------ */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!acceptedTerms) {
@@ -274,10 +223,8 @@ const ProjectRequest = () => {
     setError(null);
 
     try {
-      // Örnek dosya yükleme (URL dönüyor)
       let briefUrl = '';
       if (briefFile) {
-        // TODO: Dosya yükleme işlemini implement edin
         briefUrl = 'temp-url';
       }
 
@@ -296,56 +243,60 @@ const ProjectRequest = () => {
   };
 
   /* -----------------------------
-     Formun Adım İçeriklerini 
-     Ekleyen JSX
+     Adım İçerikleri
   ------------------------------ */
   const renderStepContent = () => {
     switch (currentStep) {
       case 1:
-        /* Adım 1: Hizmet Alanları */
         return (
           <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            className="space-y-6"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="space-y-4"
           >
-            <h2 className="text-xl sm:text-2xl font-bold mb-4 text-slate-900 dark:text-white">{t('project_request.step1.title', '1. Size Hangi Alanlarda Yardımcı Olabiliriz?')}</h2>
-            <p className="text-xs sm:text-sm text-slate-500 dark:text-gray-400 mb-4">
-              {t('project_request.step1.subtitle', 'Önce ana alanları seçin, ardından alt alanları belirleyin.')}
-            </p>
-            <div className="grid gap-4">
-              {Object.entries(services).map(([key, service]) => {
-                const category = key as ServiceCategory;
-                const Icon = service.icon;
-                const isSelected = formData.service_categories.includes(category);
-                return (
-                  <div key={key} className="space-y-4">
-                    <button
-                      type="button"
-                      onClick={() => handleServiceToggle(category)}
-                      className={`w-full flex items-center justify-between p-4 rounded-xl border transition-all ${
-                        isSelected
-                          ? 'bg-primary/10 border-primary text-primary'
-                          : 'bg-slate-50 dark:bg-dark-light/50 border-slate-200 dark:border-white/10 text-slate-600 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-white/5'
-                      }`}
-                    >
-                      <div className="flex items-center space-x-3">
-                        <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-                          <Icon className="w-5 h-5" />
-                        </div>
-                        <span className="font-medium">{service.label}</span>
+            {Object.entries(services).map(([key, service]) => {
+              const category = key as ServiceCategory;
+              const Icon = service.icon;
+              const isSelected = formData.service_categories.includes(category);
+              return (
+                <div key={key} className="space-y-3">
+                  <button
+                    type="button"
+                    onClick={() => handleServiceToggle(category)}
+                    className={`w-full flex items-center justify-between px-4 py-3.5 rounded-xl border-2 transition-all ${
+                      isSelected
+                        ? 'bg-primary/10 dark:bg-primary/20 border-primary'
+                        : 'bg-white dark:bg-[#252525] border-gray-200 dark:border-gray-600 hover:border-primary/50'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                        isSelected ? 'bg-primary text-white' : 'bg-primary/10 dark:bg-gray-700 text-primary'
+                      }`}>
+                        <Icon className="w-5 h-5" />
                       </div>
-                      <CheckCircleIcon
-                        className={`w-5 h-5 transition-opacity ${
-                          isSelected ? 'opacity-100' : 'opacity-0'
-                        }`}
-                      />
-                    </button>
+                      <span className={`font-semibold ${
+                        isSelected ? 'text-primary' : 'text-gray-800 dark:text-gray-200'
+                      }`}>
+                        {service.label}
+                      </span>
+                    </div>
+                    <div className={`w-5 h-5 rounded flex items-center justify-center transition-all ${
+                      isSelected ? 'bg-primary' : 'border-2 border-gray-300 dark:border-gray-500'
+                    }`}>
+                      {isSelected && <CheckCircle className="w-3.5 h-3.5 text-white" />}
+                    </div>
+                  </button>
 
-                    {/* Alt hizmetler */}
+                  <AnimatePresence>
                     {isSelected && (
-                      <div className="grid sm:grid-cols-2 gap-3 pl-4">
+                      <motion.div 
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="grid grid-cols-1 sm:grid-cols-2 gap-2 pl-4 overflow-hidden"
+                      >
                         {service.subServices.map((subService, idx) => {
                           const isSubSelected = selectedSubServices[category].includes(subService);
                           return (
@@ -353,40 +304,42 @@ const ProjectRequest = () => {
                               key={idx}
                               type="button"
                               onClick={() => handleSubServiceToggle(category, subService)}
-                              className={`px-4 py-3 rounded-xl border text-left flex items-center space-x-2 transition-colors ${
+                              className={`px-3 py-2.5 rounded-lg border text-left text-sm flex items-center gap-2 transition-all ${
                                 isSubSelected
-                                  ? 'bg-primary/10 border-primary text-primary'
-                                  : 'bg-slate-50 dark:bg-dark-light/50 border-slate-200 dark:border-white/10 text-slate-600 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-white/5'
+                                  ? 'bg-primary/10 dark:bg-primary/20 border-primary/50 text-primary font-medium'
+                                  : 'bg-white dark:bg-[#252525] border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:border-primary/30 hover:bg-gray-50 dark:hover:bg-dark-card-hover'
                               }`}
                             >
-                              <CheckCircleIcon
-                                className={`w-4 h-4 ${isSubSelected ? 'opacity-100' : 'opacity-0'}`}
-                              />
-                              <span>{subService}</span>
+                              <div className={`w-4 h-4 rounded flex-shrink-0 flex items-center justify-center ${
+                                isSubSelected ? 'bg-primary' : 'border-2 border-gray-300 dark:border-gray-500'
+                              }`}>
+                                {isSubSelected && <CheckCircle className="w-3 h-3 text-white" />}
+                              </div>
+                              <span className="line-clamp-1">{subService}</span>
                             </button>
                           );
                         })}
-                      </div>
+                      </motion.div>
                     )}
-                  </div>
-                );
-              })}
-            </div>
+                  </AnimatePresence>
+                </div>
+              );
+            })}
           </motion.div>
         );
 
       case 2:
-        /* Adım 2: Çözüm Türü */
         return (
           <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            className="space-y-6"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="grid grid-cols-1 sm:grid-cols-2 gap-3"
           >
-            <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">{t('project_request.step2.title', '2. Hangi Çözümümüz Sizin İçin Uygun?')}</h2>
-            <div className="grid sm:grid-cols-2 gap-4">
-              {solutionTypes.map((solution) => (
+            {solutionTypes.map((solution) => {
+              const Icon = solution.icon;
+              const isSelected = formData.solution_type === solution.id;
+              return (
                 <button
                   key={solution.id}
                   type="button"
@@ -396,38 +349,38 @@ const ProjectRequest = () => {
                       solution_type: solution.id as SolutionType,
                     }))
                   }
-                  className={`p-6 rounded-xl border text-left transition-all ${
-                    formData.solution_type === solution.id
-                      ? 'bg-primary/10 border-primary'
-                      : 'bg-slate-50 dark:bg-dark-light/50 border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-white/5'
+                  className={`px-4 py-4 rounded-xl border-2 text-left transition-all ${
+                    isSelected
+                      ? 'bg-primary/10 dark:bg-primary/20 border-primary'
+                      : 'bg-white dark:bg-[#252525] border-gray-200 dark:border-gray-600 hover:border-primary/50'
                   }`}
                 >
-                  <h3
-                    className={`text-lg font-semibold mb-2 ${
-                      formData.solution_type === solution.id ? 'text-primary' : 'text-slate-900 dark:text-white'
-                    }`}
-                  >
+                  <div className={`w-9 h-9 rounded-lg flex items-center justify-center mb-3 ${
+                    isSelected ? 'bg-primary text-white' : 'bg-primary/10 dark:bg-gray-700 text-primary'
+                  }`}>
+                    <Icon className="w-4 h-4" />
+                  </div>
+                  <h3 className={`font-semibold text-sm mb-1 ${isSelected ? 'text-primary' : 'text-gray-800 dark:text-white'}`}>
                     {solution.title}
                   </h3>
-                  <p className="text-slate-500 dark:text-gray-400 text-sm">{solution.description}</p>
+                  <p className="text-gray-500 dark:text-gray-400 text-xs line-clamp-2">{solution.description}</p>
                 </button>
-              ))}
-            </div>
+              );
+            })}
           </motion.div>
         );
 
       case 3:
-        /* Adım 3: Zaman Çizelgesi */
         return (
           <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            className="space-y-6"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="grid grid-cols-2 sm:grid-cols-3 gap-3"
           >
-            <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">{t('project_request.step3.title', '3. Ne Kadar Sürede Projenin Tamamlanmasını İstersiniz?')}</h2>
-            <div className="grid sm:grid-cols-2 gap-4">
-              {durations.map((duration) => (
+            {durations.map((duration) => {
+              const isSelected = formData.timeline === duration.id;
+              return (
                 <button
                   key={duration.id}
                   type="button"
@@ -437,181 +390,148 @@ const ProjectRequest = () => {
                       timeline: duration.id as ProjectDuration,
                     }))
                   }
-                  className={`px-6 py-4 rounded-xl border transition-colors ${
-                    formData.timeline === duration.id
-                      ? 'bg-primary/10 border-primary text-primary'
-                      : 'bg-slate-50 dark:bg-dark-light/50 border-slate-200 dark:border-white/10 text-slate-600 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-white/5'
+                  className={`px-4 py-3.5 rounded-xl border-2 transition-all text-center ${
+                    isSelected
+                      ? 'bg-primary/10 dark:bg-primary/20 border-primary text-primary font-semibold'
+                      : 'bg-white dark:bg-[#252525] border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:border-primary/50'
                   }`}
                 >
-                  {duration.label}
+                  <span className="text-sm font-medium">{duration.short}</span>
                 </button>
-              ))}
-            </div>
+              );
+            })}
           </motion.div>
         );
 
       case 4:
-        /* Adım 4: Açıklama & Brief */
         return (
           <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            className="space-y-6"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="space-y-4"
           >
-            <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">{t('project_request.step4.title', '4. İstediğiniz Hizmetten Biraz Bahsedebilir Misiniz?')}</h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-2 text-slate-700 dark:text-gray-300">{t('project_request.step4.description_label', 'Proje Açıklaması')}</label>
-                <textarea
-                  value={formData.project_description}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      project_description: e.target.value,
-                    }))
-                  }
-                  className="w-full bg-slate-50 dark:bg-dark-light/50 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-primary min-h-[120px] text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-gray-500"
-                  placeholder={t('project_request.step4.description_placeholder', 'Projenizi kısaca anlatın...')}
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2 text-slate-700 dark:text-gray-300">{t('project_request.step4.brief_label', 'Brief Belgesi (Opsiyonel)')}</label>
-                <div className="relative">
-                  <input
-                    type="file"
-                    onChange={handleBriefUpload}
-                    accept=".pdf,.doc,.docx"
-                    className="hidden"
-                    id="brief-file"
-                  />
-                  <label
-                    htmlFor="brief-file"
-                    className="flex items-center justify-center space-x-2 px-4 py-3 bg-slate-50 dark:bg-dark-light/50 border border-slate-200 dark:border-white/10 rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 transition-colors cursor-pointer text-slate-600 dark:text-gray-300"
-                  >
-                    <Upload className="w-5 h-5" />
-                    <span>{briefFile ? briefFile.name : t('project_request.step4.brief_placeholder', 'Brief Belgesi Yükle (PDF, Word)')}</span>
-                  </label>
-                  {briefFile && (
-                    <button
-                      type="button"
-                      onClick={() => setBriefFile(null)}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 p-2 hover:bg-slate-200 dark:hover:bg-white/10 rounded-lg transition-colors text-slate-500 dark:text-gray-400"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  )}
-                </div>
-                <p className="mt-2 text-sm text-slate-500 dark:text-gray-400">{t('project_request.step4.file_size_limit', 'Maksimum dosya boyutu: 8MB')}</p>
-              </div>
+            <textarea
+              value={formData.project_description}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  project_description: e.target.value,
+                }))
+              }
+              className="w-full bg-white dark:bg-[#252525] border-2 border-gray-200 dark:border-gray-600 rounded-xl px-4 py-3 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 min-h-[120px] text-gray-800 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 transition-all resize-none"
+              placeholder="Projenizi kısaca anlatın. Ne yapmak istiyorsunuz? Hedefleriniz neler?"
+              required
+            />
+            <div className="relative">
+              <input
+                type="file"
+                onChange={handleBriefUpload}
+                accept=".pdf,.doc,.docx"
+                className="hidden"
+                id="brief-file"
+              />
+              <label
+                htmlFor="brief-file"
+                className="flex items-center justify-center gap-3 px-4 py-3 bg-white dark:bg-[#252525] border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl hover:border-primary hover:bg-gray-50 dark:hover:bg-dark-card-hover transition-all cursor-pointer text-gray-500 dark:text-gray-400"
+              >
+                <Upload className="w-5 h-5" />
+                <span className="text-sm">{briefFile ? briefFile.name : 'Brief Belgesi Yükle (Opsiyonel)'}</span>
+              </label>
+              {briefFile && (
+                <button
+                  type="button"
+                  onClick={() => setBriefFile(null)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                >
+                  <X className="w-4 h-4 text-gray-500" />
+                </button>
+              )}
             </div>
           </motion.div>
         );
 
       case 5:
-        /* Adım 5: İletişim & Onay */
         return (
           <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            className="space-y-6"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="space-y-4"
           >
-            <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">{t('project_request.step5.title', '5. İletişim Bilgileri')}</h2>
-            <div className="grid gap-6">
-              <div>
-                <label className="block text-sm font-medium mb-2 text-slate-700 dark:text-gray-300">{t('project_request.step5.company_label', 'Şirket Adı')}</label>
-                <div className="relative">
-                  <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 dark:text-gray-400" />
-                  <input
-                    type="text"
-                    value={formData.company_name}
-                    onChange={(e) =>
-                      setFormData((prev) => ({ ...prev, company_name: e.target.value }))
-                    }
-                    className="w-full bg-slate-50 dark:bg-dark-light/50 border border-slate-200 dark:border-white/10 rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:border-primary text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-gray-500"
-                    placeholder={t('project_request.step5.company_placeholder', 'Şirketinizin adı')}
-                    required
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2 text-slate-700 dark:text-gray-300">{t('project_request.step5.contact_label', 'İletişim Kişisi')}</label>
-                <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 dark:text-gray-400" />
-                  <input
-                    type="text"
-                    value={formData.contact_name}
-                    onChange={(e) =>
-                      setFormData((prev) => ({ ...prev, contact_name: e.target.value }))
-                    }
-                    className="w-full bg-slate-50 dark:bg-dark-light/50 border border-slate-200 dark:border-white/10 rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:border-primary text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-gray-500"
-                    placeholder={t('project_request.step5.contact_placeholder', 'Adınız ve soyadınız')}
-                    required
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2 text-slate-700 dark:text-gray-300">{t('project_request.step5.email_label', 'E-posta')}</label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 dark:text-gray-400" />
-                  <input
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) =>
-                      setFormData((prev) => ({ ...prev, email: e.target.value }))
-                    }
-                    className="w-full bg-slate-50 dark:bg-dark-light/50 border border-slate-200 dark:border-white/10 rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:border-primary text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-gray-500"
-                    placeholder={t('project_request.step5.email_placeholder', 'E-posta adresiniz')}
-                    required
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2 text-slate-700 dark:text-gray-300">{t('project_request.step5.phone_label', 'Telefon')}</label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 dark:text-gray-400" />
-                  <input
-                    type="tel"
-                    value={formData.phone}
-                    onChange={(e) =>
-                      setFormData((prev) => ({ ...prev, phone: e.target.value }))
-                    }
-                    className="w-full bg-slate-50 dark:bg-dark-light/50 border border-slate-200 dark:border-white/10 rounded-xl pl-10 pr-4 py-3 focus:outline-none focus:border-primary text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-gray-500"
-                    placeholder="+90 555 555 5555"
-                  />
-                </div>
-              </div>
-            </div>
-            <div className="mt-4">
-              <label className="flex items-start space-x-2 text-sm text-gray-300">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="relative">
+                <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
-                  type="checkbox"
-                  checked={acceptedTerms}
-                  onChange={(e) => setAcceptedTerms(e.target.checked)}
-                  className="mt-1"
+                  type="text"
+                  value={formData.company_name}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, company_name: e.target.value }))
+                  }
+                  className="w-full bg-white dark:bg-[#252525] border-2 border-gray-200 dark:border-gray-600 rounded-xl pl-11 pr-4 py-3 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-gray-800 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500"
+                  placeholder="Şirket Adı"
+                  required
                 />
-                <span>
-                  <button
-                    type="button"
-                    onClick={openPrivacyPolicy}
-                    className="text-primary hover:text-primary-light underline"
-                  >
-                    {t('project_request.step5.privacy', 'Gizlilik Politikası')}
-                  </button>
-                  {' '}{t('project_request.step5.and', 've')}{' '}
-                  <button
-                    type="button"
-                    onClick={openTerms}
-                    className="text-primary hover:text-primary-light underline"
-                  >
-                    {t('project_request.step5.terms', 'Kullanım Koşulları')}
-                  </button>
-                  {' '}{t('project_request.step5.accept', 'nı okudum ve kabul ediyorum.')}
-                </span>
-              </label>
+              </div>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type="text"
+                  value={formData.contact_name}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, contact_name: e.target.value }))
+                  }
+                  className="w-full bg-white dark:bg-[#252525] border-2 border-gray-200 dark:border-gray-600 rounded-xl pl-11 pr-4 py-3 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-gray-800 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500"
+                  placeholder="Adınız Soyadınız"
+                  required
+                />
+              </div>
             </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, email: e.target.value }))
+                  }
+                  className="w-full bg-white dark:bg-[#252525] border-2 border-gray-200 dark:border-gray-600 rounded-xl pl-11 pr-4 py-3 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-gray-800 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500"
+                  placeholder="E-posta Adresi"
+                  required
+                />
+              </div>
+              <div className="relative">
+                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <input
+                  type="tel"
+                  value={formData.phone}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, phone: e.target.value }))
+                  }
+                  className="w-full bg-white dark:bg-[#252525] border-2 border-gray-200 dark:border-gray-600 rounded-xl pl-11 pr-4 py-3 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-gray-800 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500"
+                  placeholder="+90 555 555 55 55"
+                />
+              </div>
+            </div>
+            <label className="flex items-start gap-3 text-sm text-gray-600 dark:text-gray-400 cursor-pointer pt-2">
+              <input
+                type="checkbox"
+                checked={acceptedTerms}
+                onChange={(e) => setAcceptedTerms(e.target.checked)}
+                className="mt-0.5 w-4 h-4 rounded border-2 border-gray-300 dark:border-gray-600 text-primary focus:ring-primary"
+              />
+              <span className="leading-relaxed">
+                <button type="button" onClick={openPrivacyPolicy} className="text-primary hover:underline font-medium">
+                  Gizlilik Politikası
+                </button>
+                {' '}ve{' '}
+                <button type="button" onClick={openTerms} className="text-primary hover:underline font-medium">
+                  Kullanım Koşulları
+                </button>
+                'nı okudum ve kabul ediyorum.
+              </span>
+            </label>
           </motion.div>
         );
 
@@ -620,386 +540,365 @@ const ProjectRequest = () => {
     }
   };
 
-  /* -----------------------------
-     Ana Render
-  ------------------------------ */
-  
-  // Seçim Ekranı (Form veya Randevu)
-  const renderSelectionScreen = () => (
-    <div className="min-h-screen bg-white dark:bg-dark relative overflow-hidden">
-      <Navbar />
-      
-      {/* Arka Plan Deseni */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#00000008_1px,transparent_1px),linear-gradient(to_bottom,#00000008_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#ffffff10_1px,transparent_1px),linear-gradient(to_bottom,#ffffff10_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black_70%)]" />
-      </div>
-
-      <div className="relative z-10 max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 pt-24 sm:pt-28 pb-8 sm:pb-12">
-        {/* Hero Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-12"
-        >
-          <div className="inline-flex items-center px-4 py-2 rounded-full bg-primary/10 text-primary mb-6">
-            <Zap className="w-4 h-4 mr-2" />
-            <span className="text-sm font-medium">{t('project_request.hero.badge', 'Proje Teklifi')}</span>
-          </div>
-          
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6 text-slate-900 dark:text-white leading-tight">
-            {t('project_request.hero.title_prefix', 'Projenizi')} <br className="hidden sm:block"/>
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-600">{t('project_request.hero.title_highlight', 'Hayata Geçirelim')}</span>
-          </h1>
-          
-          <p className="text-lg text-slate-600 dark:text-gray-300 max-w-2xl mx-auto">
-            {t('projectRequest.selection.subtitle', 'Size en uygun y\u00f6ntemi se\u00e7in. Form doldurun veya \u00fccretsiz dan\u0131\u015fmanl\u0131k g\u00f6r\u00fc\u015fmesi planlay\u0131n.')}
-          </p>
-        </motion.div>
-
-        {/* Seçenek Kartları */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 max-w-4xl mx-auto">
-          {/* Form Seçeneği */}
-          <motion.button
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.1 }}
-            onClick={() => setRequestMode('form')}
-            className="group relative bg-white dark:bg-dark-light/50 border border-slate-200 dark:border-white/10 rounded-2xl p-5 sm:p-6 lg:p-8 text-left hover:border-primary dark:hover:border-primary transition-all duration-300 shadow-lg hover:shadow-xl active:scale-[0.98]"
-          >
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
-            
-            <div className="relative">
-              <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-blue-100 dark:bg-blue-500/20 rounded-xl sm:rounded-2xl flex items-center justify-center mb-4 sm:mb-6 group-hover:scale-110 transition-transform">
-                <FileText className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-blue-600 dark:text-blue-400" />
-              </div>
-              
-              <h3 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mb-2 sm:mb-3">
-                {t('projectRequest.selection.form.title', 'Form Doldurun')}
-              </h3>
-              
-              <p className="text-sm sm:text-base text-slate-600 dark:text-gray-400 mb-4 sm:mb-6">
-                {t('projectRequest.selection.form.description', 'Proje detaylar\u0131n\u0131z\u0131 payla\u015f\u0131n, size \u00f6zel teklif haz\u0131rlayal\u0131m.')}
-              </p>
-              
-              <ul className="space-y-1.5 sm:space-y-2 mb-4 sm:mb-6">
-                <li className="flex items-center text-xs sm:text-sm text-slate-600 dark:text-gray-400">
-                  <CheckCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-500 mr-2 flex-shrink-0" />
-                  {t('projectRequest.selection.form.feature1', 'Detayl\u0131 proje a\u00e7\u0131klamas\u0131')}
-                </li>
-                <li className="flex items-center text-xs sm:text-sm text-slate-600 dark:text-gray-400">
-                  <CheckCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-500 mr-2 flex-shrink-0" />
-                  {t('projectRequest.selection.form.feature2', 'Brief y\u00fckleme imkan\u0131')}
-                </li>
-                <li className="flex items-center text-xs sm:text-sm text-slate-600 dark:text-gray-400">
-                  <CheckCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-500 mr-2 flex-shrink-0" />
-                  {t('projectRequest.selection.form.feature3', '24 saat i\u00e7inde geri d\u00f6n\u00fc\u015f')}
-                </li>
-              </ul>
-              
-              <div className="flex items-center text-primary font-semibold text-sm sm:text-base group-hover:translate-x-2 transition-transform">
-                <span>{t('projectRequest.selection.form.cta', 'Forma Ge\u00e7')}</span>
-                <ArrowUpRight className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
-              </div>
-            </div>
-          </motion.button>
-
-          {/* Randevu Seçeneği */}
-          <motion.button
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.2 }}
-            onClick={() => setIsCalendlyModalOpen(true)}
-            className="group relative bg-white dark:bg-dark-light/50 border-2 border-primary/30 dark:border-primary/40 rounded-2xl p-5 sm:p-6 lg:p-8 text-left hover:border-primary dark:hover:border-primary transition-all duration-300 shadow-lg hover:shadow-xl active:scale-[0.98]"
-          >
-            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-primary/5 rounded-2xl" />
-            
-            {/* Önerilen Rozeti */}
-            <div className="absolute -top-2.5 sm:-top-3 right-2 sm:-right-3">
-              <span className="inline-flex items-center px-2.5 sm:px-3 py-0.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold bg-gradient-to-r from-primary to-purple-600 text-white shadow-lg">
-                <Zap className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-1" />
-                {t('projectRequest.selection.recommended', '\u00d6nerilen')}
-              </span>
-            </div>
-            
-            <div className="relative">
-              <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-purple-100 dark:bg-purple-500/20 rounded-xl sm:rounded-2xl flex items-center justify-center mb-4 sm:mb-6 group-hover:scale-110 transition-transform">
-                <Video className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-purple-600 dark:text-purple-400" />
-              </div>
-              
-              <h3 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white mb-2 sm:mb-3">
-                {t('projectRequest.selection.meeting.title', 'G\u00f6r\u00fc\u015fme Planlay\u0131n')}
-              </h3>
-              
-              <p className="text-sm sm:text-base text-slate-600 dark:text-gray-400 mb-4 sm:mb-6">
-                {t('projectRequest.selection.meeting.description', '30 dk \u00fccretsiz dan\u0131\u015fmanl\u0131k ile projenizi birebir konu\u015falım.')}
-              </p>
-              
-              <ul className="space-y-1.5 sm:space-y-2 mb-4 sm:mb-6">
-                <li className="flex items-center text-xs sm:text-sm text-slate-600 dark:text-gray-400">
-                  <CheckCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-500 mr-2 flex-shrink-0" />
-                  {t('projectRequest.selection.meeting.feature1', 'Birebir dan\u0131\u015fmanl\u0131k')}
-                </li>
-                <li className="flex items-center text-xs sm:text-sm text-slate-600 dark:text-gray-400">
-                  <CheckCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-500 mr-2 flex-shrink-0" />
-                  {t('projectRequest.selection.meeting.feature2', 'An\u0131nda sorular\u0131n\u0131za cevap')}
-                </li>
-                <li className="flex items-center text-xs sm:text-sm text-slate-600 dark:text-gray-400">
-                  <CheckCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-500 mr-2 flex-shrink-0" />
-                  {t('projectRequest.selection.meeting.feature3', 'Ki\u015fiselle\u015ftirilmi\u015f \u00e7\u00f6z\u00fcmler')}
-                </li>
-              </ul>
-              
-              <div className="flex items-center text-primary font-semibold text-sm sm:text-base group-hover:translate-x-2 transition-transform">
-                <span>{t('projectRequest.selection.meeting.cta', 'Randevu Al')}</span>
-                <Calendar className="w-4 h-4 sm:w-5 sm:h-5 ml-2" />
-              </div>
-            </div>
-          </motion.button>
-        </div>
-
-        {/* Alt Bilgi */}
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4 }}
-          className="text-center text-slate-500 dark:text-gray-400 text-xs sm:text-sm mt-8 sm:mt-12 px-4"
-        >
-          {t('projectRequest.selection.freeNote', 'Her iki se\u00e7enekte de')} <span className="text-primary font-medium">{t('projectRequest.selection.freeHighlight', 'tamamen \u00fccretsiz')}</span> {t('projectRequest.selection.freeNoteEnd', 'hizmet al\u0131rs\u0131n\u0131z. Taahh\u00fct yoktur.')}
-        </motion.p>
-      </div>
-
-      <CalendlyModal isOpen={isCalendlyModalOpen} onClose={() => setIsCalendlyModalOpen(false)} />
-    </div>
-  );
-
-  // Form Ekranı
-  const renderFormScreen = () => (
-    <div className="min-h-screen bg-white dark:bg-dark relative overflow-hidden">
-      <Navbar />
-      
-      {/* Sabit Kare Arka Plan Deseni */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#00000008_1px,transparent_1px),linear-gradient(to_bottom,#00000008_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#ffffff10_1px,transparent_1px),linear-gradient(to_bottom,#ffffff10_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black_70%)]" />
-      </div>
-
-      <div className="relative z-10 max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 pt-24 sm:pt-28 lg:pt-32 pb-8 sm:pb-12">
-        {/* Mobil Header */}
-        <div className="lg:hidden mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <button
-              onClick={() => setRequestMode('selection')}
-              className="flex items-center space-x-2 text-slate-500 dark:text-gray-400 hover:text-primary transition-colors"
-            >
-              <ArrowLeft className="w-5 h-5" />
-              <span className="text-sm">{t('projectRequest.back', 'Geri')}</span>
-            </button>
-            <button
-              onClick={() => setIsCalendlyModalOpen(true)}
-              className="flex items-center space-x-1.5 text-xs text-purple-600 dark:text-purple-400 font-medium"
-            >
-              <Calendar className="w-3.5 h-3.5" />
-              <span>{t('projectRequest.selection.meeting.cta', 'Randevu Al')}</span>
-            </button>
-          </div>
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
-            {t('projectRequest.form.projectLabel', 'Proje')} <span className="text-primary">{t('projectRequest.form.formLabel', 'Formu')}</span>
-          </h2>
-        </div>
-
-        <div className="grid lg:grid-cols-12 gap-6 lg:gap-12 items-start">
-          
-          {/* Sol Taraf: Hero & Bilgi - Sadece Desktop */}
-          <div className="hidden lg:block lg:col-span-5 lg:sticky lg:top-32">
-            <button
-              onClick={() => setRequestMode('selection')}
-              className="flex items-center space-x-2 text-slate-500 dark:text-gray-400 hover:text-primary dark:hover:text-white transition-colors mb-8"
-            >
-              <ArrowLeft className="w-5 h-5" />
-              <span>Geri Dön</span>
-            </button>
-
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6 }}
-            >
-              <div className="inline-flex items-center px-4 py-2 rounded-full bg-primary/10 text-primary mb-6">
-                <FileText className="w-4 h-4 mr-2" />
-                <span className="text-sm font-medium">{t('projectRequest.form.badge', 'Proje Formu')}</span>
-              </div>
-              
-              <h1 className="text-4xl sm:text-5xl font-bold mb-6 text-slate-900 dark:text-white leading-tight">
-                {t('project_request.hero.title_prefix', 'Projenizi')} <br/>
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-600">{t('project_request.hero.title_highlight', 'Hayata Geçirelim')}</span>
-              </h1>
-              
-              <p className="text-lg text-slate-600 dark:text-gray-300 mb-8 leading-relaxed">
-                {t('project_request.hero.description', 'Hayalinizdeki projeyi gerçeğe dönüştürmek için ilk adımı atın. Size özel çözümler ve profesyonel ekibimizle yanınızdayız.')}
-              </p>
-
-              {/* Randevu Alternatif CTA */}
-              <div className="p-4 bg-purple-50 dark:bg-purple-500/10 border border-purple-200 dark:border-purple-500/20 rounded-xl mb-8">
-                <p className="text-sm text-purple-700 dark:text-purple-300 mb-2">
-                  {t('projectRequest.form.preferMeeting', 'Form yerine g\u00f6r\u00fc\u015fme mi tercih edersiniz?')}
-                </p>
-                <button
-                  onClick={() => setIsCalendlyModalOpen(true)}
-                  className="flex items-center text-purple-600 dark:text-purple-400 font-semibold text-sm hover:text-purple-800 dark:hover:text-purple-200 transition-colors"
-                >
-                  <Calendar className="w-4 h-4 mr-2" />
-                  {t('projectRequest.form.createAppointment', 'Randevu Olu\u015ftur')}
-                </button>
-              </div>
-
-              {/* İlerleyiş Göstergesi - Sol Tarafta */}
-              <div className="space-y-6 relative">
-                <div className="absolute left-[19px] top-2 bottom-2 w-0.5 bg-slate-200 dark:bg-white/10" />
-                {[1, 2, 3, 4, 5].map((step) => (
-                  <div key={step} className="relative flex items-center space-x-4">
-                    <div
-                      className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-300 relative z-10 ${
-                        currentStep === step
-                          ? 'bg-primary text-white scale-110 shadow-lg shadow-primary/25'
-                          : currentStep > step
-                          ? 'bg-primary text-white'
-                          : 'bg-slate-100 dark:bg-white/5 text-slate-400 dark:text-gray-500 border border-slate-200 dark:border-white/10'
-                      }`}
-                    >
-                      {currentStep > step ? <CheckCircleIcon className="w-5 h-5" /> : step}
-                    </div>
-                    <div className={`text-sm font-medium transition-colors ${
-                      currentStep === step 
-                        ? 'text-primary' 
-                        : currentStep > step 
-                        ? 'text-slate-900 dark:text-white' 
-                        : 'text-slate-400 dark:text-gray-500'
-                    }`}>
-                      {step === 1 ? t('project_request.steps.services', 'Hizmet Alanları') :
-                       step === 2 ? t('project_request.steps.solution', 'Çözüm Türü') :
-                       step === 3 ? t('project_request.steps.timeline', 'Zaman Çizelgesi') :
-                       step === 4 ? t('project_request.steps.brief', 'Açıklama & Brief') :
-                       t('project_request.steps.contact', 'İletişim & Onay')}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </motion.div>
-          </div>
-
-          {/* Sağ Taraf: Form */}
-          <div className="lg:col-span-7">
-            {/* Mobil Stepper */}
-            <div className="lg:hidden mb-6">
-              <FormSteps currentStep={currentStep} t={t} />
-            </div>
-
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="bg-white dark:bg-dark-light/50 backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-2xl p-6 sm:p-8 shadow-xl"
-            >
-              {error && (
-                <div className="mb-6 p-4 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-xl text-red-600 dark:text-red-400 flex items-center space-x-2">
-                  <Info className="w-5 h-5 flex-shrink-0" />
-                  <span>{error}</span>
-                </div>
-              )}
-
-              <form onSubmit={handleSubmit} className="space-y-8">
-                {renderStepContent()}
-
-                <div className="flex items-center justify-between pt-6 border-t border-slate-100 dark:border-white/5">
-                  <button
-                    type="button"
-                    onClick={() => currentStep === 1 ? setRequestMode('selection') : setCurrentStep((prev) => (prev - 1) as FormStep)}
-                    className="flex items-center space-x-2 px-5 py-2.5 rounded-xl transition-colors font-medium bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-gray-300 hover:bg-slate-200 dark:hover:bg-white/10"
-                  >
-                    <ArrowLeft className="w-4 h-4" />
-                    <span>{t('project_request.nav.back', 'Geri')}</span>
-                  </button>
-
-                  {currentStep < 5 ? (
-                    <button
-                      type="button"
-                      onClick={() => setCurrentStep((prev) => (prev + 1) as FormStep)}
-                      className="flex items-center space-x-2 px-6 py-2.5 bg-primary text-white rounded-xl hover:bg-primary-dark transition-all shadow-lg shadow-primary/20 hover:shadow-primary/30 font-medium"
-                    >
-                      <span>{t('project_request.nav.next', 'İleri')}</span>
-                      <ArrowUpRight className="w-4 h-4" />
-                    </button>
-                  ) : (
-                    <button
-                      type="submit"
-                      disabled={loading || !acceptedTerms}
-                      className="flex items-center space-x-2 px-8 py-2.5 bg-primary text-white rounded-xl hover:bg-primary-dark transition-all shadow-lg shadow-primary/20 hover:shadow-primary/30 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {loading ? (
-                        <>
-                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                          <span>{t('project_request.nav.sending', 'Gönderiliyor...')}</span>
-                        </>
-                      ) : (
-                        <>
-                          <Send className="w-4 h-4" />
-                          <span>{t('project_request.nav.submit', 'Teklif Al')}</span>
-                        </>
-                      )}
-                    </button>
-                  )}
-                </div>
-              </form>
-            </motion.div>
-          </div>
-        </div>
-      </div>
-
-      <CalendlyModal isOpen={isCalendlyModalOpen} onClose={() => setIsCalendlyModalOpen(false)} />
-    </div>
-  );
-
   // Başarı Ekranı
   if (success) {
     return (
-      <div className="min-h-screen bg-white dark:bg-dark">
+      <div className="min-h-screen bg-gray-50 dark:bg-dark">
         <Navbar />
         <div className="flex items-center justify-center px-4 pt-32 pb-12">
-          <div className="bg-white dark:bg-dark-light/80 backdrop-blur-sm border border-slate-200 dark:border-white/10 rounded-2xl p-8 max-w-md w-full mx-auto text-center relative overflow-hidden shadow-2xl">
-            <div className="absolute inset-0 bg-[linear-gradient(to_right,#00000008_1px,transparent_1px),linear-gradient(to_bottom,#00000008_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#ffffff10_1px,transparent_1px),linear-gradient(to_bottom,#ffffff10_1px,transparent_1px)] pointer-events-none bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black_70%)]" />
-            <div className="absolute -left-20 -top-20 w-60 h-60 bg-primary/20 rounded-full blur-3xl opacity-20 pointer-events-none" />
-            <div className="absolute -right-20 -bottom-20 w-60 h-60 bg-primary/20 rounded-full blur-3xl opacity-20 pointer-events-none" />
-            <div className="relative">
-              <motion.div
-                initial={{ rotate: -180, scale: 0 }}
-                animate={{ rotate: 0, scale: 1 }}
-                transition={{ type: 'spring', stiffness: 200, damping: 15 }}
-                className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-6"
-              >
-                <CheckCircle className="w-8 h-8 text-primary" />
-              </motion.div>
-              <h2 className="text-2xl font-bold mb-4 text-slate-900 dark:text-white">{t('project_request.success.title', 'Talebiniz Alındı!')}</h2>
-              <p className="text-slate-600 dark:text-gray-400 mb-8">
-                {t('project_request.success.message', 'Proje talebiniz başarıyla alındı. En kısa sürede sizinle iletişime geçeceğiz.')}
-              </p>
-              <motion.a
-                href="/"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="px-8 py-3 bg-primary text-white rounded-xl hover:bg-primary-dark transition-colors inline-flex items-center space-x-2 shadow-lg shadow-primary/20"
-              >
-                <span>{t('project_request.success.home', 'Ana Sayfaya Dön')}</span>
-                <ArrowUpRight className="w-5 h-5" />
-              </motion.a>
-            </div>
-          </div>
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white dark:bg-dark-light rounded-2xl p-8 sm:p-10 max-w-md w-full mx-auto text-center shadow-xl border border-gray-200 dark:border-gray-700"
+          >
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: 'spring', stiffness: 200, damping: 15 }}
+              className="inline-flex items-center justify-center w-16 h-16 bg-primary/10 rounded-full mb-5"
+            >
+              <CheckCircle className="w-8 h-8 text-primary" />
+            </motion.div>
+            <h2 className="text-2xl font-bold mb-2 text-gray-900 dark:text-white">Talebiniz Alındı!</h2>
+            <p className="text-gray-500 dark:text-gray-400 mb-6">
+              Proje talebiniz başarıyla alındı. En kısa sürede sizinle iletişime geçeceğiz.
+            </p>
+            <a
+              href="/"
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary text-white rounded-xl font-medium hover:bg-primary-dark transition-all"
+            >
+              <span>Ana Sayfaya Dön</span>
+              <ArrowRight className="w-4 h-4" />
+            </a>
+          </motion.div>
         </div>
       </div>
     );
   }
 
-  // Mode'a göre render
-  return requestMode === 'selection' ? renderSelectionScreen() : renderFormScreen();
+  // Seçim Ekranı - Görüşme veya Form
+  if (requestType === 'selection') {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-dark">
+        <Navbar />
+        <main className="pt-24 pb-12">
+          <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Başlık */}
+            <div className="text-center mb-10">
+              <motion.h1 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mb-4"
+              >
+                Projeniz için nasıl ilerlemek istersiniz?
+              </motion.h1>
+              <motion.p 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+                className="text-gray-500 dark:text-gray-400 text-lg"
+              >
+                Size en uygun seçeneği belirleyin
+              </motion.p>
+            </div>
+
+            {/* Seçenekler */}
+            <div className="grid md:grid-cols-2 gap-6">
+              {/* Görüşme Seçeneği */}
+              <motion.button
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                onClick={() => setIsCalendlyModalOpen(true)}
+                className="group relative bg-white dark:bg-dark-light rounded-2xl p-6 sm:p-8 border-2 border-primary text-left transition-all hover:shadow-xl hover:shadow-primary/10"
+              >
+                <div className="absolute top-4 right-4">
+                  <span className="text-xs px-3 py-1 bg-primary/10 text-primary rounded-full font-medium">
+                    Önerilen
+                  </span>
+                </div>
+                <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center mb-5">
+                  <Video className="w-7 h-7 text-white" />
+                </div>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                  Ücretsiz Görüşme
+                </h2>
+                <p className="text-gray-500 dark:text-gray-400 mb-4">
+                  30 dakikalık video görüşme ile projenizi detaylı konuşalım ve size özel çözümler sunalım.
+                </p>
+                <div className="flex items-center gap-4 text-sm text-gray-400">
+                  <span className="flex items-center gap-1.5">
+                    <Clock className="w-4 h-4" />
+                    30 dakika
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <Calendar className="w-4 h-4" />
+                    Hemen randevu al
+                  </span>
+                </div>
+                <div className="mt-6 flex items-center gap-2 text-primary font-medium">
+                  <span>Randevu Oluştur</span>
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </motion.button>
+
+              {/* Form Seçeneği */}
+              <motion.button
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                onClick={() => setRequestType('form')}
+                className="group relative bg-white dark:bg-dark-light rounded-2xl p-6 sm:p-8 border-2 border-gray-200 dark:border-gray-700 text-left transition-all hover:border-primary/50 hover:shadow-lg"
+              >
+                <div className="w-14 h-14 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-5">
+                  <FileText className="w-7 h-7 text-gray-600 dark:text-gray-300" />
+                </div>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                  Form Doldur
+                </h2>
+                <p className="text-gray-500 dark:text-gray-400 mb-4">
+                  Proje detaylarınızı yazılı olarak iletin, en kısa sürede size dönüş yapalım.
+                </p>
+                <div className="flex items-center gap-4 text-sm text-gray-400">
+                  <span className="flex items-center gap-1.5">
+                    <Clock className="w-4 h-4" />
+                    ~3 dakika
+                  </span>
+                </div>
+                <div className="mt-6 flex items-center gap-2 text-gray-600 dark:text-gray-300 font-medium group-hover:text-primary transition-colors">
+                  <span>Formu Doldur</span>
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </motion.button>
+            </div>
+          </div>
+        </main>
+        <CalendlyModal isOpen={isCalendlyModalOpen} onClose={() => setIsCalendlyModalOpen(false)} />
+      </div>
+    );
+  }
+
+  // Form Ekranı
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-dark">
+      <Navbar />
+      
+      {/* Main Content - navbar altında başlasın */}
+      <main className="pt-24 pb-12">
+        <div className="max-w-[1340px] mx-auto px-4 sm:px-6 lg:px-8">
+          
+          {/* Geri Dön Butonu */}
+          <button
+            onClick={() => setRequestType('selection')}
+            className="mb-6 flex items-center gap-2 text-gray-500 dark:text-gray-400 hover:text-primary transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>Geri Dön</span>
+          </button>
+          
+          {/* Mobilde üst stepper */}
+          <div className="lg:hidden mb-6">
+            <div className="bg-white dark:bg-dark-light rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+              <div className="flex items-center justify-between">
+                {stepTitles.map((step, index) => {
+                  const isActive = currentStep === step.num;
+                  const isComplete = currentStep > step.num;
+                  return (
+                    <React.Fragment key={step.num}>
+                      <div className="flex flex-col items-center">
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-semibold transition-all ${
+                          isActive 
+                            ? 'bg-primary text-white' 
+                            : isComplete 
+                            ? 'bg-primary/20 text-primary' 
+                            : 'bg-gray-100 dark:bg-[#252525] text-gray-400'
+                        }`}>
+                          {isComplete ? <CheckCircle className="w-4 h-4" /> : step.num}
+                        </div>
+                        <span className={`text-xs mt-1 ${isActive ? 'text-primary font-medium' : 'text-gray-400'}`}>
+                          {step.title}
+                        </span>
+                      </div>
+                      {index < stepTitles.length - 1 && (
+                        <div className={`flex-1 h-0.5 mx-2 ${isComplete ? 'bg-primary' : 'bg-gray-200 dark:bg-gray-700'}`} />
+                      )}
+                    </React.Fragment>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
+            
+            {/* Sol Sidebar - Sadece Desktop */}
+            <aside className="hidden lg:block w-64 flex-shrink-0">
+              <div className="sticky top-24">
+                <div className="bg-white dark:bg-dark-light rounded-xl p-5 border border-gray-200 dark:border-gray-700">
+                  {/* Steps */}
+                  <div className="space-y-1 mb-6">
+                    {stepTitles.map((step, index) => {
+                      const Icon = step.icon;
+                      const isActive = currentStep === step.num;
+                      const isComplete = currentStep > step.num;
+                      const canNavigate = isComplete || isActive;
+                      
+                      return (
+                        <button
+                          key={step.num}
+                          type="button"
+                          onClick={() => canNavigate && setCurrentStep(step.num as FormStep)}
+                          disabled={!canNavigate}
+                          className={`w-full flex items-center gap-3 py-2.5 px-2 rounded-lg transition-all text-left ${
+                            canNavigate ? 'hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer' : 'cursor-not-allowed opacity-60'
+                          }`}
+                        >
+                          <div className={`relative w-9 h-9 rounded-lg flex items-center justify-center transition-all flex-shrink-0 ${
+                            isActive 
+                              ? 'bg-primary text-white' 
+                              : isComplete 
+                              ? 'bg-primary/20 text-primary' 
+                              : 'bg-gray-100 dark:bg-gray-700 text-gray-400'
+                          }`}>
+                            {isComplete ? <CheckCircle className="w-4 h-4" /> : <Icon className="w-4 h-4" />}
+                            {index < stepTitles.length - 1 && (
+                              <div className={`absolute top-full left-1/2 -translate-x-1/2 w-0.5 h-1.5 ${
+                                isComplete ? 'bg-primary' : 'bg-gray-200 dark:bg-gray-600'
+                              }`} />
+                            )}
+                          </div>
+                          <div>
+                            <p className={`font-medium text-sm ${
+                              isActive ? 'text-primary' : isComplete ? 'text-gray-800 dark:text-white' : 'text-gray-500 dark:text-gray-400'
+                            }`}>
+                              {step.title}
+                            </p>
+                            <p className="text-xs text-gray-400 dark:text-gray-500">Adım {step.num}/5</p>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Calendly CTA */}
+                  <div className="p-4 bg-primary/5 dark:bg-primary/10 rounded-xl border border-primary/20">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-9 h-9 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
+                        <Video className="w-4 h-4 text-white" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-800 dark:text-white text-sm">Görüşme tercih eder misiniz?</p>
+                        <p className="text-xs text-gray-500">30 dk ücretsiz</p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setIsCalendlyModalOpen(true)}
+                      className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-lg font-medium text-sm transition-all"
+                    >
+                      <Calendar className="w-4 h-4" />
+                      <span>Randevu Al</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </aside>
+
+            {/* Form Area */}
+            <div className="flex-1 min-w-0">
+              <div className="bg-white dark:bg-dark-light rounded-xl p-5 sm:p-6 border border-gray-200 dark:border-gray-700">
+                {/* Header */}
+                <div className="mb-6">
+                  <span className="text-xs font-medium text-primary mb-2 block">Adım {currentStep}/5</span>
+                  <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+                    {currentStep === 1 && 'Hangi alanlarda yardımcı olalım?'}
+                    {currentStep === 2 && 'Ne tür bir çözüm arıyorsunuz?'}
+                    {currentStep === 3 && 'Projeniz ne kadar sürmeli?'}
+                    {currentStep === 4 && 'Projenizi biraz anlatır mısınız?'}
+                    {currentStep === 5 && 'İletişim bilgileriniz'}
+                  </h1>
+                  <p className="text-gray-500 dark:text-gray-400 text-sm mt-1">
+                    {currentStep === 1 && 'Birden fazla alan seçebilirsiniz.'}
+                    {currentStep === 2 && 'Size en uygun çözümü seçin.'}
+                    {currentStep === 3 && 'Tahmini bir süre belirleyin.'}
+                    {currentStep === 4 && 'Detaylar bize yardımcı olacaktır.'}
+                    {currentStep === 5 && 'Size nasıl ulaşalım?'}
+                  </p>
+                </div>
+
+                {error && (
+                  <div className="mb-5 p-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-lg text-red-600 dark:text-red-400 flex items-center gap-2 text-sm">
+                    <Info className="w-4 h-4 flex-shrink-0" />
+                    <span>{error}</span>
+                  </div>
+                )}
+
+                <form onSubmit={handleSubmit}>
+                  <AnimatePresence mode="wait">
+                    {renderStepContent()}
+                  </AnimatePresence>
+
+                  {/* Navigation */}
+                  <div className="flex items-center justify-between mt-6 pt-5 border-t border-gray-200 dark:border-gray-700">
+                    <button
+                      type="button"
+                      onClick={() => setCurrentStep((prev) => Math.max(1, prev - 1) as FormStep)}
+                      disabled={currentStep === 1}
+                      className="flex items-center gap-2 px-4 py-2.5 rounded-lg transition-all font-medium bg-gray-100 dark:bg-[#252525] text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-dark-card-hover disabled:opacity-40 disabled:cursor-not-allowed text-sm"
+                    >
+                      <ArrowLeft className="w-4 h-4" />
+                      <span className="hidden sm:inline">Geri</span>
+                    </button>
+
+                    {currentStep < 5 ? (
+                      <button
+                        type="button"
+                        onClick={() => setCurrentStep((prev) => (prev + 1) as FormStep)}
+                        className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-lg hover:bg-primary-dark transition-all font-medium text-sm"
+                      >
+                        <span>Devam Et</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </button>
+                    ) : (
+                      <button
+                        type="submit"
+                        disabled={loading || !acceptedTerms}
+                        className="flex items-center gap-2 px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-primary-dark transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                      >
+                        {loading ? (
+                          <>
+                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                            <span>Gönderiliyor...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Send className="w-4 h-4" />
+                            <span>Teklif Al</span>
+                          </>
+                        )}
+                      </button>
+                    )}
+                  </div>
+                </form>
+
+                {/* Mobilde Calendly CTA */}
+                <div className="lg:hidden mt-6 pt-5 border-t border-gray-200 dark:border-gray-700">
+                  <button
+                    onClick={() => setIsCalendlyModalOpen(true)}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-primary/5 dark:bg-primary/10 text-primary rounded-lg font-medium text-sm border border-primary/20"
+                  >
+                    <Video className="w-4 h-4" />
+                    <span>Görüşme Planla</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <CalendlyModal isOpen={isCalendlyModalOpen} onClose={() => setIsCalendlyModalOpen(false)} />
+    </div>
+  );
 };
 
 /* -----------------------------
@@ -1007,17 +906,10 @@ const ProjectRequest = () => {
 ------------------------------ */
 function triggerConfetti() {
   const count = 200;
-  const defaults = {
-    origin: { y: 0.7 },
-    zIndex: 1000,
-  };
+  const defaults = { origin: { y: 0.7 }, zIndex: 1000 };
 
   function fire(particleRatio: number, opts: confetti.Options) {
-    confetti({
-      ...defaults,
-      ...opts,
-      particleCount: Math.floor(count * particleRatio),
-    });
+    confetti({ ...defaults, ...opts, particleCount: Math.floor(count * particleRatio) });
   }
 
   fire(0.25, { spread: 26, startVelocity: 55 });

@@ -157,16 +157,18 @@ const Navbar = () => {
     });
   };
 
+  const isUniversitiesPage = location.pathname.includes('/universities') || location.pathname.includes('/universiteliler');
+
   return (
     <motion.nav
       className={`
         fixed w-full z-50 transition-all duration-300
-        ${isScrolled
+        ${isScrolled || isUniversitiesPage
           ? 'bg-white/95 dark:bg-dark/95 backdrop-blur-xl border-b border-slate-200 dark:border-white/5 py-2'
           : 'bg-transparent py-4'}
       `}
       style={{
-        boxShadow: isScrolled
+        boxShadow: isScrolled || isUniversitiesPage
           ? theme === 'dark'
             ? '0 4px 20px rgba(95, 200, 218, 0.15), 0 2px 8px rgba(95, 200, 218, 0.1)'
             : '0 4px 20px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04)'
