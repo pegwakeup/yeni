@@ -504,9 +504,6 @@ const Home = () => {
         {/* NEDEN UNILANCER - MODERN BENTO GRID */}
         <WhyUsSection />
 
-        {/* TESTIMONIALS */}
-        <AnimatedTestimonials testimonials={testimonials} autoplay={true} />
-
         {/* SSS */}
         <FaqSection />
 
