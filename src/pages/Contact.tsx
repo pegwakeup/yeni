@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
-  Mail, Phone, MapPin, Send, Building2, ArrowUpRight,
-  MessageSquare, Clock, ExternalLink, Sparkles
+  Mail, Phone, MapPin, Send,
+  MessageSquare, ExternalLink, Sparkles
 } from 'lucide-react';
 import { useTranslation } from '../hooks/useTranslation';
 

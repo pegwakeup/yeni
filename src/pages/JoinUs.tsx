@@ -17,8 +17,6 @@ import {
   Trash2,
   CheckCircle,
   Plus,
-  Globe,
-  Users,
   Video,
   Calendar
 } from 'lucide-react';

@@ -15,7 +15,7 @@ export function WhyUsSection() {
           viewport={{ once: true }}
           className="text-center mb-10 md:mb-20"
         >
-          <h2 className="text-4xl md:text-7xl font-black text-slate-900 dark:text-white tracking-tighter mb-4 md:mb-6">
+          <h2 className="text-3xl md:text-6xl font-black text-slate-900 dark:text-white tracking-tighter">
             neden{" "}
             <span className="relative inline-block text-[#5FC8DA]">
               unilancer
@@ -31,9 +31,6 @@ export function WhyUsSection() {
             </span>
             ?
           </h2>
-          <p className="text-base md:text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto font-medium px-2">
-            Kurumsal hizmeti freelancer esnekliği ile birleştiriyoruz.
-          </p>
         </motion.div>
 
         {/* Bento Grid */}

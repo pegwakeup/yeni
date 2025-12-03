@@ -1,12 +1,7 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState } from "react";
+import { motion } from "framer-motion";
 import {
   ArrowUpRight,
-  ArrowRight,
-  Sparkles,
-  ChevronDown,
   Monitor,
   Box,
   ShoppingCart,
@@ -15,72 +10,20 @@ import {
   Code2,
   PaintBucket,
   Palette,
-  Users,
-  ShieldCheck,
-  Coins,
-  Rocket,
-  Zap,
-  Calendar,
-  X,
-  CheckCircle2,
 } from "lucide-react";
 import { LogosCarousel } from "../components/ui/sections/logos-carousel";
 import { HowItWorks } from "../components/ui/sections/how-it-works";
-import { MarqueeAnimation } from "../components/ui/effects/marquee-effect";
 import { useTranslation } from "../hooks/useTranslation";
 import CalendlyModal from "../components/modals/CalendlyModal";
 import AudienceCard from "../components/ui/core/audience-card";
 import AnimatedText from "../components/ui/effects/animated-text";
 import AuroraBackground from '../components/ui/effects/aurora-background';
 import { GlitchyText } from "../components/ui/glitchy-text";
-import {
-  ServiceCarousel,
-  type Service,
-} from "../components/ui/core/services-card";
-import { AnimatedTestimonials } from "../components/ui/animated-testimonials";
+import { ServiceCarousel, type Service } from "../components/ui/core/services-card";
 import { CTASection } from "../components/ui/cta-with-rectangle";
 import { FaqSection } from "../components/ui/sections/faq-section";
 import { WhyUsSection } from "../components/ui/sections/why-us";
 
-const getServices = () => [
-  {
-    titleKey: "home.services.website.title",
-    emoji: "💻",
-    descriptionKey: "home.services.website.description",
-  },
-  {
-    titleKey: "home.services.ecommerce.title",
-    emoji: "🛒",
-    descriptionKey: "home.services.ecommerce.description",
-  },
-  {
-    titleKey: "home.services.graphics.title",
-    emoji: "🎨",
-    descriptionKey: "home.services.graphics.description",
-  },
-  {
-    titleKey: "home.services.mobile.title",
-    emoji: "📱",
-    descriptionKey: "home.services.mobile.description",
-  },
-  {
-    titleKey: "home.services.marketing.title",
-    emoji: "📢",
-    descriptionKey: "home.services.marketing.description",
-  },
-  {
-    titleKey: "home.services.3dar.title",
-    emoji: "🍔",
-    descriptionKey: "home.services.3dar.description",
-  },
-  {
-    titleKey: "home.services.ai.title",
-    emoji: "🤖",
-    descriptionKey: "home.services.ai.description",
-  },
-];
-
-// Kimin için kartları – senin görsellerinle
 const getAudience = () => [
   {
     id: "sme",
@@ -111,69 +54,10 @@ const getAudience = () => [
   },
 ];
 
-const CalendlyInline = () => {
-  useEffect(() => {
-    const existingScript = document.querySelector(
-      'script[src="https://assets.calendly.com/assets/external/widget.js"]'
-    ) as HTMLScriptElement | null;
-
-    if (!existingScript) {
-      const script = document.createElement("script");
-      script.src = "https://assets.calendly.com/assets/external/widget.js";
-      script.async = true;
-      document.body.appendChild(script);
-    }
-  }, []);
-
-  return (
-    <div className="h-[560px] md:h-[650px] w-full">
-      <div
-        className="calendly-inline-widget w-full h-full"
-        data-url="https://calendly.com/taha-unilancerlabs/30min"
-        style={{ minWidth: "320px", height: "100%" }}
-      />
-    </div>
-  );
-};
-
 const Home = () => {
   const { t } = useTranslation();
   const audience = getAudience();
   const [isCalendlyOpen, setIsCalendlyOpen] = useState(false);
-
-  // Testimonials with translation keys
-  const testimonials = [
-    {
-      quote: t("home.testimonials.1.quote", "Unilancer sayesinde MVP'mizi çok hızlı ve uygun maliyetle hayata geçirdik. Genç ekibin enerjisi ve teknik yetkinliği beklentimizin çok üzerindeydi."),
-      name: t("home.testimonials.1.name", "Ahmet Yılmaz"),
-      designation: t("home.testimonials.1.designation", "Kurucu Ortak, TechStart"),
-      src: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=3560&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    },
-    {
-      quote: t("home.testimonials.2.quote", "E-ticaret sitemizi yenilemek için çalıştık. Hem profesyonel bir proje yönetimi hem de yaratıcı bir tasarım sundular. Satışlarımız %40 arttı."),
-      name: t("home.testimonials.2.name", "Zeynep Demir"),
-      designation: t("home.testimonials.2.designation", "Pazarlama Müdürü, ModaVibe"),
-      src: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=3540&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    },
-    {
-      quote: t("home.testimonials.3.quote", "Yoğun dönemlerimizde dış kaynak olarak Unilancer'ı kullanıyoruz. İş kalitesi ve teslimat süreleri konusunda çok başarılılar, sanki kendi ekibimiz gibiler."),
-      name: t("home.testimonials.3.name", "Caner Öztürk"),
-      designation: t("home.testimonials.3.designation", "Ajans Başkanı, CreativeWorks"),
-      src: "https://images.unsplash.com/photo-1623582854588-d60de57fa33f?q=80&w=3540&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    },
-    {
-      quote: t("home.testimonials.4.quote", "Sosyal medya içeriklerimiz için düzenli olarak çalışıyoruz. Gençlerin trendleri yakalaması ve dinamik bakış açısı markamıza büyük değer kattı."),
-      name: t("home.testimonials.4.name", "Elif Kaya"),
-      designation: t("home.testimonials.4.designation", "Marka Yöneticisi, FoodCo"),
-      src: "https://images.unsplash.com/photo-1636041293178-808a6762ab39?q=80&w=3464&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    },
-    {
-      quote: t("home.testimonials.5.quote", "Aklımdaki mobil uygulama fikrini hayata geçirmek için doğru adresti. Teknik ekip çok ilgiliydi ve süreci şeffaf bir şekilde yönettiler."),
-      name: t("home.testimonials.5.name", "Murat Çelik"),
-      designation: t("home.testimonials.5.designation", "Girişimci"),
-      src: "https://images.unsplash.com/photo-1624561172888-ac93c696e10c?q=80&w=2592&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    },
-  ];
 
   // Başlık için 3 satır: Türkiye'nin / Üniversiteli Freelancer / Ekosistemi
   const mainTitleTop = t("home.hero.mainTitle");

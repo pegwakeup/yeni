@@ -1,13 +1,11 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import { useTranslation } from '../hooks/useTranslation';
 import {
-  Code2, Database, Globe, Palette, PenTool, Layout,
-  LineChart, Search, TrendingUp, Smartphone, Cpu,
-  MessageSquare, BarChart2, Layers, Zap, Box,
-  PaintBucket, FileImage, Image, Figma, Monitor,
-  Briefcase, Target, Users, BrainCircuit, ArrowUpRight,
-  CheckCircle
+  Code2, Database, Globe, Palette,
+  Search, Smartphone,
+  Box, Figma, Monitor,
+  Target, BrainCircuit, ArrowUpRight,
+  CheckCircle, PaintBucket, FileImage, Zap
 } from 'lucide-react';
 import { ServiceCarousel, type Service } from '../components/ui/core/services-card';
 

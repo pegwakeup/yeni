@@ -1,11 +1,10 @@
-import React, { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { motion, useScroll, useSpring } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
-import { Calendar, Clock, Tag, ChevronUp, ArrowLeft, Share2, Bookmark, User, List, ArrowUpRight } from 'lucide-react';
+import { Calendar, Clock, Share2, List, ArrowUpRight } from 'lucide-react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { getBlogPost, getBlogPosts, type BlogPost } from '../lib/config/supabase';
 import { useTranslation } from '../hooks/useTranslation';
-import AuroraBackground from '../components/ui/effects/aurora-background';
 
 type Heading = {
   id: string;
@@ -107,23 +106,93 @@ const BlogDetail = () => {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-dark p-4">
         <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-4">
-          {error || 'Blog yazısı bulunamadı'}
+          {error || t('blog.detail.not_found', 'Blog yazısı bulunamadı')}
         </h1>
         <Link 
           to={`/${language}/blog`}
           className="px-6 py-3 bg-primary text-white rounded-full font-medium hover:bg-primary-dark transition-colors"
         >
-          Blog'a Dön
+          {t('blog.viewAllPosts', 'Tüm Yazıları Gör')}
         </Link>
       </div>
     );
   }
 
+  // SEO: Article structured data
+  const articleSchema = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": `https://unilancer.co/${language}/blog/${post.slug}`
+    },
+    "headline": post.title,
+    "description": post.excerpt,
+    "image": { "@type": "ImageObject", "url": post.image_url, "width": 1200, "height": 630 },
+    "datePublished": post.created_at,
+    "dateModified": post.updated_at || post.created_at,
+    "author": { "@type": "Organization", "name": "Unilancer", "url": "https://unilancer.co" },
+    "publisher": {
+      "@type": "Organization",
+      "name": "Unilancer",
+      "logo": { "@type": "ImageObject", "url": "https://unilancer.co/images/logo.png", "width": 200, "height": 60 }
+    },
+    "articleSection": post.category,
+    "keywords": post.tags?.join(', ') || post.category,
+    "wordCount": post.content?.split(/\s+/).length || 0,
+    "inLanguage": language === 'tr' ? 'tr-TR' : 'en-US'
+  };
+
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": language === 'tr' ? "Ana Sayfa" : "Home", "item": `https://unilancer.co/${language}` },
+      { "@type": "ListItem", "position": 2, "name": "Blog", "item": `https://unilancer.co/${language}/blog` },
+      { "@type": "ListItem", "position": 3, "name": post.title, "item": `https://unilancer.co/${language}/blog/${post.slug}` }
+    ]
+  };
+
+  const seoDescription = post.excerpt.length > 160 ? post.excerpt.substring(0, 157) + '...' : post.excerpt;
+
   return (
     <div className="min-h-screen bg-white dark:bg-dark relative">
       <Helmet>
         <title>{post.title} | Unilancer Blog</title>
-        <meta name="description" content={post.excerpt} />
+        <meta name="description" content={seoDescription} />
+        
+        {/* Open Graph - Article */}
+        <meta property="og:type" content="article" />
+        <meta property="og:title" content={post.title} />
+        <meta property="og:description" content={seoDescription} />
+        <meta property="og:url" content={`https://unilancer.co/${language}/blog/${post.slug}`} />
+        <meta property="og:site_name" content="Unilancer" />
+        <meta property="og:image" content={post.image_url} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content={post.title} />
+        <meta property="og:locale" content={language === 'tr' ? 'tr_TR' : 'en_US'} />
+        <meta property="article:published_time" content={post.created_at} />
+        <meta property="article:modified_time" content={post.updated_at || post.created_at} />
+        <meta property="article:section" content={post.category} />
+        {post.tags?.map(tag => <meta key={tag} property="article:tag" content={tag} />)}
+        
+        {/* Twitter Card */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={post.title} />
+        <meta name="twitter:description" content={seoDescription} />
+        <meta name="twitter:image" content={post.image_url} />
+        <meta name="twitter:image:alt" content={post.title} />
+        
+        {/* Additional SEO */}
+        <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
+        <link rel="canonical" href={`https://unilancer.co/${language}/blog/${post.slug}`} />
+        <meta name="author" content="Unilancer" />
+        <meta name="keywords" content={post.tags?.join(', ') || post.category} />
+        
+        {/* Structured Data */}
+        <script type="application/ld+json">{JSON.stringify(articleSchema)}</script>
+        <script type="application/ld+json">{JSON.stringify(breadcrumbSchema)}</script>
       </Helmet>
 
       {/* Reading Progress Bar */}
@@ -132,59 +201,60 @@ const BlogDetail = () => {
         style={{ scaleX }}
       />
 
-      {/* Hero Section */}
-      <div className="relative h-[60vh] min-h-[500px] w-full overflow-hidden">
-        <div className="absolute inset-0">
-          <img 
-            src={post.image_url} 
-            alt={post.title}
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-white dark:from-black/60 dark:via-black/40 dark:to-dark" />
-        </div>
-
-        <div className="absolute inset-0 flex flex-col justify-end pb-20">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+      {/* Hero Section - Full Width Image with Overlay Content */}
+      <div className="relative w-full min-h-[380px] h-[50vh] md:h-[60vh] md:min-h-[500px] overflow-hidden">
+        {/* Background Image - mobilde sağ taraf görünsün */}
+        <img 
+          src={post.image_url} 
+          alt={post.title}
+          className="absolute inset-0 w-full h-full object-cover object-right md:object-center"
+          loading="eager"
+          fetchPriority="high"
+        />
+        
+        {/* Gradient Overlay - Light mode: beyaz, Dark mode: siyah */}
+        <div className="absolute inset-0 bg-gradient-to-r from-white/95 via-white/70 to-transparent dark:from-black/85 dark:via-black/50 dark:to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-white/90 via-transparent to-transparent dark:from-black/70 dark:via-transparent dark:to-transparent" />
+        
+        {/* Content Overlay */}
+        <div className="absolute inset-0 flex items-end md:items-center pb-5 md:pb-0">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-14 md:pt-20">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
-              className="space-y-6"
+              className="max-w-2xl lg:max-w-3xl space-y-2 md:space-y-4"
             >
-              <Link 
-                to={`/${language}/blog`}
-                className="inline-flex items-center gap-2 text-white/80 hover:text-white transition-colors mb-4"
-              >
-                <ArrowLeft className="w-5 h-5" />
-                Blog'a Dön
-              </Link>
-
-              <div className="flex flex-wrap gap-3">
-                <span className="px-4 py-1.5 bg-primary/90 text-white text-sm font-bold rounded-full backdrop-blur-sm">
+              <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                <span className="px-2.5 py-1 min-h-[28px] bg-primary text-white text-[11px] sm:text-xs md:text-sm font-bold rounded-full inline-flex items-center">
                   {post.category}
                 </span>
-                {post.tags?.map(tag => (
-                  <span key={tag} className="px-4 py-1.5 bg-white/10 text-white text-sm font-medium rounded-full backdrop-blur-sm border border-white/20">
+                {post.tags?.slice(0, 2).map(tag => (
+                  <span key={tag} className="px-2.5 py-1 min-h-[28px] bg-slate-900/20 dark:bg-white/20 backdrop-blur-sm text-slate-800 dark:text-white text-[11px] sm:text-xs md:text-sm font-medium rounded-full inline-flex items-center">
                     #{tag}
                   </span>
                 ))}
               </div>
 
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight drop-shadow-lg max-w-4xl">
+              <h1 className="text-lg sm:text-xl md:text-3xl lg:text-4xl font-bold text-slate-900 dark:text-white leading-snug md:leading-tight line-clamp-3 sm:line-clamp-none">
                 {post.title}
               </h1>
 
-              <div className="flex flex-wrap items-center gap-6 text-white/90">
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-5 h-5" />
-                  <span className="text-sm font-medium">
-                    {new Date(post.created_at).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })}
+              <p className="text-xs sm:text-sm md:text-base lg:text-lg text-slate-700 dark:text-white/90 leading-relaxed line-clamp-2 md:line-clamp-none">
+                {post.excerpt}
+              </p>
+
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3 md:gap-6 text-slate-600 dark:text-white/80 pt-1">
+                <div className="flex items-center gap-1 sm:gap-1.5 md:gap-2">
+                  <Calendar className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-5 md:h-5" />
+                  <span className="text-[11px] sm:text-xs md:text-sm font-medium">
+                    {new Date(post.created_at).toLocaleDateString(language === 'tr' ? 'tr-TR' : 'en-US', { day: 'numeric', month: 'short' })}
                   </span>
                 </div>
 
-                <div className="flex items-center gap-2">
-                  <Clock className="w-5 h-5" />
-                  <span className="text-sm font-medium">{post.read_time}</span>
+                <div className="flex items-center gap-1 sm:gap-1.5 md:gap-2">
+                  <Clock className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-5 md:h-5" />
+                  <span className="text-[11px] sm:text-xs md:text-sm font-medium">{post.read_time}</span>
                 </div>
               </div>
             </motion.div>
@@ -193,19 +263,20 @@ const BlogDetail = () => {
       </div>
 
       {/* Content Section */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 pb-20">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-          {/* Sidebar (Left) */}
-          <div className="lg:col-span-3 space-y-8 order-2 lg:order-1">
-            {/* Table of Contents */}
-            {headings.length > 0 && (
-              <div className="sticky top-32 space-y-8">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-10 pb-20">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+          {/* Sidebar (Left) - Sadece desktop */}
+          <div className="hidden lg:block lg:col-span-3 order-2 lg:order-1">
+            {/* Sticky Container */}
+            <div className="sticky top-28 space-y-6">
+              {/* Table of Contents - sadece heading varsa */}
+              {headings.length > 0 && (
                 <div className="bg-white/80 dark:bg-white/5 backdrop-blur-xl rounded-3xl p-6 shadow-lg border border-slate-200 dark:border-white/10">
                   <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
                     <List className="w-5 h-5 text-primary" />
-                    İçindekiler
+                    {t('blog.tableOfContents', 'İçindekiler')}
                   </h3>
-                  <nav className="space-y-1 max-h-[60vh] overflow-y-auto custom-scrollbar pr-2">
+                  <nav className="space-y-1 max-h-[40vh] overflow-y-auto custom-scrollbar pr-2">
                     {headings.map((heading) => (
                       <a
                         key={heading.id}
@@ -226,73 +297,140 @@ const BlogDetail = () => {
                     ))}
                   </nav>
                 </div>
+              )}
 
-                {/* Related Posts */}
-                {relatedPosts.length > 0 && (
-                  <div className="bg-white/80 dark:bg-white/5 backdrop-blur-xl rounded-3xl p-6 shadow-lg border border-slate-200 dark:border-white/10">
-                    <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4">
-                      Diğer Yazılar
-                    </h3>
-                    <div className="space-y-4">
-                      {relatedPosts.map((related) => (
-                        <Link 
-                          key={related.id} 
-                          to={`/${language}/blog/${related.slug}`}
-                          className="block group"
-                        >
-                          <div className="aspect-video rounded-xl overflow-hidden mb-2">
-                            <img 
-                              src={related.image_url} 
-                              alt={related.title}
-                              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                            />
-                          </div>
-                          <h4 className="font-medium text-slate-900 dark:text-white text-sm line-clamp-2 group-hover:text-primary transition-colors">
-                            {related.title}
-                          </h4>
-                          <p className="text-xs text-slate-500 dark:text-gray-400 mt-1">
-                            {new Date(related.created_at).toLocaleDateString('tr-TR')}
-                          </p>
-                        </Link>
-                      ))}
-                    </div>
+              {/* Related Posts - her zaman görünür */}
+              {relatedPosts.length > 0 && (
+                <div className="bg-white/80 dark:bg-white/5 backdrop-blur-xl rounded-3xl p-6 shadow-lg border border-slate-200 dark:border-white/10">
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-4">
+                    {t('blog.relatedPosts', 'Diğer Yazılar')}
+                  </h3>
+                  <div className="space-y-4">
+                    {relatedPosts.map((related) => (
+                      <Link 
+                        key={related.id} 
+                        to={`/${language}/blog/${related.slug}`}
+                        className="block group"
+                      >
+                        <div className="aspect-video rounded-xl overflow-hidden mb-2">
+                          <img 
+                            src={related.image_url} 
+                            alt={related.title}
+                            loading="lazy"
+                            decoding="async"
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                          />
+                        </div>
+                        <h4 className="font-medium text-slate-900 dark:text-white text-sm line-clamp-2 group-hover:text-primary transition-colors">
+                          {related.title}
+                        </h4>
+                        <p className="text-xs text-slate-500 dark:text-gray-400 mt-1">
+                          {new Date(related.created_at).toLocaleDateString(language === 'tr' ? 'tr-TR' : 'en-US')}
+                        </p>
+                      </Link>
+                    ))}
                   </div>
-                )}
-
-                {/* Share Card */}
-                <div className="bg-gradient-to-br from-primary to-purple-600 rounded-3xl p-6 text-white shadow-lg text-center">
-                  <h3 className="font-bold text-lg mb-2">Bu yazıyı beğendiniz mi?</h3>
-                  <p className="text-white/80 text-sm mb-4">Arkadaşlarınızla paylaşarak bize destek olabilirsiniz.</p>
-                  <button 
-                    onClick={() => navigator.share({ title: post.title, url: window.location.href })}
-                    className="w-full inline-flex items-center justify-center gap-2 bg-white text-primary hover:bg-slate-100 px-4 py-2 rounded-xl font-bold transition-colors"
-                  >
-                    <Share2 className="w-4 h-4" />
-                    Paylaş
-                  </button>
                 </div>
+              )}
+
+              {/* Share Card - her zaman görünür */}
+              <div className="bg-gradient-to-br from-primary to-purple-600 rounded-3xl p-6 text-white shadow-lg text-center">
+                <h3 className="font-bold text-lg mb-2">{t('blog.share.title', 'Bu yazıyı beğendiniz mi?')}</h3>
+                <p className="text-white/80 text-sm mb-4">{t('blog.share.description', 'Arkadaşlarınızla paylaşarak bize destek olabilirsiniz.')}</p>
+                <button 
+                  onClick={async () => {
+                    try {
+                      if (navigator.share) {
+                        await navigator.share({ title: post.title, url: window.location.href });
+                      } else {
+                        await navigator.clipboard.writeText(window.location.href);
+                        alert(t('blog.share.copied', 'Link panoya kopyalandı!'));
+                      }
+                    } catch (err) {
+                      // User cancelled or share failed - silently ignore
+                    }
+                  }}
+                  className="w-full inline-flex items-center justify-center gap-2 bg-white text-primary hover:bg-slate-100 px-4 py-3 min-h-[44px] rounded-xl font-bold transition-colors active:scale-95"
+                >
+                  <Share2 className="w-4 h-4" />
+                  {t('blog.share.button', 'Paylaş')}
+                </button>
               </div>
-            )}
+            </div>
           </div>
 
           {/* Main Content (Right) */}
           <div className="lg:col-span-9 order-1 lg:order-2">
-            <div className="py-8 md:py-0">
-              <div 
-                ref={contentRef}
-                className="prose prose-lg dark:prose-invert max-w-none
-                  prose-headings:font-bold prose-headings:tracking-tight
-                  prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-6 prose-h2:text-slate-900 dark:prose-h2:text-white
-                  prose-h3:text-2xl prose-h3:mt-8 prose-h3:mb-4
-                  prose-p:text-slate-600 dark:prose-p:text-gray-300 prose-p:leading-relaxed
-                  prose-a:text-primary hover:prose-a:text-primary-dark prose-a:no-underline
-                  prose-strong:text-slate-900 dark:prose-strong:text-white
-                  prose-img:rounded-2xl prose-img:shadow-lg
-                  prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:bg-slate-50 dark:prose-blockquote:bg-white/5 prose-blockquote:p-6 prose-blockquote:rounded-r-xl prose-blockquote:italic
-                  prose-code:bg-slate-100 dark:prose-code:bg-white/10 prose-code:px-2 prose-code:py-1 prose-code:rounded-md prose-code:text-primary
-                  prose-li:marker:text-primary"
-                dangerouslySetInnerHTML={{ __html: post.content }}
-              />
+            <div 
+              ref={contentRef}
+              className="prose prose-base md:prose-lg dark:prose-invert max-w-none
+                prose-headings:font-bold prose-headings:tracking-tight
+                prose-h2:text-xl md:prose-h2:text-3xl prose-h2:mt-8 md:prose-h2:mt-12 prose-h2:mb-4 md:prose-h2:mb-6 prose-h2:text-slate-900 dark:prose-h2:text-white
+                prose-h3:text-lg md:prose-h3:text-2xl prose-h3:mt-6 md:prose-h3:mt-8 prose-h3:mb-3 md:prose-h3:mb-4
+                prose-p:text-slate-600 dark:prose-p:text-gray-300 prose-p:leading-relaxed prose-p:text-sm md:prose-p:text-base
+                prose-a:text-primary hover:prose-a:text-primary-dark prose-a:no-underline
+                prose-strong:text-slate-900 dark:prose-strong:text-white
+                prose-img:rounded-xl md:prose-img:rounded-2xl prose-img:shadow-lg
+                prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:bg-slate-50 dark:prose-blockquote:bg-white/5 prose-blockquote:p-4 md:prose-blockquote:p-6 prose-blockquote:rounded-r-xl prose-blockquote:italic
+                prose-code:bg-slate-100 dark:prose-code:bg-white/10 prose-code:px-2 prose-code:py-1 prose-code:rounded-md prose-code:text-primary prose-code:text-sm
+                prose-li:marker:text-primary"
+              dangerouslySetInnerHTML={{ __html: post.content }}
+            />
+
+            {/* Mobile Related Posts */}
+            {relatedPosts.length > 0 && (
+              <div className="lg:hidden mt-8 pt-6 border-t border-slate-200 dark:border-white/10">
+                <h3 className="text-base font-bold text-slate-900 dark:text-white mb-4">
+                  {t('blog.relatedPosts', 'Diğer Yazılar')}
+                </h3>
+                <div className="grid grid-cols-2 gap-3">
+                  {relatedPosts.map((related) => (
+                    <Link 
+                      key={related.id} 
+                      to={`/${language}/blog/${related.slug}`}
+                      className="block group active:scale-[0.98] transition-transform"
+                    >
+                      <div className="aspect-video rounded-lg overflow-hidden mb-2">
+                        <img 
+                          src={related.image_url} 
+                          alt={related.title}
+                          loading="lazy"
+                          decoding="async"
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                      </div>
+                      <h4 className="font-medium text-slate-900 dark:text-white text-xs sm:text-sm line-clamp-2 group-hover:text-primary transition-colors">
+                        {related.title}
+                      </h4>
+                      <p className="text-[10px] sm:text-xs text-slate-500 dark:text-gray-400 mt-1">
+                        {new Date(related.created_at).toLocaleDateString(language === 'tr' ? 'tr-TR' : 'en-US', { day: 'numeric', month: 'short' })}
+                      </p>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Mobile Share Button */}
+            <div className="lg:hidden mt-6">
+              <button 
+                onClick={async () => {
+                  try {
+                    if (navigator.share) {
+                      await navigator.share({ title: post.title, url: window.location.href });
+                    } else {
+                      await navigator.clipboard.writeText(window.location.href);
+                      alert(t('blog.share.copied', 'Link panoya kopyalandı!'));
+                    }
+                  } catch (err) {
+                    // User cancelled or share failed
+                  }
+                }}
+                className="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-primary to-purple-600 text-white px-6 py-3.5 min-h-[48px] rounded-xl font-bold shadow-lg active:scale-[0.98] transition-transform"
+              >
+                <Share2 className="w-5 h-5" />
+                {t('blog.share.button', 'Paylaş')}
+              </button>
             </div>
           </div>
         </div>

@@ -1,10 +1,10 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
-  Menu, X, Rocket, Users, ChevronDown, Code2, Palette, LineChart,
-  Globe, Smartphone, Database, BrainCircuit, PaintBucket,
-  FileImage, Figma, Search, Target, Monitor, ArrowRight, MessageSquare, Image, FileText, Sun, Moon,
-  ShoppingCart, Box, Sparkles, Languages, Calendar, ShieldCheck
+  Menu, X, Rocket, Users, ChevronDown, Code2, Palette,
+  Globe, BrainCircuit, PaintBucket,
+  Target, Monitor, ArrowRight, MessageSquare, FileText, Sun, Moon,
+  ShoppingCart, Box, Sparkles, Calendar, ShieldCheck
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../contexts/ThemeContext';
@@ -158,17 +158,20 @@ const Navbar = () => {
   };
 
   const isUniversitiesPage = location.pathname.includes('/universities') || location.pathname.includes('/universiteliler');
+  // Blog detay sayfasında navbar her zaman solid olsun
+  const isBlogDetailPage = /\/blog\/[^/]+$/.test(location.pathname);
+  const shouldBeSolid = isScrolled || isUniversitiesPage || isBlogDetailPage;
 
   return (
     <motion.nav
       className={`
         fixed w-full z-50 transition-all duration-300
-        ${isScrolled || isUniversitiesPage
+        ${shouldBeSolid
           ? 'bg-white/95 dark:bg-dark/95 backdrop-blur-xl border-b border-slate-200 dark:border-white/5 py-2'
           : 'bg-transparent py-4'}
       `}
       style={{
-        boxShadow: isScrolled || isUniversitiesPage
+        boxShadow: shouldBeSolid
           ? theme === 'dark'
             ? '0 4px 20px rgba(95, 200, 218, 0.15), 0 2px 8px rgba(95, 200, 218, 0.1)'
             : '0 4px 20px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04)'
@@ -546,243 +549,272 @@ const Navbar = () => {
           <AnimatePresence mode="wait">
             {isOpen && (
               <motion.div
-                initial={{ opacity: 0, y: -20 }}
+                initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3 }}
-                className="fixed inset-0 top-[64px] bg-white/98 dark:bg-dark/95 backdrop-blur-xl z-40 md:hidden overflow-y-auto border-t border-slate-200/50 dark:border-white/5"
-                style={{ height: 'calc(100vh - 64px)' }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.25, ease: "easeOut" }}
+                className="fixed inset-0 top-[64px] bg-white dark:bg-dark z-40 md:hidden overflow-y-auto overscroll-contain"
+                style={{ height: 'calc(100vh - 64px)', WebkitOverflowScrolling: 'touch' }}
               >
-                <div className="min-h-screen px-4 py-6">
-                  <div className="space-y-6 max-w-lg mx-auto">
-                    {/* Free Report CTA */}
-                    <div className="bg-primary/10 dark:bg-primary/20 rounded-xl p-5 border border-primary/30">
-                      <div className="space-y-3">
-                        <h3 className="text-lg font-semibold text-slate-900 dark:text-white text-center">
-                          {t('nav.getFreeReport')}
-                        </h3>
-                        <p className="text-sm text-slate-700 dark:text-slate-300 text-center">
-                          {t('nav.freeConsultation', 'Ücretsiz danışmanlık kazanın')}
-                        </p>
-                        <button
-                          onClick={() => {
-                            setIsOpen(false);
-                            setIsCalendlyOpen(true);
-                          }}
-                          className="w-full flex items-center justify-center space-x-2 px-5 py-3 bg-primary hover:bg-primary-dark text-white rounded-lg transition-colors font-semibold"
-                        >
-                          <Calendar className="w-5 h-5" />
-                          <span>{t('nav.scheduleConsultation')}</span>
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Main Navigation Links */}
-                    <div className="space-y-3">
-                      {/* Services Dropdown */}
-                      <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700">
-                        <button
-                          onClick={() => setMobileServicesOpen(!mobileServicesOpen)}
-                          className="w-full px-5 py-4 text-base font-medium text-slate-800 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white transition-colors flex items-center justify-between"
-                        >
-                          <div className="flex items-center space-x-3">
-                            <div className="w-10 h-10 bg-primary/10 dark:bg-primary/20 rounded-lg flex items-center justify-center">
-                              <Sparkles className="w-5 h-5 text-primary" />
-                            </div>
-                            <span className="font-semibold" style={{ fontFamily: '"Space Grotesk", "Inter", sans-serif' }}>
-                              <span className="text-slate-900 dark:text-white">digit</span>
-                              <span className="text-primary">All</span>
-                            </span>
-                          </div>
-                          <ChevronDown className={`w-5 h-5 text-primary transition-transform ${mobileServicesOpen ? 'rotate-180' : ''}`} />
-                        </button>
-
-                        {mobileServicesOpen && (
-                          <div className="border-t border-slate-200 dark:border-slate-700">
-                            <div className="p-3 space-y-2 bg-white dark:bg-slate-900/50">
-                              {digitAllServices.map((service, index) => (
-                                <Link
-                                  key={index}
-                                  to={service.path}
-                                  className="flex items-center space-x-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors border border-slate-200 dark:border-slate-700 hover:border-primary group"
-                                  onClick={() => {
-                                    setIsOpen(false);
-                                    setMobileServicesOpen(false);
-                                    scrollToTop();
-                                  }}
-                                >
-                                  <div className="w-9 h-9 bg-primary/10 dark:bg-primary/20 rounded-lg flex items-center justify-center">
-                                    <service.icon className="w-4 h-4 text-primary" />
-                                  </div>
-                                  <span className="flex-1 text-slate-700 dark:text-slate-300 font-medium group-hover:text-primary transition-colors">{service.label}</span>
-                                </Link>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Universities Link */}
-                      <Link
-                        to={getRouteForLanguage('/universities', language)}
-                        className="flex items-center justify-between px-6 py-4 bg-slate-50 dark:bg-dark-light/30 text-lg font-medium text-slate-800 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white rounded-xl transition-all duration-200 group border border-slate-200 dark:border-transparent shadow-sm hover:shadow-md"
-                        onClick={() => {
-                          setIsOpen(false);
-                          scrollToTop();
-                        }}
-                      >
-                        <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 bg-primary/10 dark:bg-primary/10 rounded-xl flex items-center justify-center">
-                            <Users className="w-5 h-5 text-primary" />
-                          </div>
-                          <span className="font-semibold">{t('nav.universities', 'Üniversiteliler')}</span>
-                        </div>
-                        <ArrowRight className="w-5 h-5 text-primary group-hover:translate-x-1 transition-transform" />
-                      </Link>
-
-                      {/* Digibot Link */}
-                      <Link
-                        to={getRouteForLanguage('/digibot', language)}
-                        className="flex items-center justify-between px-6 py-4 bg-slate-50 dark:bg-dark-light/30 text-lg font-medium text-slate-800 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white rounded-xl transition-all duration-200 group border border-slate-200 dark:border-transparent shadow-sm hover:shadow-md"
-                        onClick={() => {
-                          setIsOpen(false);
-                          scrollToTop();
-                        }}
-                      >
-                        <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 bg-primary/10 dark:bg-primary/10 rounded-xl flex items-center justify-center">
-                            <BrainCircuit className="w-5 h-5 text-primary" />
-                          </div>
-                          <span className="font-semibold">Digibot</span>
-                        </div>
-                        <ArrowRight className="w-5 h-5 text-primary group-hover:translate-x-1 transition-transform" />
-                      </Link>
-
-                      {/* Corporate Dropdown Mobile */}
-                      <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700">
-                        <button
-                          onClick={() => setMobileCorporateOpen(!mobileCorporateOpen)}
-                          className="w-full px-5 py-4 text-base font-medium text-slate-800 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white transition-colors flex items-center justify-between"
-                        >
-                          <div className="flex items-center space-x-3">
-                            <div className="w-10 h-10 bg-primary/10 dark:bg-primary/20 rounded-lg flex items-center justify-center">
-                              <Users className="w-5 h-5 text-primary" />
-                            </div>
-                            <span className="font-semibold">
-                              {t('nav.corporate', 'Kurumsal')}
-                            </span>
-                          </div>
-                          <ChevronDown className={`w-5 h-5 text-primary transition-transform ${mobileCorporateOpen ? 'rotate-180' : ''}`} />
-                        </button>
-
-                        {mobileCorporateOpen && (
-                          <div className="border-t border-slate-200 dark:border-slate-700">
-                            <div className="p-3 space-y-2 bg-white dark:bg-slate-900/50">
-                              {[
-                                { to: '/about', label: t('nav.about'), icon: Users },
-                                { to: '/team', label: t('nav.team', 'Ekibimiz'), icon: Users },
-                                { to: '/contact', label: t('nav.contact'), icon: MessageSquare }
-                              ].map((item, index) => (
-                                <Link
-                                  key={index}
-                                  to={getRouteForLanguage(item.to, language)}
-                                  className="flex items-center space-x-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors border border-slate-200 dark:border-slate-700 hover:border-primary group"
-                                  onClick={() => {
-                                    setIsOpen(false);
-                                    setMobileCorporateOpen(false);
-                                    scrollToTop();
-                                  }}
-                                >
-                                  <div className="w-9 h-9 bg-primary/10 dark:bg-primary/20 rounded-lg flex items-center justify-center">
-                                    <item.icon className="w-4 h-4 text-primary" />
-                                  </div>
-                                  <span className="flex-1 text-slate-700 dark:text-slate-300 font-medium group-hover:text-primary transition-colors">{item.label}</span>
-                                </Link>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Blog Link */}
-                      {language !== 'en' && (
-                        <Link
-                          to={getRouteForLanguage('/blog', language)}
-                          className="flex items-center justify-between px-6 py-4 bg-slate-50 dark:bg-dark-light/30 text-lg font-medium text-slate-800 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white rounded-xl transition-all duration-200 group border border-slate-200 dark:border-transparent shadow-sm hover:shadow-md"
-                          onClick={() => {
-                            setIsOpen(false);
-                            scrollToTop();
-                          }}
-                        >
-                          <div className="flex items-center space-x-3">
-                            <div className="w-10 h-10 bg-primary/10 dark:bg-primary/10 rounded-xl flex items-center justify-center">
-                              <FileText className="w-5 h-5 text-primary" />
-                            </div>
-                            <span className="font-semibold">{t('nav.blog')}</span>
-                          </div>
-                          <ArrowRight className="w-5 h-5 text-primary group-hover:translate-x-1 transition-transform" />
-                        </Link>
-                      )}
-                    </div>
+                <div className="px-4 py-5 pb-32">
+                  <div className="space-y-4 max-w-lg mx-auto">
                     
-                    {/* Language & Theme Toggle */}
-                    <div className="pt-4 space-y-3">
-                      <button
-                        onClick={toggleLanguage}
-                        className="w-full flex items-center justify-between px-6 py-4 bg-slate-50 dark:bg-dark-light/30 text-lg font-medium text-slate-800 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white rounded-xl transition-all duration-200 border border-slate-200 dark:border-transparent shadow-sm hover:shadow-md group"
-                      >
-                        <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 bg-primary/10 dark:bg-primary/10 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
-                            <Globe className="w-5 h-5 text-primary" />
-                          </div>
-                          <div className="flex flex-col items-start">
-                            <span className="font-semibold text-base">{language === 'tr' ? 'Türkçe' : 'English'}</span>
-                            <span className="text-xs text-slate-500 dark:text-gray-500">
-                              {language === 'tr' ? 'Switch to English' : 'Türkçeye Geç'}
-                            </span>
-                          </div>
-                        </div>
-                        <ArrowRight className="w-5 h-5 text-primary group-hover:translate-x-1 transition-transform" />
-                      </button>
-                      <button
-                        onClick={toggleTheme}
-                        className="w-full flex items-center justify-between px-6 py-4 bg-slate-50 dark:bg-dark-light/30 text-lg font-medium text-slate-800 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white rounded-xl transition-all duration-200 border border-slate-200 dark:border-transparent shadow-sm hover:shadow-md"
-                      >
-                        <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 bg-primary/10 dark:bg-primary/10 rounded-xl flex items-center justify-center">
-                            {theme === 'dark' ? (
-                              <Sun className="w-5 h-5 text-yellow-400" />
-                            ) : (
-                              <Moon className="w-5 h-5 text-slate-700" />
-                            )}
-                          </div>
-                          <span className="font-semibold">{t(theme === 'dark' ? 'nav.lightTheme' : 'nav.darkTheme')}</span>
-                        </div>
-                      </button>
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div className="grid grid-cols-2 gap-4 pt-4">
+                    {/* Quick Action Buttons - En üstte */}
+                    <div className="grid grid-cols-2 gap-3">
                       <Link
                         to={getRouteForLanguage('/project-request', language)}
-                        className="flex items-center justify-center space-x-2 px-6 py-4 bg-primary text-white rounded-xl hover:bg-primary-dark transition-all font-semibold shadow-md hover:shadow-lg"
+                        className="flex items-center justify-center gap-2 px-4 py-3.5 min-h-[52px] bg-primary text-white rounded-xl active:scale-[0.98] transition-all font-semibold shadow-lg shadow-primary/25"
                         onClick={() => setIsOpen(false)}
                       >
                         <Rocket className="w-5 h-5" />
-                        <span className="font-medium">{t('nav.getQuote')}</span>
+                        <span>{t('nav.getQuote')}</span>
                       </Link>
                       <Link
                         to={getRouteForLanguage('/join', language)}
-                        className="flex items-center justify-center space-x-2 px-6 py-4 bg-primary/10 dark:bg-primary/10 text-primary rounded-xl hover:bg-primary/20 dark:hover:bg-primary/20 transition-all font-semibold border border-primary/20 dark:border-primary/20"
+                        className="flex items-center justify-center gap-2 px-4 py-3.5 min-h-[52px] bg-slate-100 dark:bg-white/10 text-slate-900 dark:text-white rounded-xl active:scale-[0.98] transition-all font-semibold"
                         onClick={() => {
                           setIsOpen(false);
                           scrollToTop();
                         }}
                       >
                         <Users className="w-5 h-5" />
-                        <span className="font-medium">{t('nav.joinUs')}</span>
+                        <span>{t('nav.joinUs')}</span>
                       </Link>
                     </div>
+
+                    {/* Divider */}
+                    <div className="h-px bg-slate-200 dark:bg-white/10" />
+
+                    {/* Navigation Links */}
+                    <div className="space-y-2">
+                      
+                      {/* digitAll Services Accordion */}
+                      <div className="rounded-2xl overflow-hidden bg-slate-50 dark:bg-white/5 border border-slate-200/50 dark:border-white/5">
+                        <button
+                          onClick={() => setMobileServicesOpen(!mobileServicesOpen)}
+                          className="w-full px-4 py-4 min-h-[56px] flex items-center justify-between active:bg-slate-100 dark:active:bg-white/10 transition-colors"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
+                              <Sparkles className="w-5 h-5 text-primary" />
+                            </div>
+                            <span className="font-bold text-base" style={{ fontFamily: '"Space Grotesk", "Inter", sans-serif' }}>
+                              <span className="text-slate-900 dark:text-white">digit</span>
+                              <span className="text-primary">All</span>
+                            </span>
+                          </div>
+                          <motion.div
+                            animate={{ rotate: mobileServicesOpen ? 180 : 0 }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            <ChevronDown className="w-5 h-5 text-slate-400" />
+                          </motion.div>
+                        </button>
+
+                        <AnimatePresence>
+                          {mobileServicesOpen && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: "auto", opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              transition={{ duration: 0.2 }}
+                              className="overflow-hidden"
+                            >
+                              <div className="px-3 pb-3 grid grid-cols-2 gap-2">
+                                {digitAllServices.map((service, index) => (
+                                  <Link
+                                    key={index}
+                                    to={service.path}
+                                    className="flex items-center gap-2.5 p-3 min-h-[48px] bg-white dark:bg-white/5 rounded-xl active:scale-[0.98] active:bg-slate-50 dark:active:bg-white/10 transition-all border border-slate-100 dark:border-white/5"
+                                    onClick={() => {
+                                      setIsOpen(false);
+                                      setMobileServicesOpen(false);
+                                      scrollToTop();
+                                    }}
+                                  >
+                                    <service.icon className="w-4 h-4 text-primary flex-shrink-0" />
+                                    <span className="text-sm font-medium text-slate-700 dark:text-slate-200 truncate">{service.label}</span>
+                                  </Link>
+                                ))}
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+
+                      {/* Universities Link */}
+                      <Link
+                        to={getRouteForLanguage('/universities', language)}
+                        className="flex items-center justify-between px-4 py-4 min-h-[56px] bg-slate-50 dark:bg-white/5 rounded-2xl active:scale-[0.98] active:bg-slate-100 dark:active:bg-white/10 transition-all border border-slate-200/50 dark:border-white/5"
+                        onClick={() => {
+                          setIsOpen(false);
+                          scrollToTop();
+                        }}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-blue-500/10 rounded-xl flex items-center justify-center">
+                            <Users className="w-5 h-5 text-blue-500" />
+                          </div>
+                          <span className="font-semibold text-slate-900 dark:text-white">{t('nav.universities', 'Üniversiteliler')}</span>
+                        </div>
+                        <ArrowRight className="w-5 h-5 text-slate-400" />
+                      </Link>
+
+                      {/* Digibot Link */}
+                      <Link
+                        to={getRouteForLanguage('/digibot', language)}
+                        className="flex items-center justify-between px-4 py-4 min-h-[56px] bg-slate-50 dark:bg-white/5 rounded-2xl active:scale-[0.98] active:bg-slate-100 dark:active:bg-white/10 transition-all border border-slate-200/50 dark:border-white/5"
+                        onClick={() => {
+                          setIsOpen(false);
+                          scrollToTop();
+                        }}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-purple-500/10 rounded-xl flex items-center justify-center">
+                            <BrainCircuit className="w-5 h-5 text-purple-500" />
+                          </div>
+                          <span className="font-semibold text-slate-900 dark:text-white">Digibot</span>
+                        </div>
+                        <ArrowRight className="w-5 h-5 text-slate-400" />
+                      </Link>
+
+                      {/* Corporate Accordion */}
+                      <div className="rounded-2xl overflow-hidden bg-slate-50 dark:bg-white/5 border border-slate-200/50 dark:border-white/5">
+                        <button
+                          onClick={() => setMobileCorporateOpen(!mobileCorporateOpen)}
+                          className="w-full px-4 py-4 min-h-[56px] flex items-center justify-between active:bg-slate-100 dark:active:bg-white/10 transition-colors"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-amber-500/10 rounded-xl flex items-center justify-center">
+                              <Users className="w-5 h-5 text-amber-500" />
+                            </div>
+                            <span className="font-semibold text-slate-900 dark:text-white">
+                              {t('nav.corporate', 'Kurumsal')}
+                            </span>
+                          </div>
+                          <motion.div
+                            animate={{ rotate: mobileCorporateOpen ? 180 : 0 }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            <ChevronDown className="w-5 h-5 text-slate-400" />
+                          </motion.div>
+                        </button>
+
+                        <AnimatePresence>
+                          {mobileCorporateOpen && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: "auto", opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              transition={{ duration: 0.2 }}
+                              className="overflow-hidden"
+                            >
+                              <div className="px-3 pb-3 space-y-2">
+                                {[
+                                  { to: '/about', label: t('nav.about'), icon: Users },
+                                  { to: '/team', label: t('nav.team', 'Ekibimiz'), icon: Users },
+                                  { to: '/contact', label: t('nav.contact'), icon: MessageSquare }
+                                ].map((item, index) => (
+                                  <Link
+                                    key={index}
+                                    to={getRouteForLanguage(item.to, language)}
+                                    className="flex items-center gap-3 p-3 min-h-[48px] bg-white dark:bg-white/5 rounded-xl active:scale-[0.98] active:bg-slate-50 dark:active:bg-white/10 transition-all border border-slate-100 dark:border-white/5"
+                                    onClick={() => {
+                                      setIsOpen(false);
+                                      setMobileCorporateOpen(false);
+                                      scrollToTop();
+                                    }}
+                                  >
+                                    <item.icon className="w-4 h-4 text-amber-500" />
+                                    <span className="text-sm font-medium text-slate-700 dark:text-slate-200">{item.label}</span>
+                                  </Link>
+                                ))}
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+
+                      {/* Blog Link */}
+                      {language !== 'en' && (
+                        <Link
+                          to={getRouteForLanguage('/blog', language)}
+                          className="flex items-center justify-between px-4 py-4 min-h-[56px] bg-slate-50 dark:bg-white/5 rounded-2xl active:scale-[0.98] active:bg-slate-100 dark:active:bg-white/10 transition-all border border-slate-200/50 dark:border-white/5"
+                          onClick={() => {
+                            setIsOpen(false);
+                            scrollToTop();
+                          }}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-green-500/10 rounded-xl flex items-center justify-center">
+                              <FileText className="w-5 h-5 text-green-500" />
+                            </div>
+                            <span className="font-semibold text-slate-900 dark:text-white">{t('nav.blog')}</span>
+                          </div>
+                          <ArrowRight className="w-5 h-5 text-slate-400" />
+                        </Link>
+                      )}
+                    </div>
+
+                    {/* Divider */}
+                    <div className="h-px bg-slate-200 dark:bg-white/10" />
+
+                    {/* Settings Row - Language & Theme */}
+                    <div className="flex gap-3">
+                      <button
+                        onClick={toggleLanguage}
+                        className="flex-1 flex items-center justify-center gap-2 px-4 py-3.5 min-h-[52px] bg-slate-100 dark:bg-white/5 rounded-xl active:scale-[0.98] transition-all"
+                      >
+                        <Globe className="w-5 h-5 text-primary" />
+                        <span className="font-semibold text-slate-700 dark:text-slate-200">
+                          {language === 'tr' ? 'EN' : 'TR'}
+                        </span>
+                      </button>
+                      <button
+                        onClick={toggleTheme}
+                        className="flex-1 flex items-center justify-center gap-2 px-4 py-3.5 min-h-[52px] bg-slate-100 dark:bg-white/5 rounded-xl active:scale-[0.98] transition-all"
+                      >
+                        {theme === 'dark' ? (
+                          <>
+                            <Sun className="w-5 h-5 text-yellow-500" />
+                            <span className="font-semibold text-slate-700 dark:text-slate-200">{t('nav.lightTheme', 'Açık')}</span>
+                          </>
+                        ) : (
+                          <>
+                            <Moon className="w-5 h-5 text-slate-700" />
+                            <span className="font-semibold text-slate-700 dark:text-slate-200">{t('nav.darkTheme', 'Koyu')}</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+
+                    {/* Free Consultation CTA - En altta */}
+                    <div className="bg-gradient-to-br from-primary/10 to-purple-500/10 dark:from-primary/20 dark:to-purple-500/20 rounded-2xl p-5 border border-primary/20">
+                      <div className="text-center space-y-3">
+                        <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
+                          <Calendar className="w-6 h-6 text-primary" />
+                        </div>
+                        <div>
+                          <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                            {t('nav.getFreeReport', 'Ücretsiz Dijital Analiz')}
+                          </h3>
+                          <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
+                            {t('nav.freeConsultation', 'Web sitenizi analiz edelim')}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => {
+                            setIsOpen(false);
+                            setIsCalendlyOpen(true);
+                          }}
+                          className="w-full flex items-center justify-center gap-2 px-5 py-3.5 min-h-[52px] bg-primary hover:bg-primary-dark text-white rounded-xl active:scale-[0.98] transition-all font-bold shadow-lg shadow-primary/25"
+                        >
+                          <Calendar className="w-5 h-5" />
+                          <span>{t('nav.scheduleConsultation', 'Randevu Al')}</span>
+                        </button>
+                      </div>
+                    </div>
+
                   </div>
                 </div>
               </motion.div>

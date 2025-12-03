@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { Linkedin } from 'lucide-react';
 import { useTranslation } from '../../hooks/useTranslation';
-import { memo, useMemo } from 'react';
+import { memo } from 'react';
 
 // Target Decoration
 const TargetDecoration = memo(() => (
@@ -71,7 +71,7 @@ const MemberCard = memo(({ member, index }: { member: { name: string; role: stri
 export default function TeamSection({ limit }: { limit?: number }) {
     const { t } = useTranslation();
 
-    const members = useMemo(() => [
+    const members = [
         // Co-Founders
         {
             name: 'Emrah Er',
@@ -158,7 +158,7 @@ export default function TeamSection({ limit }: { limit?: number }) {
             avatar: 'https://images.unsplash.com/photo-1507591064344-4c6ce005b128?auto=format&fit=crop&q=80&w=400&h=400',
             linkedin: 'https://www.linkedin.com/in/ypehlivan/',
         },
-    ], [t]);
+    ];
 
     const displayedMembers = limit ? members.slice(0, limit) : members;
 

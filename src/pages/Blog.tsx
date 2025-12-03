@@ -1,12 +1,13 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
-import { Search, ArrowUpRight, Clock, ChevronRight, ChevronLeft, Filter, Mail, Sparkles } from 'lucide-react';
+import { Search, ArrowUpRight, Clock, ChevronRight, ChevronLeft, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import useEmblaCarousel from 'embla-carousel-react';
+import Autoplay from 'embla-carousel-autoplay';
+import type { EmblaCarouselType } from 'embla-carousel';
 import { getBlogPosts, type BlogPost } from '../lib/config/supabase';
 import { useTranslation } from '../hooks/useTranslation';
-import AuroraBackground from '../components/ui/effects/aurora-background';
 
 const getCategoryKeys = () => [
   'blog.category.all',
@@ -18,11 +19,11 @@ const getCategoryKeys = () => [
 ];
 
 const BlogHeroSkeleton = () => (
-  <div className="w-full h-[500px] md:h-[600px] bg-slate-200 dark:bg-white/5 animate-pulse relative">
-    <div className="absolute bottom-0 left-0 p-8 md:p-16 w-full max-w-4xl space-y-4">
-      <div className="h-8 w-32 bg-slate-300 dark:bg-white/10 rounded-full" />
-      <div className="h-12 w-3/4 bg-slate-300 dark:bg-white/10 rounded-lg" />
-      <div className="h-6 w-1/2 bg-slate-300 dark:bg-white/10 rounded-lg" />
+  <div className="w-full h-[350px] sm:h-[450px] md:h-[500px] lg:h-[600px] bg-slate-200 dark:bg-white/5 animate-pulse relative">
+    <div className="absolute bottom-0 left-0 p-6 sm:p-8 md:p-12 lg:p-16 w-full max-w-4xl space-y-3 sm:space-y-4">
+      <div className="h-6 sm:h-8 w-24 sm:w-32 bg-slate-300 dark:bg-white/10 rounded-full" />
+      <div className="h-8 sm:h-12 w-3/4 bg-slate-300 dark:bg-white/10 rounded-lg" />
+      <div className="h-5 sm:h-6 w-1/2 bg-slate-300 dark:bg-white/10 rounded-lg" />
     </div>
   </div>
 );
@@ -51,12 +52,24 @@ const Blog = () => {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [visiblePosts, setVisiblePosts] = useState<BlogPost[]>([]);
   const [page, setPage] = useState(1);
   const postsPerPage = 9;
 
-  // Embla Carousel
-  const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true });
+  // Embla Carousel with smoother transitions
+  const [emblaRef, emblaApi] = useEmblaCarousel(
+    { 
+      loop: true,
+      duration: 30, // Daha yumuşak geçiş için süre
+      skipSnaps: false
+    },
+    [
+      Autoplay({ 
+        delay: 5000, 
+        stopOnInteraction: true,
+        stopOnMouseEnter: true 
+      })
+    ]
+  );
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [scrollSnaps, setScrollSnaps] = useState<number[]>([]);
 
@@ -64,11 +77,11 @@ const Blog = () => {
   const scrollNext = useCallback(() => emblaApi && emblaApi.scrollNext(), [emblaApi]);
   const scrollTo = useCallback((index: number) => emblaApi && emblaApi.scrollTo(index), [emblaApi]);
 
-  const onInit = useCallback((emblaApi: any) => {
+  const onInit = useCallback((emblaApi: EmblaCarouselType) => {
     setScrollSnaps(emblaApi.scrollSnapList());
   }, []);
 
-  const onSelect = useCallback((emblaApi: any) => {
+  const onSelect = useCallback((emblaApi: EmblaCarouselType) => {
     setSelectedIndex(emblaApi.selectedScrollSnap());
   }, []);
 
@@ -81,13 +94,17 @@ const Blog = () => {
     emblaApi.on('select', onSelect);
   }, [emblaApi, onInit, onSelect]);
 
-  // Auto-play effect
+  // Autoplay is now handled by the Autoplay plugin
+  // Respect user's motion preferences
   useEffect(() => {
     if (!emblaApi) return;
-    const interval = setInterval(() => {
-      emblaApi.scrollNext();
-    }, 5000);
-    return () => clearInterval(interval);
+    const autoplay = emblaApi.plugins()?.autoplay;
+    if (!autoplay) return;
+    
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) {
+      autoplay.stop();
+    }
   }, [emblaApi]);
 
   useEffect(() => {
@@ -102,8 +119,9 @@ const Blog = () => {
     return () => clearTimeout(handler);
   }, [searchQuery]);
 
-  useEffect(() => {
-    const filtered = posts.filter(post => {
+  // useMemo ile filtreleme optimizasyonu - gereksiz re-render'ları önler
+  const visiblePosts = useMemo(() => {
+    return posts.filter(post => {
       // Check if category matches key or translated value
       const matchesCategory = selectedCategory === "blog.category.all" || 
                             post.category === selectedCategory || 
@@ -114,7 +132,6 @@ const Blog = () => {
         post.excerpt.toLowerCase().includes(debouncedQuery.toLowerCase());
       return matchesCategory && matchesSearch;
     });
-    setVisiblePosts(filtered);
   }, [selectedCategory, debouncedQuery, posts, t]);
 
   const loadBlogPosts = async () => {
@@ -123,7 +140,7 @@ const Blog = () => {
       const fetchedPosts = await getBlogPosts();
       setPosts(fetchedPosts);
     } catch (err) {
-      setError('Blog yazıları yüklenirken bir hata oluştu.');
+      setError(t('blog.loadError', 'Blog yazıları yüklenirken bir hata oluştu.'));
     } finally {
       setLoading(false);
     }
@@ -144,74 +161,134 @@ const Blog = () => {
   const totalPages = Math.ceil(gridPosts.length / postsPerPage);
   const currentGridPosts = gridPosts.slice((page - 1) * postsPerPage, page * postsPerPage);
 
+  // SEO: Blog listing structured data
+  const blogListingSchema = useMemo(() => ({
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    "name": language === 'tr' ? "Unilancer Blog" : "Unilancer Blog",
+    "description": language === 'tr' 
+      ? "Teknoloji, tasarım, yapay zeka ve dijital dönüşüm hakkında güncel blog yazıları."
+      : "Latest blog posts about technology, design, AI and digital transformation.",
+    "url": `https://unilancer.co/${language}/blog`,
+    "publisher": {
+      "@type": "Organization",
+      "name": "Unilancer",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://unilancer.co/images/logo.png"
+      }
+    },
+    "blogPost": posts.slice(0, 10).map(post => ({
+      "@type": "BlogPosting",
+      "headline": post.title,
+      "description": post.excerpt,
+      "image": post.image_url,
+      "datePublished": post.created_at,
+      "dateModified": post.updated_at || post.created_at,
+      "author": { "@type": "Organization", "name": "Unilancer" },
+      "url": `https://unilancer.co/${language}/blog/${post.slug}`
+    }))
+  }), [posts, language]);
+
+  const seoTitle = language === 'tr' 
+    ? "Blog | Teknoloji, Tasarım ve Dijital Dönüşüm - Unilancer"
+    : "Blog | Technology, Design and Digital Transformation - Unilancer";
+  
+  const seoDescription = language === 'tr'
+    ? "Teknoloji, tasarım, yapay zeka, web geliştirme ve dijital dönüşüm hakkında güncel blog yazıları. Uzman içerikler ve sektörel analizler."
+    : "Latest blog posts about technology, design, AI, web development and digital transformation. Expert content and industry analysis.";
+
   return (
     <div className="relative min-h-screen">
       <Helmet>
-        <title>Blog | Unilancer</title>
-        <meta name="description" content="Teknoloji, tasarım ve dijital dönüşüm hakkında güncel içerikler." />
+        <title>{seoTitle}</title>
+        <meta name="description" content={seoDescription} />
+        
+        {/* Open Graph */}
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content={seoTitle} />
+        <meta property="og:description" content={seoDescription} />
+        <meta property="og:url" content={`https://unilancer.co/${language}/blog`} />
+        <meta property="og:site_name" content="Unilancer" />
+        <meta property="og:image" content={posts[0]?.image_url || 'https://unilancer.co/images/og-blog.jpg'} />
+        <meta property="og:locale" content={language === 'tr' ? 'tr_TR' : 'en_US'} />
+        
+        {/* Twitter Card */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={seoTitle} />
+        <meta name="twitter:description" content={seoDescription} />
+        <meta name="twitter:image" content={posts[0]?.image_url || 'https://unilancer.co/images/og-blog.jpg'} />
+        
+        {/* Additional SEO */}
+        <meta name="robots" content="index, follow, max-image-preview:large" />
+        <link rel="canonical" href={`https://unilancer.co/${language}/blog`} />
+        <meta name="keywords" content={language === 'tr' 
+          ? "blog, teknoloji, tasarım, yapay zeka, web geliştirme, dijital dönüşüm, yazılım"
+          : "blog, technology, design, AI, web development, digital transformation, software"} />
+        
+        {/* Structured Data */}
+        <script type="application/ld+json">
+          {JSON.stringify(blogListingSchema)}
+        </script>
       </Helmet>
 
-      {/* Arka plan */}
-      <div className="fixed inset-0 z-0">
-        <AuroraBackground />
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-cyan-50/20 to-blue-100/20 dark:from-dark dark:via-dark-light dark:to-dark" />
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#5FC8DA10_1px,transparent_1px),linear-gradient(to_bottom,#5FC8DA10_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_at_center,transparent_10%,black_80%)] opacity-70" />
+      {/* Arka plan - Statik gradient (performans için) */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-blue-50/30 to-cyan-50/20 dark:from-dark dark:via-dark-light dark:to-dark" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#5FC8DA08_1px,transparent_1px),linear-gradient(to_bottom,#5FC8DA08_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-50" />
       </div>
 
-      {/* Navbar Spacer */}
-      <div className="h-20 md:h-24" />
+      {/* Navbar Spacer - Mobilde navbar yüksekliği + boşluk */}
+      <div className="h-[88px] sm:h-20 md:h-24" />
 
       {/* HERO SECTION - Full Image Slider */}
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 mb-20 relative z-10">
+      <div className="max-w-[1400px] mx-auto px-3 sm:px-6 lg:px-8 mb-6 sm:mb-10 md:mb-16 relative z-10">
         {loading ? (
           <BlogHeroSkeleton />
         ) : featuredPosts.length > 0 ? (
           <div className="relative group">
             <div className="overflow-hidden rounded-[2.5rem] shadow-2xl border border-white/20 dark:border-white/5" ref={emblaRef}>
-              <div className="flex">
+              <div className="flex will-change-transform">
                 {featuredPosts.map((post) => (
-                  <div key={post.id} className="flex-[0_0_100%] min-w-0 relative h-[500px] md:h-[600px]">
+                  <div key={post.id} className="flex-[0_0_100%] min-w-0 relative h-[350px] sm:h-[450px] md:h-[500px] lg:h-[600px]">
                     {/* Background Image */}
                     <div className="absolute inset-0">
                       <img 
                         src={post.image_url} 
                         alt={post.title}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover object-right md:object-center"
+                        loading="eager"
+                        fetchPriority="high"
                       />
                       {/* Gradient Overlay */}
                       <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/60 to-transparent" />
                     </div>
 
                     {/* Content */}
-                    <div className="relative z-10 h-full flex flex-col justify-center p-8 md:p-16 max-w-4xl">
-                      <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6 }}
-                        className="space-y-6"
-                      >
-                        <span className="inline-block px-4 py-1.5 bg-white/10 text-white text-sm font-medium rounded-full backdrop-blur-md border border-white/20">
+                    <div className="relative z-10 h-full flex flex-col justify-end sm:justify-center p-6 sm:p-8 md:p-12 lg:p-16 max-w-4xl">
+                      <div className="space-y-3 sm:space-y-4 md:space-y-6">
+                        <span className="inline-block px-3 py-1 sm:px-4 sm:py-1.5 bg-white/10 text-white text-xs sm:text-sm font-medium rounded-full backdrop-blur-md border border-white/20">
                           {t(post.category)}
                         </span>
                         
-                        <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white leading-tight tracking-tight drop-shadow-lg">
+                        <h1 className="text-xl sm:text-2xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white leading-tight tracking-tight [text-shadow:0_2px_10px_rgba(0,0,0,0.5)] line-clamp-3 md:line-clamp-none">
                           {post.title}
                         </h1>
                         
-                        <p className="text-gray-200 text-lg md:text-xl line-clamp-3 leading-relaxed max-w-2xl drop-shadow-md">
+                        <p className="text-gray-200 text-sm sm:text-base md:text-lg lg:text-xl line-clamp-2 sm:line-clamp-3 leading-relaxed max-w-2xl [text-shadow:0_1px_4px_rgba(0,0,0,0.4)]">
                           {post.excerpt}
                         </p>
                         
-                        <div className="pt-6 flex flex-wrap gap-6 items-center">
+                        <div className="pt-3 sm:pt-4 md:pt-6 flex flex-wrap gap-4 sm:gap-6 items-center">
                           <Link 
                             to={`/${language}/blog/${post.slug}`}
-                            className="inline-flex items-center gap-3 px-8 py-4 bg-white text-slate-900 rounded-full font-bold transition-all hover:bg-primary hover:scale-105 shadow-lg"
+                            className="inline-flex items-center gap-2 sm:gap-3 px-5 py-2.5 sm:px-6 sm:py-3 md:px-8 md:py-4 bg-white text-slate-900 rounded-full text-sm sm:text-base font-bold transition-all duration-300 hover:bg-primary hover:scale-105 shadow-lg"
                           >
                             {t('blog.readFullArticle')}
-                            <ArrowUpRight className="w-5 h-5" />
+                            <ArrowUpRight className="w-4 h-4 sm:w-5 sm:h-5" />
                           </Link>
                         </div>
-                      </motion.div>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -219,11 +296,14 @@ const Blog = () => {
             </div>
 
             {/* Slider Dots */}
-            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-20">
+            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-20" role="tablist" aria-label={t('blog.slider.navigation', 'Slider navigasyonu')}>
               {scrollSnaps.map((_, index) => (
                 <button
                   key={index}
                   onClick={() => scrollTo(index)}
+                  aria-label={t('blog.slider.goToSlide', 'Slayt {{number}} git').replace('{{number}}', String(index + 1))}
+                  aria-selected={index === selectedIndex}
+                  role="tab"
                   className={`h-2 rounded-full transition-all duration-300 ${
                     index === selectedIndex 
                       ? "bg-white w-8" 
@@ -233,19 +313,21 @@ const Blog = () => {
               ))}
             </div>
 
-            {/* Slider Controls */}
-            <div className="absolute bottom-8 right-8 flex gap-3 z-20">
+            {/* Slider Controls - Hidden on mobile, visible on tablet+ */}
+            <div className="absolute bottom-6 sm:bottom-8 right-4 sm:right-8 hidden sm:flex gap-2 sm:gap-3 z-20">
               <button 
                 onClick={scrollPrev}
-                className="p-4 rounded-full bg-black/30 backdrop-blur-md border border-white/20 text-white hover:bg-white hover:text-slate-900 transition-all duration-300"
+                aria-label={t('blog.slider.previous', 'Önceki slayt')}
+                className="p-2.5 sm:p-3 md:p-4 rounded-full bg-black/30 backdrop-blur-md border border-white/20 text-white hover:bg-white hover:text-slate-900 transition-all duration-300"
               >
-                <ChevronLeft className="w-6 h-6" />
+                <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
               </button>
               <button 
                 onClick={scrollNext}
-                className="p-4 rounded-full bg-black/30 backdrop-blur-md border border-white/20 text-white hover:bg-white hover:text-slate-900 transition-all duration-300"
+                aria-label={t('blog.slider.next', 'Sonraki slayt')}
+                className="p-2.5 sm:p-3 md:p-4 rounded-full bg-black/30 backdrop-blur-md border border-white/20 text-white hover:bg-white hover:text-slate-900 transition-all duration-300"
               >
-                <ChevronRight className="w-6 h-6" />
+                <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
               </button>
             </div>
           </div>
@@ -253,45 +335,68 @@ const Blog = () => {
       </div>
 
       {/* Header & Filters - Centered Pill Style */}
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-12 relative z-10">
-        <div className="flex flex-col items-center justify-center space-y-8">
-          {/* Categories Pill */}
-          <div className="bg-white/80 dark:bg-white/5 backdrop-blur-xl border border-slate-200 dark:border-white/10 p-1.5 rounded-full inline-flex flex-wrap justify-center gap-1 shadow-lg max-w-full overflow-x-auto no-scrollbar">
-            {categoryKeys.map((key) => (
-              <button
-                key={key}
-                onClick={() => { setSelectedCategory(key); setPage(1); }}
-                className={`
-                  px-6 py-2.5 rounded-full text-sm font-medium transition-all duration-300 whitespace-nowrap
-                  ${selectedCategory === key
-                    ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-md'
-                    : 'text-slate-600 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-white/10'}
-                `}
-              >
-                {t(key)}
-              </button>
-            ))}
+      <div className="max-w-[1400px] mx-auto px-3 sm:px-6 lg:px-8 pt-2 sm:pt-4 pb-4 sm:pb-8 relative z-10">
+        <div className="flex flex-col items-center justify-center space-y-4 sm:space-y-6">
+          {/* Categories - Grid on mobile, Pill on desktop */}
+          <div className="w-full">
+            {/* Mobile: 3-column grid - 44px min touch target */}
+            <div className="grid grid-cols-3 gap-2 sm:hidden">
+              {categoryKeys.map((key) => (
+                <button
+                  key={key}
+                  onClick={() => { setSelectedCategory(key); setPage(1); }}
+                  className={`
+                    px-2 py-2.5 min-h-[44px] rounded-xl text-xs font-medium transition-all duration-200 text-center active:scale-95
+                    ${selectedCategory === key
+                      ? 'bg-primary text-white shadow-lg shadow-primary/25'
+                      : 'bg-white/90 dark:bg-white/10 text-slate-700 dark:text-gray-200 border border-slate-200/50 dark:border-white/10'}
+                  `}
+                >
+                  {t(key)}
+                </button>
+              ))}
+            </div>
+            {/* Desktop: Pill style */}
+            <div className="hidden sm:flex justify-center">
+              <div className="bg-white/80 dark:bg-white/5 backdrop-blur-xl border border-slate-200 dark:border-white/10 p-1.5 rounded-full inline-flex flex-wrap justify-center gap-1 shadow-lg">
+                {categoryKeys.map((key) => (
+                  <button
+                    key={key}
+                    onClick={() => { setSelectedCategory(key); setPage(1); }}
+                    className={`
+                      px-4 md:px-6 py-2 sm:py-2.5 rounded-full text-sm font-medium transition-all duration-300 whitespace-nowrap
+                      ${selectedCategory === key
+                        ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-md'
+                        : 'text-slate-600 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-white/10'}
+                    `}
+                  >
+                    {t(key)}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
 
-          {/* Search & Sort Row */}
-          <div className="w-full flex flex-col md:flex-row justify-between items-center gap-4">
-             <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
+          {/* Search & Title Row */}
+          <div className="w-full flex flex-col md:flex-row justify-between items-center gap-3">
+             <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-2 text-center md:text-left">
                {selectedCategory === 'blog.category.all' ? (
                  <>
-                   {t('blog.latestUpdates')} <Sparkles className="w-6 h-6 text-primary animate-pulse" />
+                   {t('blog.latestUpdates')} <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-primary animate-pulse" />
                  </>
                ) : t(selectedCategory)}
              </h2>
              
-             <div className="flex items-center gap-4 w-full md:w-auto">
+             <div className="flex items-center w-full md:w-auto">
               <div className="relative flex-1 md:w-72">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" aria-hidden="true" />
                 <input
                   type="text"
                   placeholder={t('blog.searchPlaceholder')}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-white/80 dark:bg-white/5 backdrop-blur-sm border border-slate-200 dark:border-white/10 rounded-full pl-11 pr-4 py-3 text-sm shadow-sm focus:ring-2 focus:ring-primary dark:focus:ring-primary/50 transition-all"
+                  aria-label={t('blog.searchPlaceholder', 'Blog yazılarında ara')}
+                  className="w-full bg-white/90 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl pl-10 pr-4 py-3 min-h-[44px] text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-gray-500 shadow-sm focus:ring-2 focus:ring-primary/50 focus:border-primary focus:outline-none transition-all"
                 />
               </div>
             </div>
@@ -335,52 +440,56 @@ const Blog = () => {
             </div>
           ) : (
             currentGridPosts.map((post, index) => (
-              <motion.article
+              <article
                 key={post.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
-                className="group flex flex-col bg-white/50 dark:bg-white/5 backdrop-blur-sm rounded-[2rem] p-4 hover:bg-white dark:hover:bg-white/10 transition-all duration-300 border border-transparent hover:border-slate-200 dark:hover:border-white/10 hover:shadow-xl"
+                className="group flex flex-col bg-white/50 dark:bg-white/5 backdrop-blur-sm rounded-[1.5rem] sm:rounded-[2rem] p-3 sm:p-4 hover:bg-white dark:hover:bg-white/10 transition-all duration-300 border border-transparent hover:border-slate-200 dark:hover:border-white/10 hover:shadow-xl"
+                style={{ 
+                  animationDelay: `${index * 50}ms`,
+                  animation: 'fadeInUp 0.4s ease-out forwards',
+                  opacity: 0
+                }}
               >
-                <Link to={`/${language}/blog/${post.slug}`} className="block mb-6 relative overflow-hidden rounded-[1.5rem] aspect-[4/3]">
+                <Link to={`/${language}/blog/${post.slug}`} className="block mb-4 sm:mb-6 relative overflow-hidden rounded-xl sm:rounded-[1.5rem] aspect-[4/3]">
                   <img
                     src={post.image_url}
                     alt={post.title}
-                    className="w-full h-full object-cover object-right transition-transform duration-700 group-hover:scale-105"
+                    loading="lazy"
+                    decoding="async"
+                    className="w-full h-full object-cover object-right md:object-center transition-transform duration-700 group-hover:scale-105"
                   />
-                  <div className="absolute top-4 left-4">
-                    <span className="px-3 py-1 bg-white/90 dark:bg-black/50 backdrop-blur-md text-slate-900 dark:text-white text-xs font-bold rounded-full shadow-sm">
+                  <div className="absolute top-3 left-3 sm:top-4 sm:left-4">
+                    <span className="px-2.5 py-1 sm:px-3 bg-white/90 dark:bg-black/50 backdrop-blur-md text-slate-900 dark:text-white text-[10px] sm:text-xs font-bold rounded-full shadow-sm">
                       {t(post.category)}
                     </span>
                   </div>
                 </Link>
                 
-                <div className="space-y-4 px-2 pb-2">
-                  <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-gray-400">
-                    <Clock className="w-4 h-4" />
+                <div className="space-y-3 sm:space-y-4 px-1 sm:px-2 pb-2">
+                  <div className="flex items-center gap-2 text-xs sm:text-sm text-slate-500 dark:text-gray-400">
+                    <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     <span>{post.read_time}</span>
                     <span className="w-1 h-1 rounded-full bg-slate-300 dark:bg-gray-600" />
-                    <span>{new Date(post.created_at).toLocaleDateString(language === 'tr' ? 'tr-TR' : 'en-US', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                    <span className="truncate">{new Date(post.created_at).toLocaleDateString(language === 'tr' ? 'tr-TR' : 'en-US', { day: 'numeric', month: 'short' })}</span>
                   </div>
                   
                   <Link to={`/${language}/blog/${post.slug}`}>
-                    <h3 className="text-2xl font-bold text-slate-900 dark:text-white leading-tight group-hover:text-primary transition-colors">
+                    <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-slate-900 dark:text-white leading-tight group-hover:text-primary transition-colors line-clamp-2">
                       {post.title}
                     </h3>
                   </Link>
                   
-                  <p className="text-slate-600 dark:text-gray-400 line-clamp-2 leading-relaxed text-sm">
+                  <p className="text-slate-600 dark:text-gray-400 line-clamp-2 leading-relaxed text-xs sm:text-sm">
                     {post.excerpt}
                   </p>
                   
-                  <div className="flex items-center gap-3 pt-4 mt-auto border-t border-slate-100 dark:border-white/5">
-                    <Link to={`/${language}/blog/${post.slug}`} className="flex items-center gap-2 text-sm font-bold text-primary hover:text-primary-dark transition-colors ml-auto">
+                  <div className="flex items-center gap-3 pt-3 sm:pt-4 mt-auto border-t border-slate-100 dark:border-white/5">
+                    <Link to={`/${language}/blog/${post.slug}`} className="flex items-center gap-2 text-xs sm:text-sm font-bold text-primary hover:text-primary-dark transition-colors ml-auto">
                       {t('blog.readMore')}
-                      <ArrowUpRight className="w-4 h-4" />
+                      <ArrowUpRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     </Link>
                   </div>
                 </div>
-              </motion.article>
+              </article>
             ))
           )}
         </div>
