@@ -167,14 +167,35 @@ const About = () => {
       </section>
 
       {/* TEAM SECTION */}
-      <div className="pb-32 pt-10 bg-white dark:bg-dark">
-        <TeamSection limit={4} />
-        <div className="flex justify-center -mt-8 relative z-20">
-           <Button asChild size="lg" className="h-14 rounded-full px-10 text-lg shadow-xl shadow-primary/20 hover:shadow-2xl hover:shadow-primary/30 transition-all hover:scale-105 bg-gradient-to-r from-primary to-purple-600 border-0">
+      <div className="bg-slate-50 dark:bg-dark">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-24 md:py-32">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary font-semibold text-sm mb-6">
+              <Sparkles className="w-4 h-4" />
+              <span>{t('about.leadership.badge', 'Liderlik Ekibi')}</span>
+            </div>
+            <h2 className="text-4xl md:text-5xl font-bold text-slate-900 dark:text-white mb-6">
+              {t('about.leadership.title', "Unilancer'ı Yönlendirenler")}
+            </h2>
+            <p className="text-lg text-slate-600 dark:text-slate-300 max-w-2xl mx-auto">
+              {t('about.leadership.description', 'Vizyonumuzun arkasındaki deneyimli liderler ve yenilikçi düşünürler')}
+            </p>
+          </motion.div>
+          
+          <TeamSection limit={4} />
+          
+          <div className="flex justify-center mt-12">
+            <Button asChild size="lg" className="h-14 rounded-full px-10 text-lg shadow-lg hover:shadow-xl transition-all hover:scale-105">
               <Link to="/tr/ekibimiz">
                 {t('about.view_all_team', 'Tüm Ekibi Gör')} <ChevronRight className="ml-2 w-5 h-5" />
               </Link>
-           </Button>
+            </Button>
+          </div>
         </div>
       </div>
 

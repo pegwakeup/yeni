@@ -486,20 +486,6 @@ const Home = () => {
 
         {/* NASIL CALISIR */}
         <HowItWorks />
-        
-        {/* BEYİN GÖÇÜ MARQUEE */}
-        <section className="py-6 w-full">
-          <div className="max-w-[1400px] mx-auto px-3 sm:px-4 lg:px-6">
-            <MarqueeAnimation
-              direction="right"
-              baseVelocity={-2}
-              className="bg-gradient-to-r from-blue-50 via-cyan-50 to-blue-50 dark:from-blue-900/20 dark:via-cyan-800/30 dark:to-blue-900/20 text-blue-700 dark:text-cyan-300 py-4 text-lg sm:text-xl md:text-2xl font-medium rounded-xl border border-blue-200/50 dark:border-blue-700/30 shadow-sm"
-            >
-              {`${t("home.marquee.brainDrain", "BEYİN GÖÇÜ YERİNE HİZMET İHRACATI")} • ${t("home.marquee.brainDrain", "BEYİN GÖÇÜ YERİNE HİZMET İHRACATI")} • ${t("home.marquee.brainDrain", "BEYİN GÖÇÜ YERİNE HİZMET İHRACATI")}`}
-            </MarqueeAnimation>
-          </div>
-        </section>
-
 
         {/* NEDEN UNILANCER - MODERN BENTO GRID */}
         <WhyUsSection />
