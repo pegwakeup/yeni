@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Helmet } from 'react-helmet-async';
 import {
   Code2, Palette, LineChart, Globe, Smartphone, Database,
   BrainCircuit, PaintBucket, FileImage, Figma, Monitor,
@@ -46,6 +47,16 @@ const getCategories = (t: (key: string) => string) => ({
 const Portfolio = () => {
   const { t } = useTranslation();
   const categories = getCategories(t);
+  
+  // SEO meta data
+  const currentLang = window.location.pathname.startsWith('/en') ? 'en' : 'tr';
+  const seoTitle = currentLang === 'tr' 
+    ? 'Portfolyo | Unilancer - Tamamladığımız Projeler ve Çalışmalar'
+    : 'Portfolio | Unilancer - Our Completed Projects and Works';
+  const seoDescription = currentLang === 'tr'
+    ? 'Unilancer\'ın tamamladığı web tasarım, yazılım, 3D/AR, e-ticaret, dijital pazarlama ve kurumsal kimlik projelerini keşfedin. Başarılı çalışmalarımızı inceleyin.'
+    : 'Discover Unilancer\'s completed web design, software, 3D/AR, e-commerce, digital marketing, and brand identity projects. Explore our successful works.';
+  const canonicalUrl = `https://unilancer.co/${currentLang}/portfolyo`;
 
   const CategoryIcon = ({ category }: { category: string }) => {
     const categoryData = categories[category as keyof typeof categories];
@@ -91,6 +102,85 @@ const Portfolio = () => {
   });
 
   return (
+    <>
+      <Helmet>
+        {/* Primary Meta Tags */}
+        <title>{seoTitle}</title>
+        <meta name="title" content={seoTitle} />
+        <meta name="description" content={seoDescription} />
+        <meta name="keywords" content="portfolyo, projeler, web tasarım, yazılım, 3D, AR, e-ticaret, dijital pazarlama, kurumsal kimlik, başarılı çalışmalar" />
+        <meta name="robots" content="index, follow" />
+        <link rel="canonical" href={canonicalUrl} />
+        
+        {/* Language alternates */}
+        <link rel="alternate" hrefLang="tr" href="https://unilancer.co/tr/portfolyo" />
+        <link rel="alternate" hrefLang="en" href="https://unilancer.co/en/portfolio" />
+        
+        {/* Open Graph */}
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:title" content={seoTitle} />
+        <meta property="og:description" content={seoDescription} />
+        <meta property="og:image" content="https://unilancer.co/og-portfolio.jpg" />
+        <meta property="og:site_name" content="Unilancer" />
+        <meta property="og:locale" content={currentLang === 'tr' ? 'tr_TR' : 'en_US'} />
+        
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={seoTitle} />
+        <meta name="twitter:description" content={seoDescription} />
+        <meta name="twitter:image" content="https://unilancer.co/og-portfolio.jpg" />
+        
+        {/* CollectionPage Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "CollectionPage",
+            "name": seoTitle,
+            "description": seoDescription,
+            "url": canonicalUrl,
+            "mainEntity": {
+              "@type": "ItemList",
+              "name": currentLang === 'tr' ? "Unilancer Portfolyo" : "Unilancer Portfolio",
+              "numberOfItems": items.length,
+              "itemListElement": items.slice(0, 10).map((item, index) => ({
+                "@type": "ListItem",
+                "position": index + 1,
+                "item": {
+                  "@type": "CreativeWork",
+                  "name": item.title,
+                  "description": item.description,
+                  "image": item.main_image,
+                  "url": `https://unilancer.co/${currentLang}/portfolyo/${item.slug}`
+                }
+              }))
+            }
+          })}
+        </script>
+        
+        {/* BreadcrumbList Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": currentLang === 'tr' ? "Ana Sayfa" : "Home",
+                "item": `https://unilancer.co/${currentLang}`
+              },
+              {
+                "@type": "ListItem",
+                "position": 2,
+                "name": currentLang === 'tr' ? "Portfolyo" : "Portfolio",
+                "item": canonicalUrl
+              }
+            ]
+          })}
+        </script>
+      </Helmet>
+
     <div className="pt-24 pb-16 bg-white dark:bg-dark">
       {/* Hero Section */}
       <section className="relative py-20 overflow-hidden">
@@ -340,6 +430,7 @@ const Portfolio = () => {
         </div>
       </section>
     </div>
+    </>
   );
 };
 

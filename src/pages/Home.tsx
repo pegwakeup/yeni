@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
 import {
   ArrowUpRight,
@@ -104,13 +105,127 @@ const Home = () => {
     return { text: word };
   });
 
+  // SEO meta data
+  const seoTitle = t('seo.home.title', 'Unilancer | Türkiye\'nin En İyi Dijital Ajansı - Web Tasarım, Yazılım, AI');
+  const seoDescription = t('seo.home.description', 'Web tasarım, yazılım geliştirme, 3D/AR, e-ticaret, dijital pazarlama ve yapay zeka çözümleri. Genç yeteneklerle işletmenizi dijital dünyada öne çıkarın. Ücretsiz teklif alın!');
+  const currentLang = window.location.pathname.startsWith('/en') ? 'en' : 'tr';
+  const canonicalUrl = `https://unilancer.co/${currentLang}`;
+
   return (
+    <>
+      <Helmet>
+        {/* Primary Meta Tags */}
+        <title>{seoTitle}</title>
+        <meta name="title" content={seoTitle} />
+        <meta name="description" content={seoDescription} />
+        <meta name="keywords" content="web tasarım, yazılım geliştirme, 3D modelleme, AR, e-ticaret, dijital pazarlama, yapay zeka, chatbot, kurumsal kimlik, grafik tasarım, SEO, İstanbul, Türkiye, dijital ajans, freelancer, genç yetenek" />
+        <meta name="author" content="Unilancer" />
+        <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+        <link rel="canonical" href={canonicalUrl} />
+        
+        {/* Language alternates */}
+        <link rel="alternate" hrefLang="tr" href="https://unilancer.co/tr" />
+        <link rel="alternate" hrefLang="en" href="https://unilancer.co/en" />
+        <link rel="alternate" hrefLang="x-default" href="https://unilancer.co/tr" />
+        
+        {/* Open Graph / Facebook */}
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:title" content={seoTitle} />
+        <meta property="og:description" content={seoDescription} />
+        <meta property="og:image" content="https://unilancer.co/og-image.jpg" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:site_name" content="Unilancer" />
+        <meta property="og:locale" content={currentLang === 'tr' ? 'tr_TR' : 'en_US'} />
+        
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:url" content={canonicalUrl} />
+        <meta name="twitter:title" content={seoTitle} />
+        <meta name="twitter:description" content={seoDescription} />
+        <meta name="twitter:image" content="https://unilancer.co/og-image.jpg" />
+        
+        {/* Organization Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            "name": "Unilancer",
+            "alternateName": "Unilancer Labs",
+            "url": "https://unilancer.co",
+            "logo": "https://unilancer.co/logo.png",
+            "description": seoDescription,
+            "foundingDate": "2023",
+            "founders": [
+              {
+                "@type": "Person",
+                "name": "Unilancer Team"
+              }
+            ],
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Şehit Muhtar, Mis Sk. No:24",
+              "addressLocality": "Beyoğlu",
+              "addressRegion": "İstanbul",
+              "postalCode": "34435",
+              "addressCountry": "TR"
+            },
+            "contactPoint": {
+              "@type": "ContactPoint",
+              "telephone": "+90-506-152-32-55",
+              "contactType": "customer service",
+              "email": "info@unilancerlabs.com",
+              "availableLanguage": ["Turkish", "English"]
+            },
+            "sameAs": [
+              "https://www.linkedin.com/company/unilancer",
+              "https://www.instagram.com/unilancer",
+              "https://twitter.com/unilancer"
+            ],
+            "areaServed": {
+              "@type": "Country",
+              "name": "Turkey"
+            },
+            "knowsAbout": [
+              "Web Development",
+              "Mobile App Development",
+              "UI/UX Design",
+              "3D Modeling",
+              "Augmented Reality",
+              "E-commerce",
+              "Digital Marketing",
+              "SEO",
+              "Artificial Intelligence",
+              "Chatbot Development",
+              "Brand Identity",
+              "Graphic Design"
+            ]
+          })}
+        </script>
+        
+        {/* WebSite Schema for Search */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "name": "Unilancer",
+            "url": "https://unilancer.co",
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": "https://unilancer.co/search?q={search_term_string}",
+              "query-input": "required name=search_term_string"
+            }
+          })}
+        </script>
+      </Helmet>
+      
     <div className="relative min-h-screen">
       {/* Arka plan */}
       <div className="fixed inset-0 z-0">
         <AuroraBackground />
         <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-cyan-50/20 to-blue-100/20 dark:from-dark dark:via-dark-light dark:to-dark" />
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#5FC8DA10_1px,transparent_1px),linear-gradient(to_bottom,#5FC8DA10_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_at_center,transparent_10%,black_80%)] opacity-70" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#5FC8DA10_1px,transparent_1px),linear_gradient(to_bottom,#5FC8DA10_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_at_center,transparent_10%,black_80%)] opacity-70" />
       </div>
 
       <div className="relative z-10">
@@ -387,6 +502,7 @@ const Home = () => {
         />
       </div>
     </div>
+    </>
   );
 };
 

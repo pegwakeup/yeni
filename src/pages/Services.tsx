@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { Helmet } from 'react-helmet-async';
 import { useTranslation } from '../hooks/useTranslation';
 import {
   Code2, Database, Globe, Palette,
@@ -70,6 +71,16 @@ const ImageSection = ({ image, title, description }: {
 
 const Services = () => {
   const { t } = useTranslation();
+  
+  // SEO meta data
+  const currentLang = window.location.pathname.startsWith('/en') ? 'en' : 'tr';
+  const seoTitle = currentLang === 'tr' 
+    ? 'Hizmetlerimiz | Web Tasarım, Yazılım, 3D/AR, E-Ticaret, AI - Unilancer'
+    : 'Our Services | Web Design, Software, 3D/AR, E-Commerce, AI - Unilancer';
+  const seoDescription = currentLang === 'tr'
+    ? 'Web tasarım, 3D modelleme, e-ticaret, dijital pazarlama, yapay zeka chatbot, yazılım geliştirme, kurumsal kimlik ve grafik tasarım hizmetleri. Profesyonel dijital çözümler.'
+    : 'Web design, 3D modeling, e-commerce, digital marketing, AI chatbot, software development, brand identity and graphic design services. Professional digital solutions.';
+  const canonicalUrl = `https://unilancer.co/${currentLang}/hizmetler`;
 
   const featuredServices: Service[] = [
     {
@@ -138,7 +149,87 @@ const Services = () => {
     },
   ];
 
+  // Services schema data
+  const servicesSchemaItems = featuredServices.map((service, index) => ({
+    "@type": "ListItem",
+    "position": index + 1,
+    "item": {
+      "@type": "Service",
+      "name": service.title,
+      "description": service.description,
+      "provider": {
+        "@type": "Organization",
+        "name": "Unilancer"
+      },
+      "url": `https://unilancer.co/${currentLang}/hizmetler/${service.slug}`
+    }
+  }));
+
   return (
+    <>
+      <Helmet>
+        {/* Primary Meta Tags */}
+        <title>{seoTitle}</title>
+        <meta name="title" content={seoTitle} />
+        <meta name="description" content={seoDescription} />
+        <meta name="keywords" content="web tasarım, yazılım geliştirme, 3D modelleme, AR, e-ticaret, dijital pazarlama, yapay zeka, chatbot, kurumsal kimlik, grafik tasarım, hizmetler" />
+        <meta name="robots" content="index, follow" />
+        <link rel="canonical" href={canonicalUrl} />
+        
+        {/* Language alternates */}
+        <link rel="alternate" hrefLang="tr" href="https://unilancer.co/tr/hizmetler" />
+        <link rel="alternate" hrefLang="en" href="https://unilancer.co/en/services" />
+        
+        {/* Open Graph */}
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:title" content={seoTitle} />
+        <meta property="og:description" content={seoDescription} />
+        <meta property="og:image" content="https://unilancer.co/og-services.jpg" />
+        <meta property="og:site_name" content="Unilancer" />
+        <meta property="og:locale" content={currentLang === 'tr' ? 'tr_TR' : 'en_US'} />
+        
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={seoTitle} />
+        <meta name="twitter:description" content={seoDescription} />
+        <meta name="twitter:image" content="https://unilancer.co/og-services.jpg" />
+        
+        {/* ItemList Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "ItemList",
+            "name": currentLang === 'tr' ? "Unilancer Hizmetleri" : "Unilancer Services",
+            "description": seoDescription,
+            "numberOfItems": featuredServices.length,
+            "itemListElement": servicesSchemaItems
+          })}
+        </script>
+        
+        {/* BreadcrumbList Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": currentLang === 'tr' ? "Ana Sayfa" : "Home",
+                "item": `https://unilancer.co/${currentLang}`
+              },
+              {
+                "@type": "ListItem",
+                "position": 2,
+                "name": currentLang === 'tr' ? "Hizmetler" : "Services",
+                "item": canonicalUrl
+              }
+            ]
+          })}
+        </script>
+      </Helmet>
+      
     <div className="pt-24 pb-16 bg-white dark:bg-dark">
       {/* Hero Section */}
       <section className="relative py-20 overflow-hidden">
@@ -484,6 +575,7 @@ const Services = () => {
         </div>
       </section>
     </div>
+    </>
   );
 };
 

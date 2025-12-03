@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
 import {
   Send,
@@ -197,6 +198,16 @@ const JoinUs = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { openPrivacyPolicy, openTerms } = usePrivacyTerms();
+  
+  // SEO meta data
+  const currentLang = window.location.pathname.startsWith('/en') ? 'en' : 'tr';
+  const seoTitle = currentLang === 'tr' 
+    ? 'Bize Katıl | Unilancer - Freelancer Olarak Aramıza Katıl'
+    : 'Join Us | Unilancer - Join Our Team as a Freelancer';
+  const seoDescription = currentLang === 'tr'
+    ? 'Unilancer ailesine katıl! Yeteneklerini sergile, gerçek projelerde yer al ve kazanmaya başla. Yazılım, tasarım ve dijital pazarlama alanlarında freelancer başvurusu yap.'
+    : 'Join the Unilancer family! Showcase your talents, work on real projects and start earning. Apply as a freelancer in software, design and digital marketing.';
+  const canonicalUrl = `https://unilancer.co/${currentLang}/bize-katil`;
 
   /* Calendly Modal State */
   const [isCalendlyModalOpen, setIsCalendlyModalOpen] = useState(false);
@@ -376,6 +387,58 @@ const JoinUs = () => {
      FORM RENDER - ProjectRequest benzeri layout
   ------------------------------ */
   return (
+    <>
+      <Helmet>
+        {/* Primary Meta Tags */}
+        <title>{seoTitle}</title>
+        <meta name="title" content={seoTitle} />
+        <meta name="description" content={seoDescription} />
+        <meta name="keywords" content="freelancer, bize katıl, iş başvurusu, yazılım, tasarım, dijital pazarlama, kariyer, genç yetenek" />
+        <meta name="robots" content="index, follow" />
+        <link rel="canonical" href={canonicalUrl} />
+        
+        {/* Language alternates */}
+        <link rel="alternate" hrefLang="tr" href="https://unilancer.co/tr/bize-katil" />
+        <link rel="alternate" hrefLang="en" href="https://unilancer.co/en/join-us" />
+        
+        {/* Open Graph */}
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:title" content={seoTitle} />
+        <meta property="og:description" content={seoDescription} />
+        <meta property="og:image" content="https://unilancer.co/og-joinus.jpg" />
+        <meta property="og:site_name" content="Unilancer" />
+        <meta property="og:locale" content={currentLang === 'tr' ? 'tr_TR' : 'en_US'} />
+        
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={seoTitle} />
+        <meta name="twitter:description" content={seoDescription} />
+        <meta name="twitter:image" content="https://unilancer.co/og-joinus.jpg" />
+        
+        {/* BreadcrumbList Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": currentLang === 'tr' ? "Ana Sayfa" : "Home",
+                "item": `https://unilancer.co/${currentLang}`
+              },
+              {
+                "@type": "ListItem",
+                "position": 2,
+                "name": currentLang === 'tr' ? "Bize Katıl" : "Join Us",
+                "item": canonicalUrl
+              }
+            ]
+          })}
+        </script>
+      </Helmet>
+      
     <div className="min-h-screen bg-gray-50 dark:bg-dark">
       <Navbar />
       
@@ -1146,6 +1209,7 @@ const JoinUs = () => {
 
       <CalendlyModal isOpen={isCalendlyModalOpen} onClose={() => setIsCalendlyModalOpen(false)} />
     </div>
+    </>
   );
 };
 

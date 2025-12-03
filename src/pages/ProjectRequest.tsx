@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Helmet } from 'react-helmet-async';
 import {
   Code2,
   Palette,
@@ -163,6 +164,16 @@ type RequestType = 'selection' | 'form';
 const ProjectRequest = () => {
   const { t } = useTranslation();
   const { openPrivacyPolicy, openTerms } = usePrivacyTerms();
+  
+  // SEO meta data
+  const currentLang = window.location.pathname.startsWith('/en') ? 'en' : 'tr';
+  const seoTitle = currentLang === 'tr' 
+    ? 'Proje Talebi | Unilancer - Projeniz İçin Teklif Alın'
+    : 'Project Request | Unilancer - Get a Quote for Your Project';
+  const seoDescription = currentLang === 'tr'
+    ? 'Web tasarım, yazılım, 3D/AR, e-ticaret, dijital pazarlama projeleriniz için ücretsiz teklif alın. Projenizi detaylandırın, size özel çözümler sunalım.'
+    : 'Get a free quote for your web design, software, 3D/AR, e-commerce, digital marketing projects. Describe your project, let us provide tailored solutions.';
+  const canonicalUrl = `https://unilancer.co/${currentLang}/proje-talebi`;
 
   const services = React.useMemo(() => getServices(t), [t]);
   const solutionTypes = React.useMemo(() => getSolutionTypes(t), [t]);
@@ -680,6 +691,58 @@ const ProjectRequest = () => {
 
   // Form Ekranı
   return (
+    <>
+      <Helmet>
+        {/* Primary Meta Tags */}
+        <title>{seoTitle}</title>
+        <meta name="title" content={seoTitle} />
+        <meta name="description" content={seoDescription} />
+        <meta name="keywords" content="proje talebi, teklif al, web tasarım, yazılım, 3D, e-ticaret, dijital pazarlama, proje başvurusu" />
+        <meta name="robots" content="index, follow" />
+        <link rel="canonical" href={canonicalUrl} />
+        
+        {/* Language alternates */}
+        <link rel="alternate" hrefLang="tr" href="https://unilancer.co/tr/proje-talebi" />
+        <link rel="alternate" hrefLang="en" href="https://unilancer.co/en/project-request" />
+        
+        {/* Open Graph */}
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:title" content={seoTitle} />
+        <meta property="og:description" content={seoDescription} />
+        <meta property="og:image" content="https://unilancer.co/og-project.jpg" />
+        <meta property="og:site_name" content="Unilancer" />
+        <meta property="og:locale" content={currentLang === 'tr' ? 'tr_TR' : 'en_US'} />
+        
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={seoTitle} />
+        <meta name="twitter:description" content={seoDescription} />
+        <meta name="twitter:image" content="https://unilancer.co/og-project.jpg" />
+        
+        {/* BreadcrumbList Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": currentLang === 'tr' ? "Ana Sayfa" : "Home",
+                "item": `https://unilancer.co/${currentLang}`
+              },
+              {
+                "@type": "ListItem",
+                "position": 2,
+                "name": currentLang === 'tr' ? "Proje Talebi" : "Project Request",
+                "item": canonicalUrl
+              }
+            ]
+          })}
+        </script>
+      </Helmet>
+      
     <div className="min-h-screen bg-gray-50 dark:bg-dark">
       <Navbar />
       
@@ -898,6 +961,7 @@ const ProjectRequest = () => {
 
       <CalendlyModal isOpen={isCalendlyModalOpen} onClose={() => setIsCalendlyModalOpen(false)} />
     </div>
+    </>
   );
 };
 

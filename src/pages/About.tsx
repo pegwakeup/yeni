@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ChevronRight, Target, Eye, Sparkles } from 'lucide-react';
@@ -6,8 +7,97 @@ import { useTranslation } from '../hooks/useTranslation';
 
 const About = () => {
   const { t } = useTranslation();
+  
+  // SEO meta data
+  const currentLang = window.location.pathname.startsWith('/en') ? 'en' : 'tr';
+  const seoTitle = currentLang === 'tr' 
+    ? 'Hakkımızda | Unilancer - Türkiye\'nin Genç Yetenek Platformu'
+    : 'About Us | Unilancer - Turkey\'s Young Talent Platform';
+  const seoDescription = currentLang === 'tr'
+    ? 'Unilancer, Türkiye\'nin en yetenekli üniversite öğrencileri ve mezunları ile işletmeleri buluşturan yeni nesil dijital ajans. Vizyonumuz ve misyonumuz.'
+    : 'Unilancer is a next-generation digital agency connecting Turkey\'s most talented university students and graduates with businesses. Our vision and mission.';
+  const canonicalUrl = `https://unilancer.co/${currentLang}/hakkimizda`;
 
   return (
+    <>
+      <Helmet>
+        {/* Primary Meta Tags */}
+        <title>{seoTitle}</title>
+        <meta name="title" content={seoTitle} />
+        <meta name="description" content={seoDescription} />
+        <meta name="keywords" content="unilancer, hakkımızda, genç yetenek, üniversite öğrencisi, freelancer, dijital ajans, İstanbul, vizyon, misyon" />
+        <meta name="robots" content="index, follow" />
+        <link rel="canonical" href={canonicalUrl} />
+        
+        {/* Language alternates */}
+        <link rel="alternate" hrefLang="tr" href="https://unilancer.co/tr/hakkimizda" />
+        <link rel="alternate" hrefLang="en" href="https://unilancer.co/en/about" />
+        
+        {/* Open Graph */}
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:title" content={seoTitle} />
+        <meta property="og:description" content={seoDescription} />
+        <meta property="og:image" content="https://unilancer.co/og-about.jpg" />
+        <meta property="og:site_name" content="Unilancer" />
+        <meta property="og:locale" content={currentLang === 'tr' ? 'tr_TR' : 'en_US'} />
+        
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={seoTitle} />
+        <meta name="twitter:description" content={seoDescription} />
+        <meta name="twitter:image" content="https://unilancer.co/og-about.jpg" />
+        
+        {/* AboutPage Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "AboutPage",
+            "name": seoTitle,
+            "description": seoDescription,
+            "url": canonicalUrl,
+            "mainEntity": {
+              "@type": "Organization",
+              "name": "Unilancer",
+              "description": seoDescription,
+              "url": "https://unilancer.co",
+              "logo": "https://unilancer.co/logo.png",
+              "foundingDate": "2023",
+              "address": {
+                "@type": "PostalAddress",
+                "streetAddress": "Şehit Muhtar, Mis Sk. No:24",
+                "addressLocality": "Beyoğlu",
+                "addressRegion": "İstanbul",
+                "postalCode": "34435",
+                "addressCountry": "TR"
+              }
+            }
+          })}
+        </script>
+        
+        {/* BreadcrumbList Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": currentLang === 'tr' ? "Ana Sayfa" : "Home",
+                "item": `https://unilancer.co/${currentLang}`
+              },
+              {
+                "@type": "ListItem",
+                "position": 2,
+                "name": currentLang === 'tr' ? "Hakkımızda" : "About",
+                "item": canonicalUrl
+              }
+            ]
+          })}
+        </script>
+      </Helmet>
+
     <div className="relative min-h-screen bg-white dark:bg-dark overflow-hidden">
       {/* HERO SECTION */}
       <section className="relative overflow-hidden min-h-screen flex items-center">
@@ -165,6 +255,7 @@ const About = () => {
       </section>
 
     </div>
+    </>
   );
 };
 

@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
+import { Helmet } from 'react-helmet-async';
 import { ArrowRight, CheckCircle, HelpCircle, Layers, Zap, TrendingUp, Briefcase } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import AuroraBackground from '../ui/effects/aurora-background';
@@ -17,6 +18,9 @@ export interface ServiceDetailLayoutProps {
     process: { title: string; description: string }[];
     faq: { question: string; answer: string }[];
     technologies?: string[];
+    // SEO fields
+    slug?: string;
+    seoKeywords?: string;
   };
 }
 
@@ -36,8 +40,128 @@ const stagger = {
 
 const ServiceDetailLayout: React.FC<ServiceDetailLayoutProps> = ({ data }) => {
   const isRichBenefits = data.benefits.length > 0 && typeof data.benefits[0] !== 'string';
+  
+  // SEO meta data
+  const currentLang = window.location.pathname.startsWith('/en') ? 'en' : 'tr';
+  const seoTitle = `${data.title} | Unilancer - ${data.heroTitle}`;
+  const seoDescription = data.heroDescription;
+  const slug = data.slug || data.title.toLowerCase().replace(/\s+/g, '-').replace(/ü/g, 'u').replace(/ı/g, 'i').replace(/ö/g, 'o').replace(/ç/g, 'c').replace(/ş/g, 's').replace(/ğ/g, 'g');
+  const canonicalUrl = `https://unilancer.co/${currentLang}/hizmetler/${slug}`;
+  const keywords = data.seoKeywords || `${data.title}, ${data.subServices.map(s => s.title).join(', ')}, unilancer, dijital ajans`;
+
+  // FAQ Schema
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": data.faq.map(item => ({
+      "@type": "Question",
+      "name": item.question,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": item.answer
+      }
+    }))
+  };
+
+  // Service Schema
+  const serviceSchema = {
+    "@context": "https://schema.org",
+    "@type": "Service",
+    "name": data.title,
+    "description": data.heroDescription,
+    "provider": {
+      "@type": "Organization",
+      "name": "Unilancer",
+      "url": "https://unilancer.co"
+    },
+    "url": canonicalUrl,
+    "image": data.heroImage,
+    "areaServed": {
+      "@type": "Country",
+      "name": "Turkey"
+    },
+    "hasOfferCatalog": {
+      "@type": "OfferCatalog",
+      "name": `${data.title} Hizmetleri`,
+      "itemListElement": data.subServices.map((service) => ({
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": service.title,
+          "description": service.description
+        }
+      }))
+    }
+  };
+
+  // Breadcrumb Schema
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": currentLang === 'tr' ? "Ana Sayfa" : "Home",
+        "item": `https://unilancer.co/${currentLang}`
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": currentLang === 'tr' ? "Hizmetler" : "Services",
+        "item": `https://unilancer.co/${currentLang}/hizmetler`
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": data.title,
+        "item": canonicalUrl
+      }
+    ]
+  };
 
   return (
+    <>
+      <Helmet>
+        {/* Primary Meta Tags */}
+        <title>{seoTitle}</title>
+        <meta name="title" content={seoTitle} />
+        <meta name="description" content={seoDescription} />
+        <meta name="keywords" content={keywords} />
+        <meta name="robots" content="index, follow" />
+        <link rel="canonical" href={canonicalUrl} />
+        
+        {/* Open Graph */}
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:title" content={seoTitle} />
+        <meta property="og:description" content={seoDescription} />
+        <meta property="og:image" content={data.heroImage || "https://unilancer.co/og-services.jpg"} />
+        <meta property="og:site_name" content="Unilancer" />
+        <meta property="og:locale" content={currentLang === 'tr' ? 'tr_TR' : 'en_US'} />
+        
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={seoTitle} />
+        <meta name="twitter:description" content={seoDescription} />
+        <meta name="twitter:image" content={data.heroImage || "https://unilancer.co/og-services.jpg"} />
+        
+        {/* Service Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify(serviceSchema)}
+        </script>
+        
+        {/* FAQ Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify(faqSchema)}
+        </script>
+        
+        {/* Breadcrumb Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify(breadcrumbSchema)}
+        </script>
+      </Helmet>
+      
     <div className="min-h-screen bg-white dark:bg-dark overflow-hidden">
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
@@ -404,6 +528,7 @@ const ServiceDetailLayout: React.FC<ServiceDetailLayoutProps> = ({ data }) => {
         </div>
       </section>
     </div>
+    </>
   );
 };
 

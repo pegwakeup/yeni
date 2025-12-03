@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { Helmet } from 'react-helmet-async';
 import {
   Mail, Phone, MapPin, Send,
   MessageSquare, ExternalLink, Sparkles
@@ -8,6 +9,17 @@ import { useTranslation } from '../hooks/useTranslation';
 
 const Contact = () => {
   const { t } = useTranslation();
+  
+  // SEO meta data
+  const currentLang = window.location.pathname.startsWith('/en') ? 'en' : 'tr';
+  const seoTitle = currentLang === 'tr' 
+    ? 'İletişim | Unilancer - Bize Ulaşın, Projenizi Hayata Geçirelim'
+    : 'Contact | Unilancer - Get in Touch, Let\'s Bring Your Project to Life';
+  const seoDescription = currentLang === 'tr'
+    ? 'Unilancer ile iletişime geçin. Proje talepleriniz, iş birlikleri ve sorularınız için bize ulaşın. İstanbul, Beyoğlu - Cube. Tel: +90 506 152 32 55'
+    : 'Contact Unilancer. Reach out for project requests, collaborations, and inquiries. Istanbul, Beyoğlu - Cube. Tel: +90 506 152 32 55';
+  const canonicalUrl = `https://unilancer.co/${currentLang}/iletisim`;
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -22,6 +34,99 @@ const Contact = () => {
   };
 
   return (
+    <>
+      <Helmet>
+        {/* Primary Meta Tags */}
+        <title>{seoTitle}</title>
+        <meta name="title" content={seoTitle} />
+        <meta name="description" content={seoDescription} />
+        <meta name="keywords" content="iletişim, contact, unilancer, proje talebi, iş birliği, İstanbul, Beyoğlu, dijital ajans" />
+        <meta name="robots" content="index, follow" />
+        <link rel="canonical" href={canonicalUrl} />
+        
+        {/* Language alternates */}
+        <link rel="alternate" hrefLang="tr" href="https://unilancer.co/tr/iletisim" />
+        <link rel="alternate" hrefLang="en" href="https://unilancer.co/en/contact" />
+        
+        {/* Open Graph */}
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:title" content={seoTitle} />
+        <meta property="og:description" content={seoDescription} />
+        <meta property="og:image" content="https://unilancer.co/og-contact.jpg" />
+        <meta property="og:site_name" content="Unilancer" />
+        <meta property="og:locale" content={currentLang === 'tr' ? 'tr_TR' : 'en_US'} />
+        
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={seoTitle} />
+        <meta name="twitter:description" content={seoDescription} />
+        <meta name="twitter:image" content="https://unilancer.co/og-contact.jpg" />
+        
+        {/* ContactPage Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "ContactPage",
+            "name": seoTitle,
+            "description": seoDescription,
+            "url": canonicalUrl,
+            "mainEntity": {
+              "@type": "LocalBusiness",
+              "name": "Unilancer",
+              "description": seoDescription,
+              "url": "https://unilancer.co",
+              "logo": "https://unilancer.co/logo.png",
+              "image": "https://unilancer.co/og-image.jpg",
+              "telephone": "+90-506-152-32-55",
+              "email": "info@unilancerlabs.com",
+              "address": {
+                "@type": "PostalAddress",
+                "streetAddress": "Şehit Muhtar, Mis Sk. No:24",
+                "addressLocality": "Beyoğlu",
+                "addressRegion": "İstanbul",
+                "postalCode": "34435",
+                "addressCountry": "TR"
+              },
+              "geo": {
+                "@type": "GeoCoordinates",
+                "latitude": "41.03473",
+                "longitude": "28.97772"
+              },
+              "openingHoursSpecification": {
+                "@type": "OpeningHoursSpecification",
+                "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+                "opens": "09:00",
+                "closes": "18:00"
+              },
+              "priceRange": "$$"
+            }
+          })}
+        </script>
+        
+        {/* BreadcrumbList Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": currentLang === 'tr' ? "Ana Sayfa" : "Home",
+                "item": `https://unilancer.co/${currentLang}`
+              },
+              {
+                "@type": "ListItem",
+                "position": 2,
+                "name": currentLang === 'tr' ? "İletişim" : "Contact",
+                "item": canonicalUrl
+              }
+            ]
+          })}
+        </script>
+      </Helmet>
+
     <div className="min-h-screen bg-white dark:bg-dark relative overflow-hidden">
       {/* Background Elements */}
       <div className="absolute top-0 left-0 w-full h-[500px] bg-gradient-to-b from-primary/5 to-transparent dark:from-primary/10 pointer-events-none" />
@@ -229,6 +334,7 @@ const Contact = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 
