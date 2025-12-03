@@ -36,7 +36,7 @@ const StepCard = memo(({
   return (
     <div
       style={{ zIndex, contain: 'layout style paint' }}
-      className={`relative bg-white/95 dark:bg-dark-light/95 p-6 md:p-12 flex flex-col items-start gap-4 md:gap-6 group transition-colors duration-300 hover:bg-white dark:hover:bg-dark-light ${borderClasses} ${className}`}
+      className={`relative bg-white/95 dark:bg-dark-light/95 p-5 sm:p-6 md:p-12 flex flex-col items-start gap-4 md:gap-6 group transition-colors duration-300 hover:bg-white dark:hover:bg-dark-light ${borderClasses} ${className}`}
     >
       {/* Hover Gradient - simplified */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
@@ -45,17 +45,17 @@ const StepCard = memo(({
       <div className="w-full">
         {/* Header with Icon */}
         <div className="w-full flex items-center justify-between mb-4 md:mb-6">
-           <div className="w-12 h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-primary/10 flex items-center justify-center text-primary transition-transform duration-300 group-hover:scale-110">
-              <Icon className="w-6 h-6 md:w-7 md:h-7" />
+           <div className="w-11 h-11 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-primary/10 flex items-center justify-center text-primary transition-transform duration-300 group-hover:scale-110">
+              <Icon className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7" />
            </div>
-           <span className="text-5xl md:text-6xl font-black text-slate-200 dark:text-white/10 select-none group-hover:text-primary/20 transition-colors duration-300">
+           <span className="text-4xl sm:text-5xl md:text-6xl font-black text-slate-200 dark:text-white/10 select-none group-hover:text-primary/20 transition-colors duration-300">
               0{displayNumber}
            </span>
         </div>
 
         {/* Text Content */}
         <div className="relative z-10">
-          <h3 className="text-lg md:text-2xl font-bold text-slate-900 dark:text-white mb-2 md:mb-3 group-hover:text-primary transition-colors duration-300">
+          <h3 className="text-base sm:text-lg md:text-2xl font-bold text-slate-900 dark:text-white mb-2 md:mb-3 group-hover:text-primary transition-colors duration-300">
             {title}
           </h3>
           <p className="text-slate-600 dark:text-slate-400 leading-relaxed text-sm md:text-base font-medium">
@@ -117,14 +117,14 @@ export const HowItWorks = memo(function HowItWorks() {
   ], []);
 
   return (
-    <section id="nasil-calisir" className="py-8 md:py-16 relative overflow-hidden" style={{ contain: 'content' }}>
+    <section id="nasil-calisir" className="py-12 md:py-16 relative overflow-hidden" style={{ contain: 'content' }}>
       <div className="max-w-[1340px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Header */}
         <div className="text-center max-w-4xl mx-auto mb-0 md:mb-12 px-2">
-          <h2 className="text-[24px] sm:text-[29px] md:text-[41px] font-bold tracking-tight text-slate-900 dark:text-white leading-tight mb-4 md:mb-6">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-slate-900 dark:text-white leading-tight mb-4 md:mb-6">
             <span className="text-primary">unilancer</span> {t('howItWorks.title.with', 'ile dijitalleşmek')} <span className="relative inline-block">
               {t('howItWorks.title.easy', 'çok kolay')}
-              <svg className="absolute -bottom-2 left-0 w-full h-3 text-primary" viewBox="0 0 100 10" preserveAspectRatio="none">
+              <svg className="absolute -bottom-2 left-0 w-full h-4 text-primary" viewBox="0 0 100 10" preserveAspectRatio="none">
                  <path d="M0 5 Q 50 10 100 5" stroke="currentColor" strokeWidth="3" fill="none" />
               </svg>
             </span>

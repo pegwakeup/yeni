@@ -41,15 +41,10 @@ const Login = () => {
         throw new Error(t('login.lütfen_eposta_ve', 'Lütfen e-posta ve şifrenizi girin.'));
       }
 
-      console.log('Attempting login with:', email);
       const { data, error } = await signIn(email, password);
-
-      console.log('Login response:', { data, error });
 
       if (error) throw error;
       if (!data.session) throw new Error(t('login.oturum_oluşturulamadı', 'Oturum oluşturulamadı.'));
-
-      console.log('Login successful, redirecting to:', location.state?.from?.pathname || '/admin');
 
       // Redirect to admin or intended page
       const from = location.state?.from?.pathname || '/admin';

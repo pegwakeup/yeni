@@ -298,8 +298,8 @@ export const staticTranslations: Record<string, Record<Language, string>> = {
 
   // For Whom Section
   'home.forWhom.title': {
-    tr: 'Kimin için?',
-    en: 'For Whom?'
+    tr: 'kimin için?',
+    en: 'for whom?'
   },
   'home.forWhom.description': {
     tr: 'Unilancer, hem işverenler hem de üniversiteli freelancerlar için tasarlanmış bir ekosistemdir.',

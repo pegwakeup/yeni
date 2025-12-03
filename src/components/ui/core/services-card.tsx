@@ -268,7 +268,7 @@ const ServiceCard = memo(function ServiceCard({ service }: { service: Service })
       {/* Content Container */}
       <div className="relative z-10 flex h-full flex-col p-5 md:p-6">
         {/* Title - Top Left */}
-        <h3 className="text-[15px] md:text-[20px] font-bold text-slate-900 dark:text-white leading-tight z-20 max-w-[80%]">
+        <h3 className="text-base md:text-xl font-bold text-slate-900 dark:text-white leading-tight z-20 max-w-[80%]">
           {service.title}
         </h3>
 
@@ -287,9 +287,9 @@ const ServiceCard = memo(function ServiceCard({ service }: { service: Service })
 
         {/* Details Button/Indicator */}
         <div className="absolute bottom-4 right-4 md:bottom-5 md:right-5 z-20">
-            <div className="flex items-center gap-1.5 md:gap-2 px-3 md:px-4 py-1.5 md:py-2 rounded-full bg-white/80 dark:bg-white/10 backdrop-blur-sm border border-slate-100 dark:border-white/5 shadow-sm group-hover:bg-primary group-hover:border-primary group-hover:text-white transition-colors duration-300">
-                <span className="text-[11px] md:text-xs font-medium text-slate-600 dark:text-slate-300 group-hover:text-white">İncele</span>
-                <ArrowRight className="w-3 h-3 md:w-3.5 md:h-3.5 text-slate-600 dark:text-slate-300 group-hover:text-white" />
+            <div className="flex items-center gap-2 px-4 py-2.5 min-h-[44px] rounded-full bg-white/80 dark:bg-white/10 backdrop-blur-sm border border-slate-100 dark:border-white/5 shadow-sm group-hover:bg-primary group-hover:border-primary group-hover:text-white transition-colors duration-300">
+                <span className="text-xs font-medium text-slate-600 dark:text-slate-300 group-hover:text-white">İncele</span>
+                <ArrowRight className="w-4 h-4 text-slate-600 dark:text-slate-300 group-hover:text-white" />
             </div>
         </div>
       </div>
@@ -322,9 +322,9 @@ export const ServiceCarousel = memo(function ServiceCarousel({ services }: { ser
         </CarouselContent>
 
         {/* Navigation Buttons */}
-        <div className="mt-8 flex justify-center gap-4 md:hidden">
-          <CarouselPrevious className="static translate-y-0 border-slate-200 dark:border-white/10" />
-          <CarouselNext className="static translate-y-0 border-slate-200 dark:border-white/10" />
+        <div className="mt-6 flex justify-center gap-4 md:hidden">
+          <CarouselPrevious className="static translate-y-0 h-11 w-11 border-slate-200 dark:border-white/10" />
+          <CarouselNext className="static translate-y-0 h-11 w-11 border-slate-200 dark:border-white/10" />
         </div>
 
         {/* Desktop Navigation Buttons */}

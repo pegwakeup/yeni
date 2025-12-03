@@ -100,9 +100,8 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleViewFreelancer = (freelancer: Freelancer) => {
+  const handleViewFreelancer = (_freelancer: Freelancer) => {
     // TODO: Implement freelancer details view
-    console.log('View freelancer:', freelancer);
   };
 
   const handleUpdateStatus = async (id: string, status: Freelancer['status']) => {

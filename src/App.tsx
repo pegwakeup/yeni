@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import PrivateRoute from './components/PrivateRoute';
+import ErrorBoundary from './components/ErrorBoundary';
 import { PrivacyTermsProvider } from './components/ui/modals/privacy-terms-provider';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { LanguageProvider } from './contexts/LanguageContext';
@@ -36,6 +37,9 @@ const GraphicDesign = lazy(() => import('./pages/services/GraphicDesign'));
 // Admin routes
 const AdminRoutes = lazy(() => import('./features/admin/routes'));
 
+// 404 Page
+const NotFound = lazy(() => import('./pages/NotFound'));
+
 // Scroll to top component
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -59,12 +63,13 @@ const PageLoader = () => (
 
 function App() {
   return (
-    <HelmetProvider>
-      <Router>
-        <ThemeProvider>
-          <LanguageProvider>
-            <PrivacyTermsProvider>
-              <ScrollToTop />
+    <ErrorBoundary>
+      <HelmetProvider>
+        <Router>
+          <ThemeProvider>
+            <LanguageProvider>
+              <PrivacyTermsProvider>
+                <ScrollToTop />
               <div className="min-h-screen bg-white dark:bg-dark text-slate-900 dark:text-white font-sans transition-colors duration-300">
                 <Suspense fallback={<PageLoader />}>
                   <Routes>
@@ -148,16 +153,17 @@ function App() {
                     {/* Root redirect to Turkish */}
                     <Route path="/" element={<Navigate to="/tr" replace />} />
 
-                    {/* Catch all route - redirect to Turkish home */}
-                    <Route path="*" element={<Navigate to="/tr" replace />} />
+                    {/* 404 - Not Found */}
+                    <Route path="*" element={<NotFound />} />
                   </Routes>
                 </Suspense>
               </div>
-            </PrivacyTermsProvider>
-          </LanguageProvider>
-        </ThemeProvider>
-      </Router>
-    </HelmetProvider>
+              </PrivacyTermsProvider>
+            </LanguageProvider>
+          </ThemeProvider>
+        </Router>
+      </HelmetProvider>
+    </ErrorBoundary>
   );
 }
 

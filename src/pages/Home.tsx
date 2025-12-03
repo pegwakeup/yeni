@@ -232,7 +232,7 @@ const Home = () => {
         {/* HERO */}
         <section
           id="hero"
-          className="relative overflow-hidden min-h-[600px] lg:min-h-[750px] flex items-center pt-24 pb-12 md:pt-32 md:pb-20"
+          className="relative overflow-hidden min-h-[520px] sm:min-h-[600px] lg:min-h-[750px] flex items-center pt-20 pb-10 sm:pt-24 sm:pb-12 md:pt-32 md:pb-20"
         >
           <div className="max-w-[1340px] mx-auto px-4 sm:px-6 lg:px-8 w-full z-10">
             <div className="grid lg:grid-cols-2 gap-10 lg:gap-12 items-center">
@@ -276,16 +276,16 @@ const Home = () => {
                     {t("home.hero.mainDescription")}
                   </p>
 
-                  <div className="inline-flex items-center text-left text-[11px] sm:text-sm text-slate-500 dark:text-gray-400 bg-white/80 dark:bg-white/5 border border-slate-200/70 dark:border-white/10 rounded-xl sm:rounded-2xl px-3 sm:px-4 py-2 mx-auto lg:mx-0 max-w-full shadow-sm backdrop-blur-sm">
+                  <div className="inline-flex items-center text-left text-xs sm:text-sm text-slate-500 dark:text-gray-400 bg-white/80 dark:bg-white/5 border border-slate-200/70 dark:border-white/10 rounded-xl sm:rounded-2xl px-4 py-2.5 mx-auto lg:mx-0 max-w-full shadow-sm backdrop-blur-sm">
                     <span className="mr-2.5 text-primary flex-shrink-0 text-lg">•</span>
                     <span className="leading-snug">{t("home.hero.servicesNote")}</span>
                   </div>
                 </motion.div>
 
-                <motion.div variants={heroItemVariants} className="flex flex-col sm:flex-row gap-2.5 sm:gap-4 pt-1 sm:pt-2 justify-center lg:justify-start px-2 sm:px-0">
+                <motion.div variants={heroItemVariants} className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-1 sm:pt-2 justify-center lg:justify-start px-2 sm:px-0">
                   <motion.a
                     href="/project-request"
-                    className="inline-flex items-center justify-center w-full sm:w-auto px-5 sm:px-8 py-2.5 sm:py-3.5 bg-primary hover:bg-primary-dark text-white rounded-xl font-bold text-[13px] sm:text-base transition-all shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 group"
+                    className="inline-flex items-center justify-center w-full sm:w-auto px-5 sm:px-8 py-3 sm:py-3.5 min-h-[48px] bg-primary hover:bg-primary-dark text-white rounded-xl font-bold text-sm sm:text-base transition-all shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 group"
                     whileHover={{ scale: 1.02, y: -1 }}
                     whileTap={{ scale: 0.98 }}
                     transition={{ type: "spring", stiffness: 400, damping: 15 }}
@@ -296,7 +296,7 @@ const Home = () => {
 
                   <motion.button
                     onClick={() => setIsCalendlyOpen(true)}
-                    className="inline-flex items-center justify-center w-full sm:w-auto px-5 sm:px-8 py-2.5 sm:py-3.5 bg-white/80 dark:bg-white/5 backdrop-blur-md text-slate-900 dark:text-white rounded-xl font-bold text-[13px] sm:text-base hover:bg-white dark:hover:bg-white/10 transition-all border border-slate-200 dark:border-white/10 group shadow-sm"
+                    className="inline-flex items-center justify-center w-full sm:w-auto px-5 sm:px-8 py-3 sm:py-3.5 min-h-[48px] bg-white/80 dark:bg-white/5 backdrop-blur-md text-slate-900 dark:text-white rounded-xl font-bold text-sm sm:text-base hover:bg-white dark:hover:bg-white/10 transition-all border border-slate-200 dark:border-white/10 group shadow-sm"
                     whileHover={{ scale: 1.02, y: -1 }}
                     whileTap={{ scale: 0.98 }}
                     transition={{ type: "spring", stiffness: 400, damping: 15 }}
@@ -305,7 +305,7 @@ const Home = () => {
                   </motion.button>
                 </motion.div>
 
-                <motion.div variants={heroItemVariants} className="flex flex-row items-center gap-x-3 sm:gap-x-4 gap-y-2 pt-1 sm:pt-2 text-[11px] sm:text-sm font-medium text-slate-500 dark:text-gray-400 justify-center lg:justify-start">
+                <motion.div variants={heroItemVariants} className="flex flex-row items-center gap-x-3 sm:gap-x-4 gap-y-2 pt-1 sm:pt-2 text-xs sm:text-sm font-medium text-slate-500 dark:text-gray-400 justify-center lg:justify-start">
                   <span className="flex items-center"><span className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-primary mr-1.5 sm:mr-2"></span>{t("home.hero.stats.projects")}</span>
                   <span className="text-slate-300 dark:text-white/20">|</span>
                   <span className="flex items-center"><span className="w-1 h-1 sm:w-1.5 sm:h-1.5 rounded-full bg-primary mr-1.5 sm:mr-2"></span>{t("home.hero.stats.freelancers")}</span>
@@ -317,9 +317,9 @@ const Home = () => {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
-                className="flex justify-center lg:justify-end mt-6 lg:mt-0"
+                className="flex justify-center lg:justify-end mt-4 lg:mt-0"
               >
-                <div className="relative w-full max-w-[280px] sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl group cursor-pointer">
+                <div className="relative w-full max-w-[300px] sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl group cursor-pointer">
                   <div className="pointer-events-none absolute -inset-6 rounded-[40px] bg-gradient-to-tr from-primary/25 via-cyan-400/15 to-purple-500/25 blur-2xl opacity-80 group-hover:opacity-100 transition-opacity duration-500" />
                   <img
                     src="https://ctncspdgguclpeijikfp.supabase.co/storage/v1/object/public/Landing%20Page/elsikisma.webp"
@@ -358,12 +358,12 @@ const Home = () => {
         {/* HİZMETLERİMİZ - DigitAll Services */}
         <section id="hizmetlerimiz" className="relative py-12 md:py-16 overflow-hidden">
           <div>
-            <div className="max-w-[1340px] mx-auto px-4 sm:px-6 lg:px-8 mb-8 md:mb-10 relative z-10">
+            <div className="max-w-[1340px] mx-auto px-4 sm:px-6 lg:px-8 mb-10 md:mb-14 relative z-10">
               <div className="text-center flex flex-col items-center">
-                <div className="mb-2">
+                <div className="mb-3">
                    <GlitchyText text="digitAll" fontSize={36} />
                 </div>
-                <h2 className="text-[20px] sm:text-[24px] md:text-[29px] font-bold tracking-tight text-slate-900 dark:text-white mb-4 max-w-4xl leading-tight mx-auto px-2">
+                <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-slate-900 dark:text-white mb-4 max-w-4xl leading-tight mx-auto px-2">
                   {t("home.services.headline", "işletmenizi dijital dünyada öne çıkaracak çözümler")}
                 </h2>
               </div>
@@ -458,17 +458,17 @@ const Home = () => {
               />
           </div>
         </section>        {/* KIMIN ICIN */}
-        <section id="kimin-icin" className="py-10 md:py-16">
+        <section id="kimin-icin" className="py-12 md:py-16">
           <div className="max-w-[1340px] mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-3xl mx-auto text-center px-2">
                 <AnimatedText
                     as="h2"
-                    className="text-[22px] sm:text-[28px] md:text-[41.47px] font-bold tracking-tight text-slate-900 dark:text-white leading-tight"
+                    className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-slate-900 dark:text-white leading-tight"
                     words={forWhomTitleWords}
                 />
             </div>
 
-            <div className="mt-10 md:mt-14 grid gap-6 md:gap-x-8 md:gap-y-12 md:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-12 md:mt-16 grid gap-6 md:gap-8 md:grid-cols-2 lg:grid-cols-3">
               {audience.map((item, index) => (
                 <AudienceCard
                   key={item.id}

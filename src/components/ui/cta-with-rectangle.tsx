@@ -23,9 +23,9 @@ function CTASection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-[28px] sm:text-[35px] md:text-[50px] lg:text-[60px] font-bold tracking-tight max-w-5xl text-foreground leading-[1.1]"
+            className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight max-w-5xl text-foreground leading-tight"
           >
-            Projenizi Hayata Geçirmek İçin <br />
+            <span className="block sm:inline">Projenizi Hayata Geçirmek İçin</span>{' '}
             <span className="text-primary">
               Doğru Zaman Şimdi!
             </span>
@@ -37,7 +37,7 @@ function CTASection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.3 }}
-            className="text-[15px] sm:text-[16.5px] md:text-[20px] text-muted-foreground max-w-2xl leading-relaxed"
+            className="text-sm sm:text-base md:text-lg text-muted-foreground max-w-2xl leading-relaxed px-2"
           >
             Türkiye'nin en yetenekli üniversiteli ekipleriyle çalışın. 
             Web sitesinden mobil uygulamaya, tasarımdan pazarlamaya kadar tüm dijital ihtiyaçlarınız için profesyonel destek alın.
@@ -49,11 +49,11 @@ function CTASection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.4 }}
-            className="flex flex-col sm:flex-row gap-4 mt-6"
+            className="flex flex-col sm:flex-row gap-3 sm:gap-4 mt-4 sm:mt-6 w-full sm:w-auto px-4 sm:px-0"
           >
             <Button 
               size="lg" 
-              className="bg-primary hover:bg-primary-dark text-white min-w-[180px] h-14 text-lg shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all duration-300 rounded-xl"
+              className="bg-primary hover:bg-primary-dark text-white w-full sm:w-auto sm:min-w-[180px] h-12 sm:h-14 text-base sm:text-lg shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all duration-300 rounded-xl"
               onClick={() => window.location.href = '/project-request'}
             >
               <Rocket className="mr-2 h-5 w-5" />
@@ -62,7 +62,7 @@ function CTASection() {
             
             <Button 
               size="lg" 
-              className="text-white min-w-[180px] h-14 text-lg shadow-lg transition-all duration-300 rounded-xl hover:opacity-90"
+              className="text-white w-full sm:w-auto sm:min-w-[180px] h-12 sm:h-14 text-base sm:text-lg shadow-lg transition-all duration-300 rounded-xl hover:opacity-90"
               style={{ backgroundColor: '#b370ab' }}
               onClick={() => window.location.href = '/join-us'}
             >
