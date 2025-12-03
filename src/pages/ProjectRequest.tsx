@@ -750,15 +750,6 @@ const ProjectRequest = () => {
       <main className="pt-24 pb-12">
         <div className="max-w-[1340px] mx-auto px-4 sm:px-6 lg:px-8">
           
-          {/* Geri Dön Butonu */}
-          <button
-            onClick={() => setRequestType('selection')}
-            className="mb-6 flex items-center gap-2 text-gray-500 dark:text-gray-400 hover:text-primary transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Geri Dön</span>
-          </button>
-          
           {/* Mobilde üst stepper */}
           <div className="lg:hidden mb-6">
             <div className="bg-white dark:bg-dark-light rounded-xl p-4 border border-gray-200 dark:border-gray-700">

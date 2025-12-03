@@ -232,7 +232,7 @@ const Home = () => {
         {/* HERO */}
         <section
           id="hero"
-          className="relative overflow-hidden min-h-[520px] sm:min-h-[600px] lg:min-h-[750px] flex items-center pt-20 pb-10 sm:pt-24 sm:pb-12 md:pt-32 md:pb-20"
+          className="relative overflow-hidden min-h-[520px] sm:min-h-[600px] lg:min-h-[750px] flex items-center pt-28 pb-10 sm:pt-32 sm:pb-12 md:pt-36 md:pb-20"
         >
           <div className="max-w-[1340px] mx-auto px-4 sm:px-6 lg:px-8 w-full z-10">
             <div className="grid lg:grid-cols-2 gap-10 lg:gap-12 items-center">

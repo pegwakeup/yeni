@@ -136,6 +136,18 @@ const Navbar = () => {
     setIsServicesOpen(false);
   }, [location]);
 
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
+
   // Keyboard navigation for dropdown
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -553,10 +565,10 @@ const Navbar = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.25, ease: "easeOut" }}
-                className="fixed inset-0 top-[64px] bg-white dark:bg-dark z-40 md:hidden overflow-y-auto overscroll-contain"
-                style={{ height: 'calc(100vh - 64px)', WebkitOverflowScrolling: 'touch' }}
+                className="fixed inset-0 bg-white dark:bg-dark z-30 md:hidden overflow-y-auto overflow-x-hidden overscroll-contain"
+                style={{ height: '100dvh', WebkitOverflowScrolling: 'touch' }}
               >
-                <div className="px-4 py-5 pb-32">
+                <div className="px-4 pt-24 pb-32">
                   <div className="space-y-4 max-w-lg mx-auto">
                     
                     {/* Quick Action Buttons - En üstte */}
