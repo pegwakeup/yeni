@@ -1,19 +1,17 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useMemo, useCallback } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { 
   Users, 
   Briefcase, 
   GraduationCap,
   Zap,
-  ArrowRight,
   Tag,
   Clock,
-  ChevronRight,
-  LayoutGrid,
   Search,
-  Bell,
-  Menu
+  MoreHorizontal,
+  LucideIcon
 } from 'lucide-react';
 import AuroraBackground from '../components/ui/effects/aurora-background';
 
@@ -21,7 +19,7 @@ interface TabItem {
   id: number;
   title: string;
   description: string;
-  icon: any;
+  icon: LucideIcon;
   color: string;
   bgColor: string;
   borderColor: string;
@@ -32,7 +30,8 @@ interface TabItem {
 const Universities = () => {
   const [activeTab, setActiveTab] = useState(0);
 
-  const tabItems: TabItem[] = [
+  // Memoize tab items to prevent recreation on each render
+  const tabItems: TabItem[] = useMemo(() => [
     {
       id: 1,
       title: 'İş & Gelir',
@@ -42,7 +41,7 @@ const Universities = () => {
       bgColor: 'bg-green-50 dark:bg-green-900/20',
       borderColor: 'border-green-200 dark:border-green-800',
       status: 'active',
-      image: 'https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&w=1000&q=80'
+      image: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=800&q=80'
     },
     {
       id: 2,
@@ -53,7 +52,7 @@ const Universities = () => {
       bgColor: 'bg-purple-50 dark:bg-purple-900/20',
       borderColor: 'border-purple-200 dark:border-purple-800',
       status: 'coming-soon',
-      image: 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1000&q=80'
+      image: 'https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&w=800&q=80'
     },
     {
       id: 3,
@@ -64,7 +63,7 @@ const Universities = () => {
       bgColor: 'bg-pink-50 dark:bg-pink-900/20',
       borderColor: 'border-pink-200 dark:border-pink-800',
       status: 'coming-soon',
-      image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1000&q=80'
+      image: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&w=800&q=80'
     },
     {
       id: 4,
@@ -75,12 +74,37 @@ const Universities = () => {
       bgColor: 'bg-yellow-50 dark:bg-yellow-900/20',
       borderColor: 'border-yellow-200 dark:border-yellow-800',
       status: 'coming-soon',
-      image: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1000&q=80'
+      image: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=800&q=80'
     }
-  ];
+  ], []);
+
+  // Memoize tab change handler
+  const handleTabChange = useCallback((index: number) => {
+    setActiveTab(index);
+  }, []);
+
+  // Keyboard navigation handler
+  const handleKeyDown = useCallback((e: React.KeyboardEvent, index: number) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      setActiveTab(index);
+    } else if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      setActiveTab((prev) => (prev + 1) % tabItems.length);
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      setActiveTab((prev) => (prev - 1 + tabItems.length) % tabItems.length);
+    }
+  }, [tabItems.length]);
 
   return (
-    <div className="relative min-h-screen font-sans overflow-hidden">
+    <>
+      <Helmet>
+        <title>Üniversiteli Ekosistemi | Unilancer</title>
+        <meta name="description" content="Unilancer ile gerçek iş deneyimi kazan, freelancer kulüplerine katıl, özel indirimlerden yararlan ve kariyerini şekillendir." />
+        <meta name="keywords" content="üniversite, freelancer, staj, iş deneyimi, öğrenci, kariyer" />
+      </Helmet>
+      <div className="relative min-h-screen font-sans overflow-hidden">
       {/* Background */}
       <div className="fixed inset-0 z-0" style={{ contain: 'strict' }}>
         <AuroraBackground />
@@ -96,11 +120,11 @@ const Universities = () => {
         />
       </div>
       
-      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10">
-        <div className="flex flex-col lg:flex-row gap-16 items-center justify-between min-h-screen py-20 lg:py-0">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10">
+        <div className="flex flex-col lg:flex-row gap-12 items-center justify-between min-h-screen py-20 lg:py-0">
           
           {/* Left Content */}
-          <div className="flex-1 relative z-20 pt-10 lg:pt-0 max-w-xl">
+          <div className="flex-1 relative z-20 pt-10 lg:pt-0">
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -134,14 +158,49 @@ const Universities = () => {
               Sadece bir çalışma platformu değil; deneyim kazandığın, sosyalleştiğin ve kariyerini inşa ettiğin dev bir kampüs.
             </motion.p>
 
-            <motion.div
+            {/* Navigation Tabs */}
+            <motion.div 
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.3 }}
+              className="flex flex-wrap gap-3 mb-8"
+              role="tablist"
+              aria-label="Ekosistem özellikleri"
+            >
+              {tabItems.map((item, index) => {
+                const isActive = activeTab === index;
+                const Icon = item.icon;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => handleTabChange(index)}
+                    onKeyDown={(e) => handleKeyDown(e, index)}
+                    role="tab"
+                    aria-selected={isActive}
+                    aria-controls={`tabpanel-${item.id}`}
+                    tabIndex={isActive ? 0 : -1}
+                    className={`
+                      flex items-center px-4 py-2 rounded-xl font-bold text-sm transition-all duration-300 border-2 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2
+                      ${isActive 
+                        ? 'bg-white dark:bg-white/10 border-slate-900 dark:border-white text-slate-900 dark:text-white shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] dark:shadow-[4px_4px_0px_0px_rgba(255,255,255,0.5)] translate-x-[-2px] translate-y-[-2px]' 
+                        : 'bg-transparent border-transparent text-slate-500 hover:bg-white/50 dark:hover:bg-white/5'}
+                    `}
+                  >
+                    <Icon className="w-4 h-4 mr-2" aria-hidden="true" />
+                    {item.title}
+                  </button>
+                );
+              })}
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.4 }}
             >
               <Link
                 to="/tr/basvuru"
-                className="inline-flex items-center px-8 py-4 bg-primary hover:bg-primary-dark text-white rounded-xl font-bold transition-all shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/30 hover:-translate-y-1"
+                className="inline-flex items-center px-8 py-4 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl font-black transition-all shadow-[6px_6px_0px_0px_rgba(0,0,0,0.2)] hover:shadow-[8px_8px_0px_0px_rgba(0,0,0,0.2)] hover:-translate-y-1 border-2 border-transparent"
               >
                 <Zap className="w-5 h-5 mr-2 fill-current" />
                 Aramıza Katıl
@@ -149,172 +208,118 @@ const Universities = () => {
             </motion.div>
           </div>
 
-          {/* Right Content - Desktop Interface */}
+          {/* Right Content - Desktop Browser View (Caricaturistic/Pop Style) */}
           <motion.div 
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
             className="flex-1 w-full flex justify-center lg:justify-end relative z-10"
           >
-            {/* Desktop Window Frame */}
-            <div className="relative w-full max-w-3xl aspect-[16/10] bg-slate-900 rounded-xl shadow-2xl border border-slate-800 ring-1 ring-white/10 overflow-hidden flex flex-col transform hover:scale-[1.02] transition-transform duration-500">
+            {/* Browser Window Frame */}
+            <div className="w-full max-w-2xl bg-white dark:bg-slate-900 rounded-2xl border-4 border-slate-900 dark:border-slate-200 shadow-[12px_12px_0px_0px_rgba(15,23,42,0.2)] dark:shadow-[12px_12px_0px_0px_rgba(255,255,255,0.1)] overflow-hidden transform rotate-1 hover:rotate-0 transition-transform duration-500">
               
               {/* Browser Header */}
-              <div className="h-10 bg-slate-800/50 backdrop-blur-md flex items-center px-4 gap-2 border-b border-white/5">
+              <div className="bg-slate-100 dark:bg-slate-800 px-4 py-3 flex items-center gap-3 border-b-4 border-slate-900 dark:border-slate-200">
                 <div className="flex gap-2">
-                  <div className="w-3 h-3 rounded-full bg-red-500/80"/>
-                  <div className="w-3 h-3 rounded-full bg-yellow-500/80"/>
-                  <div className="w-3 h-3 rounded-full bg-green-500/80"/>
+                  <div className="w-3 h-3 rounded-full bg-red-500 border border-slate-900/20"></div>
+                  <div className="w-3 h-3 rounded-full bg-yellow-500 border border-slate-900/20"></div>
+                  <div className="w-3 h-3 rounded-full bg-green-500 border border-slate-900/20"></div>
                 </div>
-                <div className="ml-4 flex-1 max-w-md h-6 bg-slate-950/50 rounded-md flex items-center justify-center px-3 text-[10px] text-slate-500 font-mono border border-white/5">
-                  <span className="opacity-50">https://</span>unilancer.com/student-hub
+                
+                {/* Address Bar */}
+                <div className="flex-1 bg-white dark:bg-slate-900 rounded-lg border-2 border-slate-200 dark:border-slate-700 px-3 py-1.5 flex items-center gap-2">
+                  <div className="bg-slate-100 dark:bg-slate-800 p-1 rounded">
+                    <Search className="w-3 h-3 text-slate-400" />
+                  </div>
+                  <span className="text-xs font-bold text-slate-600 dark:text-slate-300 font-mono">unilancer.app/student-hub</span>
                 </div>
+
+                <MoreHorizontal className="w-5 h-5 text-slate-400" />
               </div>
 
-              {/* App Layout */}
-              <div className="flex-1 flex overflow-hidden bg-slate-50 dark:bg-slate-950">
-                
-                {/* Sidebar */}
-                <div className="w-64 bg-white dark:bg-slate-900/50 border-r border-slate-200 dark:border-white/5 flex flex-col">
-                  <div className="p-4 border-b border-slate-100 dark:border-white/5">
-                    <div className="flex items-center gap-2 text-slate-900 dark:text-white font-bold">
-                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-                        <LayoutGrid className="w-5 h-5" />
-                      </div>
-                      <span>Dashboard</span>
-                    </div>
-                  </div>
-                  
-                  <div className="p-3 space-y-1">
-                    {tabItems.map((item, index) => {
-                      const isActive = activeTab === index;
-                      const Icon = item.icon;
-                      return (
-                        <button
-                          key={item.id}
-                          onClick={() => setActiveTab(index)}
-                          className={`
-                            w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all
-                            ${isActive 
-                              ? 'bg-slate-100 dark:bg-white/10 text-slate-900 dark:text-white shadow-sm' 
-                              : 'text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5'}
-                          `}
-                        >
-                          <Icon className={`w-4 h-4 ${isActive ? item.color : 'opacity-70'}`} />
-                          {item.title}
-                          {isActive && <ChevronRight className="w-3 h-3 ml-auto opacity-50" />}
-                        </button>
-                      );
-                    })}
-                  </div>
+              {/* Browser Content */}
+              <div 
+                className="relative aspect-[16/10] bg-slate-50 dark:bg-slate-950 overflow-hidden group"
+                role="tabpanel"
+                id={`tabpanel-${tabItems[activeTab].id}`}
+                aria-labelledby={`tab-${tabItems[activeTab].id}`}
+              >
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={activeTab}
+                    initial={{ opacity: 0, scale: 1.05 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3, ease: 'easeOut' }}
+                    className="absolute inset-0"
+                    style={{ willChange: 'opacity, transform' }}
+                  >
+                    <img 
+                      src={tabItems[activeTab].image} 
+                      alt={`${tabItems[activeTab].title} - ${tabItems[activeTab].description}`}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                    <div className="absolute inset-0 bg-slate-900/20 backdrop-blur-[2px]"></div>
+                  </motion.div>
+                </AnimatePresence>
 
-                  <div className="mt-auto p-4 border-t border-slate-100 dark:border-white/5">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-primary to-purple-500"></div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-xs font-bold text-slate-900 dark:text-white truncate">Öğrenci Hesabı</div>
-                        <div className="text-[10px] text-slate-500 truncate">student@uni.edu</div>
+                {/* Floating Card Content */}
+                <div className="absolute inset-0 flex items-center justify-center p-4 sm:p-8">
+                  <motion.div 
+                    key={`card-${activeTab}`}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.15, duration: 0.3, ease: 'easeOut' }}
+                    style={{ willChange: 'opacity, transform' }}
+                    className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md p-6 rounded-2xl border-4 border-slate-900 dark:border-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] dark:shadow-[8px_8px_0px_0px_rgba(255,255,255,0.5)] max-w-sm w-full"
+                  >
+                    <div className={`inline-flex p-3 rounded-xl mb-4 ${tabItems[activeTab].bgColor} border-2 ${tabItems[activeTab].borderColor}`} aria-hidden="true">
+                      {(() => {
+                        const Icon = tabItems[activeTab].icon;
+                        return <Icon className={`w-6 h-6 ${tabItems[activeTab].color}`} aria-hidden="true" />;
+                      })()}
+                    </div>
+                    
+                    <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-2">
+                      {tabItems[activeTab].title}
+                    </h3>
+                    
+                    <p className="text-slate-600 dark:text-slate-300 font-medium leading-relaxed mb-4">
+                      {tabItems[activeTab].description}
+                    </p>
+
+                    <div className="flex items-center justify-between pt-4 border-t-2 border-slate-100 dark:border-slate-800">
+                      {tabItems[activeTab].status === 'active' ? (
+                        <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-bold bg-green-100 text-green-800 border-2 border-green-200">
+                          <span className="w-2 h-2 rounded-full bg-green-500 mr-1.5 animate-pulse"/>
+                          AKTİF
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-bold bg-slate-100 text-slate-600 border-2 border-slate-200">
+                          <Clock className="w-3 h-3 mr-1.5"/>
+                          YAKINDA
+                        </span>
+                      )}
+                      
+                      <div className="flex gap-1">
+                        <div className="w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-600"></div>
+                        <div className="w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-600"></div>
+                        <div className="w-6 h-2 rounded-full bg-primary"></div>
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                 </div>
 
-                {/* Main Content Area */}
-                <div className="flex-1 relative overflow-hidden flex flex-col">
-                  {/* Top Bar */}
-                  <div className="h-14 border-b border-slate-100 dark:border-white/5 flex items-center justify-between px-6 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm">
-                    <div className="relative">
-                      <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                      <input 
-                        type="text" 
-                        placeholder="Fırsatları ara..." 
-                        className="h-8 pl-9 pr-4 rounded-full bg-slate-100 dark:bg-white/5 border-none text-xs w-48 focus:ring-1 focus:ring-primary"
-                      />
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <button className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors">
-                        <Bell className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Content */}
-                  <div className="flex-1 p-6 overflow-y-auto">
-                    <AnimatePresence mode="wait">
-                      <motion.div
-                        key={activeTab}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        transition={{ duration: 0.3 }}
-                        className="h-full flex flex-col"
-                      >
-                        {/* Hero Image Card */}
-                        <div className="relative h-48 sm:h-64 rounded-2xl overflow-hidden mb-6 group shadow-lg">
-                          <img 
-                            src={tabItems[activeTab].image} 
-                            alt={tabItems[activeTab].title}
-                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                          
-                          <div className="absolute bottom-0 left-0 p-6 w-full">
-                            <div className="flex items-center justify-between mb-2">
-                              {tabItems[activeTab].status === 'active' ? (
-                                <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-green-500/20 text-green-300 backdrop-blur-md border border-green-500/30">
-                                  <span className="w-1.5 h-1.5 rounded-full bg-green-400 mr-1.5 animate-pulse"/>
-                                  Aktif
-                                </span>
-                              ) : (
-                                <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-white/10 text-white backdrop-blur-md border border-white/20">
-                                  <Clock className="w-3 h-3 mr-1.5"/>
-                                  Çok Yakında
-                                </span>
-                              )}
-                            </div>
-                            <h2 className="text-2xl font-bold text-white mb-1">{tabItems[activeTab].title}</h2>
-                            <p className="text-white/80 text-sm line-clamp-1">{tabItems[activeTab].description}</p>
-                          </div>
-                        </div>
-
-                        {/* Details Grid */}
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="p-4 rounded-xl bg-white dark:bg-white/5 border border-slate-100 dark:border-white/5">
-                            <div className="text-xs text-slate-500 dark:text-slate-400 mb-1">Durum</div>
-                            <div className="font-semibold text-slate-900 dark:text-white text-sm">
-                              {tabItems[activeTab].status === 'active' ? 'Başvurular Açık' : 'Hazırlanıyor'}
-                            </div>
-                          </div>
-                          <div className="p-4 rounded-xl bg-white dark:bg-white/5 border border-slate-100 dark:border-white/5">
-                            <div className="text-xs text-slate-500 dark:text-slate-400 mb-1">Erişim</div>
-                            <div className="font-semibold text-slate-900 dark:text-white text-sm">
-                              Üniversite E-postası
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="mt-auto pt-6">
-                          <Link 
-                            to="/tr/basvuru"
-                            className="w-full flex items-center justify-center px-4 py-3 bg-primary hover:bg-primary-dark text-white rounded-xl font-bold text-sm transition-all shadow-lg shadow-primary/20 hover:shadow-primary/30"
-                          >
-                            {tabItems[activeTab].status === 'active' ? 'Hemen Başla' : 'Haberdar Ol'}
-                            <ArrowRight className="w-4 h-4 ml-2" />
-                          </Link>
-                        </div>
-
-                      </motion.div>
-                    </AnimatePresence>
-                  </div>
-
-                </div>
               </div>
             </div>
           </motion.div>
 
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 };
 
