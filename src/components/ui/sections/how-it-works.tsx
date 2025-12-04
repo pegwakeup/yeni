@@ -133,16 +133,7 @@ export const HowItWorks = memo(function HowItWorks() {
 
         {/* Grid Layout */}
         <div className="relative mt-0 md:mt-60 isolate">
-          {/* Mobile: Image above grid - overlapping with first card */}
-          <div className="md:hidden flex justify-center -mb-6 relative z-0">
-            <img 
-              src="https://ctncspdgguclpeijikfp.supabase.co/storage/v1/object/public/Landing%20Page/ekiptopluseffaf.webp" 
-              alt="" 
-              className="w-[95%] max-w-[360px] object-contain"
-              loading="lazy"
-              decoding="async"
-            />
-          </div>
+          {/* Mobile: Image hidden for cleaner mobile experience */}
 
           {/* Desktop: Process Image - Behind and Shifted Up */}
           <div className="absolute inset-0 -z-10 hidden md:flex items-center justify-center pointer-events-none -translate-y-96" style={{ contentVisibility: 'auto' }}>

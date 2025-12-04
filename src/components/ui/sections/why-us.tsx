@@ -1,19 +1,13 @@
-import { motion } from "framer-motion";
 import { useTranslation } from "@/hooks/useTranslation";
 
 export function WhyUsSection() {
   useTranslation(); // Keep for potential future translations
 
   return (
-    <section id="neden-unilancer" className="py-12 md:py-16 relative overflow-hidden">
+    <section id="neden-unilancer" className="py-12 md:py-16 relative overflow-hidden overflow-x-hidden">
       <div className="max-w-[1340px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Header */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-12 md:mb-16"
-        >
+        <div className="text-center mb-12 md:mb-16">
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 dark:text-white tracking-tight">
             neden{" "}
             <span className="relative inline-block text-[#5FC8DA]">
@@ -30,18 +24,14 @@ export function WhyUsSection() {
             </span>
             ?
           </h2>
-        </motion.div>
+        </div>
 
         {/* Bento Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 auto-rows-[minmax(220px,auto)] sm:auto-rows-[minmax(240px,auto)] md:auto-rows-[minmax(280px,auto)]">
           
           {/* 1. Kurumsal Kalite, Freelance Esnekliği (Tall Vertical - Left Column) */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.4, ease: "easeOut" }}
-            className="md:col-span-1 md:row-span-2 rounded-[24px] sm:rounded-[32px] md:rounded-[48px] bg-[#F0F4FF] dark:bg-zinc-900 p-5 sm:p-6 md:p-8 flex flex-col relative overflow-hidden group hover:shadow-2xl hover:shadow-indigo-500/20 transition-all duration-500 border border-indigo-100 dark:border-white/5 min-h-[380px] sm:min-h-[420px] md:min-h-0"
+          <div
+            className="md:col-span-1 md:row-span-2 rounded-[24px] sm:rounded-[32px] md:rounded-[48px] bg-[#F0F4FF] dark:bg-zinc-900 p-5 sm:p-6 md:p-8 flex flex-col relative overflow-hidden group hover:shadow-2xl hover:shadow-indigo-500/20 transition-shadow duration-500 border border-indigo-100 dark:border-white/5 min-h-[380px] sm:min-h-[420px] md:min-h-0"
           >
             {/* Dark Mode Gradient Overlay */}
             <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent opacity-0 dark:opacity-100 transition-opacity duration-500" />
@@ -62,15 +52,11 @@ export function WhyUsSection() {
                  loading="lazy"
                />
             </div>
-          </motion.div>
+          </div>
 
           {/* 2. Süper Yönetim (Wide Horizontal - Top Right) */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.4, ease: "easeOut", delay: 0.05 }}
-            className="md:col-span-2 rounded-[24px] sm:rounded-[32px] md:rounded-[48px] bg-[#FFF0F5] dark:bg-zinc-900 flex flex-col md:flex-row relative overflow-hidden group hover:shadow-2xl hover:shadow-pink-500/20 transition-all duration-500 border border-pink-100 dark:border-white/5"
+          <div
+            className="md:col-span-2 rounded-[24px] sm:rounded-[32px] md:rounded-[48px] bg-[#FFF0F5] dark:bg-zinc-900 flex flex-col md:flex-row relative overflow-hidden group hover:shadow-2xl hover:shadow-pink-500/20 transition-shadow duration-500 border border-pink-100 dark:border-white/5"
           >
             {/* Dark Mode Gradient Overlay */}
             <div className="absolute inset-0 bg-gradient-to-br from-pink-500/5 to-transparent opacity-0 dark:opacity-100 transition-opacity duration-500" />
@@ -90,15 +76,11 @@ export function WhyUsSection() {
                  loading="lazy"
                />
             </div>
-          </motion.div>
+          </div>
 
           {/* 3. Proje Yönetimi (Standard - Middle Right Left) */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.4, ease: "easeOut", delay: 0.1 }}
-            className="md:col-span-1 rounded-[24px] sm:rounded-[32px] md:rounded-[48px] bg-[#F0FFF4] dark:bg-zinc-900 p-5 sm:p-6 md:p-8 relative overflow-hidden group hover:shadow-2xl hover:shadow-green-500/20 transition-all duration-500 border border-green-100 dark:border-white/5"
+          <div
+            className="md:col-span-1 rounded-[24px] sm:rounded-[32px] md:rounded-[48px] bg-[#F0FFF4] dark:bg-zinc-900 p-5 sm:p-6 md:p-8 relative overflow-hidden group hover:shadow-2xl hover:shadow-green-500/20 transition-shadow duration-500 border border-green-100 dark:border-white/5"
           >
             {/* Dark Mode Gradient Overlay */}
             <div className="absolute inset-0 bg-gradient-to-br from-green-500/5 to-transparent opacity-0 dark:opacity-100 transition-opacity duration-500" />
@@ -116,15 +98,11 @@ export function WhyUsSection() {
                  loading="lazy"
                />
             </div>
-          </motion.div>
+          </div>
 
           {/* 4. Tek Muhatap (Standard - Middle Right Right) */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.4, ease: "easeOut", delay: 0.15 }}
-            className="md:col-span-1 rounded-[24px] sm:rounded-[32px] md:rounded-[48px] bg-[#EBF8FF] dark:bg-zinc-900 p-5 sm:p-6 md:p-8 relative overflow-hidden group hover:shadow-2xl hover:shadow-sky-500/20 transition-all duration-500 border border-sky-100 dark:border-white/5"
+          <div
+            className="md:col-span-1 rounded-[24px] sm:rounded-[32px] md:rounded-[48px] bg-[#EBF8FF] dark:bg-zinc-900 p-5 sm:p-6 md:p-8 relative overflow-hidden group hover:shadow-2xl hover:shadow-sky-500/20 transition-shadow duration-500 border border-sky-100 dark:border-white/5"
           >
             {/* Dark Mode Gradient Overlay */}
             <div className="absolute inset-0 bg-gradient-to-br from-sky-500/5 to-transparent opacity-0 dark:opacity-100 transition-opacity duration-500" />
@@ -142,15 +120,11 @@ export function WhyUsSection() {
                  loading="lazy"
                />
             </div>
-          </motion.div>
+          </div>
 
           {/* 5. Sınırları Kaldırıyoruz (Wide - Bottom Left) */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
-            transition={{ duration: 0.4, ease: "easeOut", delay: 0.2 }}
-            className="md:col-span-2 rounded-[24px] sm:rounded-[32px] md:rounded-[48px] bg-[#FFF4ED] dark:bg-zinc-900 flex flex-col md:flex-row relative overflow-hidden group hover:shadow-2xl hover:shadow-orange-500/20 transition-all duration-500 border border-orange-100 dark:border-white/5"
+          <div
+            className="md:col-span-2 rounded-[24px] sm:rounded-[32px] md:rounded-[48px] bg-[#FFF4ED] dark:bg-zinc-900 flex flex-col md:flex-row relative overflow-hidden group hover:shadow-2xl hover:shadow-orange-500/20 transition-shadow duration-500 border border-orange-100 dark:border-white/5"
           >
             {/* Dark Mode Gradient Overlay */}
             <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent opacity-0 dark:opacity-100 transition-opacity duration-500" />
@@ -204,15 +178,11 @@ export function WhyUsSection() {
                  loading="lazy"
                />
             </div>
-          </motion.div>
+          </div>
 
           {/* 6. İstatistiklerimiz (Standard - Bottom Right) */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.5 }}
-            className="md:col-span-1 rounded-[24px] sm:rounded-[32px] md:rounded-[48px] bg-[#F0F0FF] dark:bg-zinc-900 p-5 sm:p-6 md:p-8 relative overflow-hidden group hover:shadow-2xl hover:shadow-purple-500/20 transition-all duration-500 border border-purple-100 dark:border-white/5"
+          <div
+            className="md:col-span-1 rounded-[24px] sm:rounded-[32px] md:rounded-[48px] bg-[#F0F0FF] dark:bg-zinc-900 p-5 sm:p-6 md:p-8 relative overflow-hidden group hover:shadow-2xl hover:shadow-purple-500/20 transition-shadow duration-500 border border-purple-100 dark:border-white/5"
           >
             {/* Dark Mode Gradient Overlay */}
             <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 dark:opacity-100 transition-opacity duration-500" />
@@ -235,7 +205,7 @@ export function WhyUsSection() {
                 </div>
               </div>
             </div>
-          </motion.div>
+          </div>
 
         </div>
       </div>

@@ -131,13 +131,7 @@ export function FaqSection() {
     <section id="sss" className="py-12 md:py-16 relative">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="text-center mb-12 md:mb-16"
-        >
+        <div className="text-center mb-12 md:mb-16">
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6">
             <HelpCircle className="w-4 h-4" />
@@ -150,7 +144,7 @@ export function FaqSection() {
           <p className="text-base md:text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
             {t("home.faq.description")}
           </p>
-        </motion.div>
+        </div>
 
         {/* Tabs - Improved Design */}
         <div className="flex justify-center mb-10">
@@ -211,13 +205,7 @@ export function FaqSection() {
         </div>
 
         {/* Bottom CTA - Clean Design */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.2 }}
-          className="mt-12 md:mt-16"
-        >
+        <div className="mt-12 md:mt-16">
           <div className="relative overflow-hidden rounded-3xl bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 shadow-sm">
             <div className="flex flex-col md:flex-row items-center gap-6 p-6 md:p-8">
               <div className="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
@@ -242,7 +230,7 @@ export function FaqSection() {
               </Link>
             </div>
           </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

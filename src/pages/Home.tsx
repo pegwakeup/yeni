@@ -451,7 +451,10 @@ const Home = () => {
 
             <ServiceCarousel services={digitAllServices} />
           </div>
-        </section>        {/* KIMIN ICIN */}
+        </section>        {/* NASIL CALISIR */}
+        <HowItWorks />
+
+        {/* KIMIN ICIN */}
         <section id="kimin-icin" className="py-12 md:py-16">
           <div className="max-w-[1340px] mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-3xl mx-auto text-center px-2">
@@ -476,9 +479,6 @@ const Home = () => {
             </div>
           </div>
         </section>
-
-        {/* NASIL CALISIR */}
-        <HowItWorks />
 
         {/* NEDEN UNILANCER - MODERN BENTO GRID */}
         <WhyUsSection />
