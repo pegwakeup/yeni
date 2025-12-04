@@ -74,6 +74,22 @@
     <priority>0.7</priority>
   </url>
   
+  <url>
+    <loc>https://unilancer.co/tr/bize-katil</loc>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://unilancer.co/tr/bize-katil"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://unilancer.co/en/join-us"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>https://unilancer.co/tr/teklif-al</loc>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://unilancer.co/tr/teklif-al"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://unilancer.co/en/project-request"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
   <!-- Service Pages Turkish -->
   <url>
     <loc>https://unilancer.co/tr/hizmetler/web-tasarim</loc>
@@ -202,6 +218,87 @@
     <xhtml:link rel="alternate" hreflang="en" href="https://unilancer.co/en/digibot"/>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>https://unilancer.co/en/join-us</loc>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://unilancer.co/tr/bize-katil"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://unilancer.co/en/join-us"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  
+  <url>
+    <loc>https://unilancer.co/en/project-request</loc>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://unilancer.co/tr/teklif-al"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://unilancer.co/en/project-request"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <!-- English Service Pages -->
+  <url>
+    <loc>https://unilancer.co/en/services/web-design</loc>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://unilancer.co/tr/hizmetler/web-tasarim"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://unilancer.co/en/services/web-design"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://unilancer.co/en/services/ecommerce</loc>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://unilancer.co/tr/hizmetler/e-ticaret-cozumleri"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://unilancer.co/en/services/ecommerce"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://unilancer.co/en/services/software-development</loc>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://unilancer.co/tr/hizmetler/yazilim-gelistirme"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://unilancer.co/en/services/software-development"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://unilancer.co/en/services/marketing</loc>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://unilancer.co/tr/hizmetler/pazarlama-reklam"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://unilancer.co/en/services/marketing"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://unilancer.co/en/services/ai-digibot</loc>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://unilancer.co/tr/hizmetler/yapay-zeka-digibot"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://unilancer.co/en/services/ai-digibot"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://unilancer.co/en/services/3d-ar</loc>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://unilancer.co/tr/hizmetler/3d-ar"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://unilancer.co/en/services/3d-ar"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://unilancer.co/en/services/graphic-design</loc>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://unilancer.co/tr/hizmetler/grafik-tasarim"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://unilancer.co/en/services/graphic-design"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  
+  <url>
+    <loc>https://unilancer.co/en/services/branding</loc>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://unilancer.co/tr/hizmetler/kurumsal-kimlik-marka"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://unilancer.co/en/services/branding"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
   </url>
   
 </urlset>

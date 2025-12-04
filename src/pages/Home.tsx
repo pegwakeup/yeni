@@ -391,10 +391,13 @@ const Home = () => {
                   <div className="pointer-events-none absolute -inset-6 rounded-[40px] bg-gradient-to-tr from-primary/25 via-cyan-400/15 to-purple-500/25 blur-2xl opacity-80 group-hover:opacity-100 transition-opacity duration-500" />
                   <img
                     src="https://ctncspdgguclpeijikfp.supabase.co/storage/v1/object/public/Landing%20Page/elsikisma.webp"
-                    alt="Unilancer iş birliği"
+                    alt="Unilancer iş birliği - Dijital ajans ekip çalışması"
                     loading="eager"
                     decoding="async"
-                    className="relative w-full h-auto rounded-3xl shadow-2xl object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+                    fetchPriority="high"
+                    width={600}
+                    height={450}
+                    className="relative w-full h-auto aspect-[4/3] rounded-3xl shadow-2xl object-cover transition-transform duration-300 group-hover:scale-[1.02]"
                   />
                 </div>
               </motion.div>

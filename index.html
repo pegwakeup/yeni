@@ -37,9 +37,10 @@
     <meta name="author" content="Unilancer" />
     <link rel="canonical" href="https://unilancer.co/" />
     
-    <!-- Fonts -->
+    <!-- Fonts - Preload critical fonts for faster LCP -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preload" href="https://fonts.gstatic.com/s/inter/v13/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZ9hiA.woff2" as="font" type="font/woff2" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     
     <!-- Theme Detection -->
@@ -52,10 +53,11 @@
       })();
     </script>
     
-    <!-- Calendly -->
+    <!-- Calendly - Async CSS loading to prevent render blocking -->
     <link rel="preconnect" href="https://assets.calendly.com">
     <link rel="dns-prefetch" href="https://assets.calendly.com">
-    <link href="https://assets.calendly.com/assets/external/widget.css" rel="stylesheet">
+    <link rel="preload" href="https://assets.calendly.com/assets/external/widget.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://assets.calendly.com/assets/external/widget.css"></noscript>
     <script src="https://assets.calendly.com/assets/external/widget.js" type="text/javascript" defer></script>
     
     <!-- Model Viewer for 3D/AR -->

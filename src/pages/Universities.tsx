@@ -103,6 +103,26 @@ const Universities = () => {
         <title>Üniversiteli Ekosistemi | Unilancer</title>
         <meta name="description" content="Unilancer ile gerçek iş deneyimi kazan, freelancer kulüplerine katıl, özel indirimlerden yararlan ve kariyerini şekillendir." />
         <meta name="keywords" content="üniversite, freelancer, staj, iş deneyimi, öğrenci, kariyer" />
+        <meta name="robots" content="index, follow" />
+        <link rel="canonical" href="https://unilancer.co/tr/universiteliler" />
+        
+        {/* Open Graph */}
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://unilancer.co/tr/universiteliler" />
+        <meta property="og:title" content="Üniversiteli Ekosistemi | Unilancer" />
+        <meta property="og:description" content="Unilancer ile gerçek iş deneyimi kazan, freelancer kulüplerine katıl, özel indirimlerden yararlan ve kariyerini şekillendir." />
+        <meta property="og:image" content="https://unilancer.co/images/og-universities.jpg" />
+        <meta property="og:locale" content="tr_TR" />
+        
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="Üniversiteli Ekosistemi | Unilancer" />
+        <meta name="twitter:description" content="Unilancer ile gerçek iş deneyimi kazan, freelancer kulüplerine katıl." />
+        <meta name="twitter:image" content="https://unilancer.co/images/og-universities.jpg" />
+        
+        {/* Language Alternates */}
+        <link rel="alternate" hrefLang="tr" href="https://unilancer.co/tr/universiteliler" />
+        <link rel="alternate" hrefLang="en" href="https://unilancer.co/en/universities" />
       </Helmet>
       <div className="relative min-h-screen font-sans overflow-hidden">
       {/* Background */}
