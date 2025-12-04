@@ -305,8 +305,10 @@ export const ServiceCarousel = memo(function ServiceCarousel({ services }: { ser
         opts={{
           align: "start",
           loop: true,
+          dragFree: true,
+          containScroll: "trimSnaps",
         }}
-        className="relative"
+        className="relative touch-pan-y"
       >
         <CarouselContent className="-ml-4 md:-ml-6">
           {services.map((service, index) => (

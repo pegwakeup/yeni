@@ -80,8 +80,8 @@ const LogosCarousel = ({
             AutoScroll({
               playOnInit: true,
               speed: 1,
-              stopOnInteraction: false,
-              stopOnMouseEnter: false,
+              stopOnInteraction: true,
+              stopOnMouseEnter: true,
               rootNode: (emblaRoot) => emblaRoot.parentElement as HTMLElement,
               direction: "rtl"
             })

@@ -485,6 +485,9 @@ const ProjectRequest = () => {
                 <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="text"
+                  inputMode="text"
+                  autoComplete="organization"
+                  enterKeyHint="next"
                   value={formData.company_name}
                   onChange={(e) =>
                     setFormData((prev) => ({ ...prev, company_name: e.target.value }))
@@ -498,6 +501,9 @@ const ProjectRequest = () => {
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="text"
+                  inputMode="text"
+                  autoComplete="name"
+                  enterKeyHint="next"
                   value={formData.contact_name}
                   onChange={(e) =>
                     setFormData((prev) => ({ ...prev, contact_name: e.target.value }))
@@ -513,6 +519,9 @@ const ProjectRequest = () => {
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="email"
+                  inputMode="email"
+                  autoComplete="email"
+                  enterKeyHint="next"
                   value={formData.email}
                   onChange={(e) =>
                     setFormData((prev) => ({ ...prev, email: e.target.value }))
@@ -526,6 +535,9 @@ const ProjectRequest = () => {
                 <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="tel"
+                  inputMode="tel"
+                  autoComplete="tel"
+                  enterKeyHint="done"
                   value={formData.phone}
                   onChange={(e) =>
                     setFormData((prev) => ({ ...prev, phone: e.target.value }))

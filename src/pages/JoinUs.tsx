@@ -606,6 +606,9 @@ const JoinUs = () => {
                           <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                           <input
                             type="text"
+                            inputMode="text"
+                            autoComplete="name"
+                            enterKeyHint="next"
                             value={formData.fullName}
                             onChange={(e) =>
                               setFormData((prev) => ({ ...prev, fullName: e.target.value }))
@@ -620,6 +623,9 @@ const JoinUs = () => {
                           <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                           <input
                             type="email"
+                            inputMode="email"
+                            autoComplete="email"
+                            enterKeyHint="next"
                             value={formData.email}
                             onChange={(e) =>
                               setFormData((prev) => ({ ...prev, email: e.target.value }))
@@ -634,6 +640,9 @@ const JoinUs = () => {
                           <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                           <input
                             type="tel"
+                            inputMode="tel"
+                            autoComplete="tel"
+                            enterKeyHint="next"
                             value={formData.phone}
                             onChange={(e) =>
                               setFormData((prev) => ({ ...prev, phone: e.target.value }))
