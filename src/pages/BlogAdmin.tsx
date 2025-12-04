@@ -6,6 +6,7 @@ import {
   ListOrdered, List, Heading2, ImagePlus, Undo, Redo,
   AlignLeft, AlignCenter, AlignRight, Quote, Eye, Save, Upload, X, Check
 } from 'lucide-react';
+import DOMPurify from 'dompurify';
 
 interface BlogAdminProps {
   post?: BlogPost | null;
@@ -338,7 +339,7 @@ const BlogAdmin = ({ post, onCancel, onSuccess }: BlogAdminProps) => {
                   prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-6
                   prose-p:text-slate-600 dark:prose-p:text-gray-300 prose-p:leading-relaxed
                   prose-img:rounded-2xl prose-img:shadow-lg"
-                dangerouslySetInnerHTML={{ __html: formData.content }}
+                dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(formData.content) }}
               />
             </div>
           </div>

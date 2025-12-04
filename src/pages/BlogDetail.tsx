@@ -5,6 +5,7 @@ import { Calendar, Clock, Share2, List, ArrowUpRight } from 'lucide-react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { getBlogPost, getBlogPosts, type BlogPost } from '../lib/config/supabase';
 import { useTranslation } from '../hooks/useTranslation';
+import DOMPurify from 'dompurify';
 
 type Heading = {
   id: string;
@@ -374,7 +375,7 @@ const BlogDetail = () => {
                 prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:bg-slate-50 dark:prose-blockquote:bg-white/5 prose-blockquote:p-4 md:prose-blockquote:p-6 prose-blockquote:rounded-r-xl prose-blockquote:italic
                 prose-code:bg-slate-100 dark:prose-code:bg-white/10 prose-code:px-2 prose-code:py-1 prose-code:rounded-md prose-code:text-primary prose-code:text-sm
                 prose-li:marker:text-primary"
-              dangerouslySetInnerHTML={{ __html: post.content }}
+              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content) }}
             />
 
             {/* Mobile Related Posts */}

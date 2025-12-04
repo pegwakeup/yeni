@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { createBlogPost, uploadImage, updateBlogPost } from '../../../../lib/config/supabase';
 import type { BlogPost } from '../types';
+import DOMPurify from 'dompurify';
 
 interface BlogEditorProps {
   post?: BlogPost;
@@ -242,7 +243,7 @@ const BlogEditor = ({ post }: BlogEditorProps) => {
                   {previewMode ? (
                     <div 
                       className="prose dark:prose-invert max-w-none p-4"
-                      dangerouslySetInnerHTML={{ __html: formData.content }}
+                      dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(formData.content) }}
                     />
                   ) : (
                     <textarea

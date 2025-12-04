@@ -10,6 +10,7 @@ import {
   ExternalLink,
   Github,
 } from 'lucide-react';
+import DOMPurify from 'dompurify';
 import {
   createPortfolioItem,
   updatePortfolioItem,
@@ -311,7 +312,7 @@ const PortfolioEditor = () => {
                   {previewMode ? (
                     <div
                       className="prose dark:prose-invert max-w-none p-4"
-                      dangerouslySetInnerHTML={{ __html: formData.content || '' }}
+                      dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(formData.content || '') }}
                     />
                   ) : (
                     <textarea
