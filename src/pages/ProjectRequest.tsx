@@ -214,6 +214,51 @@ const ProjectRequest = () => {
   const [success, setSuccess] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [honeypot, setHoneypot] = useState(''); // Spam protection
+
+  // Step validation function
+  const validateStep = (step: FormStep): boolean => {
+    switch (step) {
+      case 1:
+        return formData.service_categories.length > 0;
+      case 2:
+        return !!formData.solution_type;
+      case 3:
+        return !!formData.timeline;
+      case 4:
+        return formData.project_description.trim().length >= 20;
+      case 5:
+        return (
+          formData.company_name.trim().length > 0 &&
+          formData.contact_name.trim().length > 0 &&
+          isValidEmail(formData.email) &&
+          acceptedTerms
+        );
+      default:
+        return true;
+    }
+  };
+
+  const getStepError = (step: FormStep): string | null => {
+    switch (step) {
+      case 1:
+        return formData.service_categories.length === 0 ? 'Lütfen en az bir hizmet kategorisi seçin' : null;
+      case 2:
+        return !formData.solution_type ? 'Lütfen bir çözüm türü seçin' : null;
+      case 3:
+        return !formData.timeline ? 'Lütfen bir süre seçin' : null;
+      case 4:
+        return formData.project_description.trim().length < 20 ? 'Proje açıklaması en az 20 karakter olmalıdır' : null;
+      case 5:
+        if (!formData.company_name.trim()) return 'Şirket/Proje adı zorunludur';
+        if (!formData.contact_name.trim()) return 'Ad soyad zorunludur';
+        if (!isValidEmail(formData.email)) return 'Geçerli bir e-posta adresi girin';
+        if (!acceptedTerms) return 'Lütfen kullanım koşullarını kabul edin';
+        return null;
+      default:
+        return null;
+    }
+  };
 
   const handleServiceToggle = (category: ServiceCategory) => {
     setFormData((prev) => ({
@@ -245,6 +290,14 @@ const ProjectRequest = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Honeypot spam check
+    if (honeypot) {
+      console.log('Spam detected');
+      setSuccess(true); // Fake success to confuse bots
+      return;
+    }
+    
     if (!acceptedTerms) {
       setError(t('project_request.error.terms', 'Lütfen gizlilik politikasını ve kullanım koşullarını kabul edin.'));
       return;
@@ -625,6 +678,18 @@ const ProjectRequest = () => {
                 )}
               </div>
             </div>
+            {/* Honeypot field - hidden from real users */}
+            <input
+              type="text"
+              name="website_url"
+              value={honeypot}
+              onChange={(e) => setHoneypot(e.target.value)}
+              className="absolute -left-[9999px] opacity-0 h-0 w-0"
+              tabIndex={-1}
+              autoComplete="off"
+              aria-hidden="true"
+            />
+            
             <label className="flex items-start gap-3 text-sm text-gray-600 dark:text-gray-400 cursor-pointer pt-2">
               <input
                 type="checkbox"
@@ -1006,8 +1071,17 @@ const ProjectRequest = () => {
                     {currentStep < 5 ? (
                       <button
                         type="button"
-                        onClick={() => setCurrentStep((prev) => (prev + 1) as FormStep)}
-                        className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-lg hover:bg-primary-dark transition-all font-medium text-sm"
+                        onClick={() => {
+                          const stepError = getStepError(currentStep);
+                          if (stepError) {
+                            setError(stepError);
+                            return;
+                          }
+                          setError(null);
+                          setCurrentStep((prev) => (prev + 1) as FormStep);
+                        }}
+                        disabled={!validateStep(currentStep)}
+                        className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-lg hover:bg-primary-dark transition-all font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         <span>Devam Et</span>
                         <ArrowRight className="w-4 h-4" />

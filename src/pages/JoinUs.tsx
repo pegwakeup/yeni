@@ -238,6 +238,7 @@ const JoinUs = () => {
   const [newTool, setNewTool] = useState<string>('');
   const [acceptedTerms, setAcceptedTerms] = useState<boolean>(false);
   const [touched, setTouched] = useState<Record<string, boolean>>({});
+  const [honeypot, setHoneypot] = useState(''); // Spam protection
 
   const categories = useMemo(() => getCategories(t), [t]);
 
@@ -273,6 +274,14 @@ const JoinUs = () => {
   /* Form Gönderme */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Honeypot spam check
+    if (honeypot) {
+      console.log('Spam detected');
+      setSuccess(true); // Fake success to confuse bots
+      return;
+    }
+    
     if (!validateStep()) {
       setError(t('joinUs.error.requiredFields', 'Lütfen tüm zorunlu alanları doldurun ve kullanım şartlarını kabul edin.'));
       return;
@@ -1202,6 +1211,18 @@ const JoinUs = () => {
                             </div>
                           </div>
                         </div>
+
+                        {/* Honeypot field - hidden from real users */}
+                        <input
+                          type="text"
+                          name="company_website"
+                          value={honeypot}
+                          onChange={(e) => setHoneypot(e.target.value)}
+                          className="absolute -left-[9999px] opacity-0 h-0 w-0"
+                          tabIndex={-1}
+                          autoComplete="off"
+                          aria-hidden="true"
+                        />
 
                         {/* Gizlilik Onayı */}
                         <label className="flex items-start gap-3 text-sm text-gray-600 dark:text-gray-400 cursor-pointer p-4 bg-gray-50 dark:bg-[#1f1f1f] rounded-xl border border-gray-200 dark:border-gray-700">
