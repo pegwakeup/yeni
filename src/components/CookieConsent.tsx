@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Cookie, X, Check, Settings } from 'lucide-react';
+import { Shield, Sparkles, ChevronDown } from 'lucide-react';
 import { useLanguage } from '../contexts/LanguageContext';
 
 const CONSENT_KEY = 'cookie_consent';
@@ -12,7 +12,7 @@ interface ConsentSettings {
 }
 
 const defaultSettings: ConsentSettings = {
-  necessary: true, // Always required
+  necessary: true,
   analytics: false,
   marketing: false,
 };
@@ -25,34 +25,32 @@ export default function CookieConsent() {
 
   const translations = {
     tr: {
-      title: 'Çerez Kullanımı',
-      description: 'Web sitemizde deneyiminizi geliştirmek için çerezler kullanıyoruz. Tercihlerinizi aşağıdan yönetebilirsiniz.',
+      title: 'Gizliliğinize Önem Veriyoruz',
+      description: 'Size en iyi deneyimi sunmak için çerezler kullanıyoruz.',
       acceptAll: 'Tümünü Kabul Et',
-      acceptSelected: 'Seçilenleri Kabul Et',
-      rejectAll: 'Sadece Zorunlu',
-      settings: 'Ayarlar',
-      necessary: 'Zorunlu Çerezler',
-      necessaryDesc: 'Web sitesinin düzgün çalışması için gereklidir.',
-      analytics: 'Analiz Çerezleri',
-      analyticsDesc: 'Ziyaretçi istatistiklerini anlamamıza yardımcı olur.',
-      marketing: 'Pazarlama Çerezleri',
-      marketingDesc: 'Kişiselleştirilmiş reklamlar için kullanılır.',
-      privacyPolicy: 'Gizlilik Politikası',
+      rejectAll: 'Reddet',
+      customize: 'Özelleştir',
+      save: 'Kaydet',
+      necessary: 'Zorunlu',
+      necessaryDesc: 'Site işlevselliği için gerekli',
+      analytics: 'Analitik',
+      analyticsDesc: 'Performans iyileştirme',
+      marketing: 'Pazarlama',
+      marketingDesc: 'Kişiselleştirilmiş içerik',
     },
     en: {
-      title: 'Cookie Usage',
-      description: 'We use cookies to enhance your experience on our website. You can manage your preferences below.',
+      title: 'We Value Your Privacy',
+      description: 'We use cookies to provide you with the best experience.',
       acceptAll: 'Accept All',
-      acceptSelected: 'Accept Selected',
-      rejectAll: 'Only Necessary',
-      settings: 'Settings',
-      necessary: 'Necessary Cookies',
-      necessaryDesc: 'Required for the website to function properly.',
-      analytics: 'Analytics Cookies',
-      analyticsDesc: 'Helps us understand visitor statistics.',
-      marketing: 'Marketing Cookies',
-      marketingDesc: 'Used for personalized advertisements.',
-      privacyPolicy: 'Privacy Policy',
+      rejectAll: 'Reject',
+      customize: 'Customize',
+      save: 'Save',
+      necessary: 'Essential',
+      necessaryDesc: 'Required for site functionality',
+      analytics: 'Analytics',
+      analyticsDesc: 'Performance improvement',
+      marketing: 'Marketing',
+      marketingDesc: 'Personalized content',
     },
   };
 
@@ -61,11 +59,9 @@ export default function CookieConsent() {
   useEffect(() => {
     const savedConsent = localStorage.getItem(CONSENT_KEY);
     if (!savedConsent) {
-      // Show banner after a short delay
-      const timer = setTimeout(() => setIsVisible(true), 1000);
+      const timer = setTimeout(() => setIsVisible(true), 1500);
       return () => clearTimeout(timer);
     } else {
-      // Apply saved settings
       try {
         const parsed = JSON.parse(savedConsent);
         applyConsent(parsed);
@@ -76,7 +72,6 @@ export default function CookieConsent() {
   }, []);
 
   const applyConsent = (consent: ConsentSettings) => {
-    // Update Google Analytics consent
     if (typeof window !== 'undefined' && (window as any).gtag) {
       (window as any).gtag('consent', 'update', {
         analytics_storage: consent.analytics ? 'granted' : 'denied',
@@ -95,26 +90,14 @@ export default function CookieConsent() {
   };
 
   const handleAcceptAll = () => {
-    const allAccepted: ConsentSettings = {
-      necessary: true,
-      analytics: true,
-      marketing: true,
-    };
-    setSettings(allAccepted);
-    saveConsent(allAccepted);
+    saveConsent({ necessary: true, analytics: true, marketing: true });
   };
 
   const handleRejectAll = () => {
-    const onlyNecessary: ConsentSettings = {
-      necessary: true,
-      analytics: false,
-      marketing: false,
-    };
-    setSettings(onlyNecessary);
-    saveConsent(onlyNecessary);
+    saveConsent({ necessary: true, analytics: false, marketing: false });
   };
 
-  const handleAcceptSelected = () => {
+  const handleSaveSettings = () => {
     saveConsent(settings);
   };
 
@@ -123,132 +106,162 @@ export default function CookieConsent() {
   return (
     <AnimatePresence>
       <motion.div
-        initial={{ y: 100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        exit={{ y: 100, opacity: 0 }}
-        transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-        className="fixed bottom-0 left-0 right-0 z-50 p-4 md:p-6"
+        initial={{ y: 100, opacity: 0, scale: 0.95 }}
+        animate={{ y: 0, opacity: 1, scale: 1 }}
+        exit={{ y: 100, opacity: 0, scale: 0.95 }}
+        transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+        className="fixed bottom-4 left-4 right-4 md:left-auto md:right-6 md:bottom-6 z-50 md:max-w-md"
       >
-        <div className="max-w-4xl mx-auto bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-          {/* Main Banner */}
-          <div className="p-4 md:p-6">
-            <div className="flex items-start gap-4">
-              <div className="hidden sm:flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex-shrink-0">
-                <Cookie className="w-6 h-6 text-white" />
+        {/* Glow Effect */}
+        <div className="absolute -inset-1 bg-gradient-to-r from-primary/30 via-cyan-400/20 to-purple-500/30 rounded-3xl blur-xl opacity-70" />
+        
+        {/* Main Container */}
+        <div className="relative bg-white/90 dark:bg-dark/95 backdrop-blur-xl rounded-2xl border border-slate-200/50 dark:border-white/10 shadow-2xl shadow-primary/10 overflow-hidden">
+          {/* Gradient Top Border */}
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-primary via-cyan-400 to-purple-500" />
+          
+          {/* Content */}
+          <div className="p-5">
+            {/* Header */}
+            <div className="flex items-center gap-3 mb-3">
+              <div className="relative">
+                <div className="absolute inset-0 bg-primary/20 blur-lg rounded-full" />
+                <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-cyan-500 flex items-center justify-center shadow-lg shadow-primary/30">
+                  <Shield className="w-5 h-5 text-white" />
+                </div>
               </div>
-              
-              <div className="flex-1">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+              <div>
+                <h3 className="font-bold text-slate-900 dark:text-white text-base">
                   {t.title}
                 </h3>
-                <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+                <p className="text-xs text-slate-500 dark:text-slate-400">
                   {t.description}
                 </p>
+              </div>
+            </div>
 
-                {/* Settings Panel */}
-                <AnimatePresence>
-                  {showSettings && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      className="overflow-hidden"
-                    >
-                      <div className="space-y-3 mb-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-xl">
-                        {/* Necessary */}
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium text-gray-900 dark:text-white text-sm">
-                              {t.necessary}
-                            </p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">
-                              {t.necessaryDesc}
-                            </p>
-                          </div>
-                          <div className="w-12 h-6 bg-green-500 rounded-full flex items-center justify-end px-1 cursor-not-allowed opacity-75">
-                            <div className="w-4 h-4 bg-white rounded-full" />
-                          </div>
+            {/* Settings Panel */}
+            <AnimatePresence>
+              {showSettings && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="overflow-hidden"
+                >
+                  <div className="py-3 space-y-2">
+                    {/* Necessary */}
+                    <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-white/5">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center">
+                          <div className="w-2 h-2 rounded-full bg-green-500" />
                         </div>
-
-                        {/* Analytics */}
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium text-gray-900 dark:text-white text-sm">
-                              {t.analytics}
-                            </p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">
-                              {t.analyticsDesc}
-                            </p>
-                          </div>
-                          <button
-                            onClick={() => setSettings(s => ({ ...s, analytics: !s.analytics }))}
-                            className={`w-12 h-6 rounded-full flex items-center px-1 transition-colors ${
-                              settings.analytics ? 'bg-green-500 justify-end' : 'bg-gray-300 dark:bg-gray-600 justify-start'
-                            }`}
-                          >
-                            <div className="w-4 h-4 bg-white rounded-full shadow" />
-                          </button>
-                        </div>
-
-                        {/* Marketing */}
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium text-gray-900 dark:text-white text-sm">
-                              {t.marketing}
-                            </p>
-                            <p className="text-xs text-gray-500 dark:text-gray-400">
-                              {t.marketingDesc}
-                            </p>
-                          </div>
-                          <button
-                            onClick={() => setSettings(s => ({ ...s, marketing: !s.marketing }))}
-                            className={`w-12 h-6 rounded-full flex items-center px-1 transition-colors ${
-                              settings.marketing ? 'bg-green-500 justify-end' : 'bg-gray-300 dark:bg-gray-600 justify-start'
-                            }`}
-                          >
-                            <div className="w-4 h-4 bg-white rounded-full shadow" />
-                          </button>
+                        <div>
+                          <p className="font-medium text-slate-900 dark:text-white text-sm">{t.necessary}</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400">{t.necessaryDesc}</p>
                         </div>
                       </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                      <div className="w-11 h-6 bg-green-500 rounded-full flex items-center justify-end px-0.5 cursor-not-allowed">
+                        <motion.div className="w-5 h-5 bg-white rounded-full shadow-md" />
+                      </div>
+                    </div>
 
-                {/* Buttons */}
-                <div className="flex flex-wrap gap-2">
+                    {/* Analytics */}
+                    <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-white/5">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                          <Sparkles className="w-4 h-4 text-primary" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-slate-900 dark:text-white text-sm">{t.analytics}</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400">{t.analyticsDesc}</p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => setSettings(s => ({ ...s, analytics: !s.analytics }))}
+                        className={`w-11 h-6 rounded-full flex items-center px-0.5 transition-all duration-300 ${
+                          settings.analytics 
+                            ? 'bg-primary justify-end' 
+                            : 'bg-slate-300 dark:bg-slate-600 justify-start'
+                        }`}
+                      >
+                        <motion.div 
+                          layout
+                          className="w-5 h-5 bg-white rounded-full shadow-md" 
+                        />
+                      </button>
+                    </div>
+
+                    {/* Marketing */}
+                    <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-white/5">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                          <div className="w-3 h-3 rounded-sm bg-purple-500" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-slate-900 dark:text-white text-sm">{t.marketing}</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400">{t.marketingDesc}</p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => setSettings(s => ({ ...s, marketing: !s.marketing }))}
+                        className={`w-11 h-6 rounded-full flex items-center px-0.5 transition-all duration-300 ${
+                          settings.marketing 
+                            ? 'bg-purple-500 justify-end' 
+                            : 'bg-slate-300 dark:bg-slate-600 justify-start'
+                        }`}
+                      >
+                        <motion.div 
+                          layout
+                          className="w-5 h-5 bg-white rounded-full shadow-md" 
+                        />
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Buttons */}
+            <div className="flex gap-2 mt-4">
+              {!showSettings ? (
+                <>
                   <button
                     onClick={handleAcceptAll}
-                    className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg text-sm font-medium hover:from-blue-700 hover:to-purple-700 transition-all"
+                    className="flex-1 px-4 py-2.5 bg-gradient-to-r from-primary to-cyan-500 hover:from-primary-dark hover:to-cyan-600 text-white rounded-xl text-sm font-semibold transition-all duration-300 shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:scale-[1.02] active:scale-[0.98]"
                   >
-                    <Check className="w-4 h-4" />
                     {t.acceptAll}
                   </button>
-                  
                   <button
                     onClick={handleRejectAll}
-                    className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg text-sm font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-all"
+                    className="px-4 py-2.5 bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/20 text-slate-700 dark:text-white rounded-xl text-sm font-medium transition-all duration-300"
                   >
                     {t.rejectAll}
                   </button>
-                  
                   <button
-                    onClick={() => setShowSettings(!showSettings)}
-                    className="flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 rounded-lg text-sm font-medium hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
+                    onClick={() => setShowSettings(true)}
+                    className="px-3 py-2.5 border border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/5 text-slate-600 dark:text-slate-300 rounded-xl transition-all duration-300"
                   >
-                    <Settings className="w-4 h-4" />
-                    {t.settings}
+                    <ChevronDown className="w-4 h-4" />
                   </button>
-
-                  {showSettings && (
-                    <button
-                      onClick={handleAcceptSelected}
-                      className="px-4 py-2 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-200 rounded-lg text-sm font-medium hover:bg-blue-200 dark:hover:bg-blue-800 transition-all"
-                    >
-                      {t.acceptSelected}
-                    </button>
-                  )}
-                </div>
-              </div>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={handleSaveSettings}
+                    className="flex-1 px-4 py-2.5 bg-gradient-to-r from-primary to-cyan-500 hover:from-primary-dark hover:to-cyan-600 text-white rounded-xl text-sm font-semibold transition-all duration-300 shadow-lg shadow-primary/25"
+                  >
+                    {t.save}
+                  </button>
+                  <button
+                    onClick={() => setShowSettings(false)}
+                    className="px-4 py-2.5 bg-slate-100 dark:bg-white/10 hover:bg-slate-200 dark:hover:bg-white/20 text-slate-700 dark:text-white rounded-xl text-sm font-medium transition-all duration-300"
+                  >
+                    <ChevronDown className="w-4 h-4 rotate-180" />
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>
