@@ -27,6 +27,7 @@ import { cities } from '../data/location/cities';
 import { countries } from '../data/location/countries';
 import { usePrivacyTerms } from '../components/ui/modals/privacy-terms-provider';
 import { useTranslation } from '../hooks/useTranslation';
+import { useRecaptcha } from '../hooks/useRecaptcha';
 import Navbar from '../components/Navbar';
 import { CalendlyModal } from '../components/modals/CalendlyModal';
 
@@ -198,6 +199,7 @@ const JoinUs = () => {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { openPrivacyPolicy, openTerms } = usePrivacyTerms();
+  const { validateSubmission } = useRecaptcha();
   
   // SEO meta data
   const currentLang = window.location.pathname.startsWith('/en') ? 'en' : 'tr';
@@ -261,6 +263,15 @@ const JoinUs = () => {
     }
     setLoading(true);
     setError(null);
+    
+    // reCAPTCHA doğrulaması
+    const { valid, error: recaptchaError } = await validateSubmission('joinus_form');
+    if (!valid) {
+      setError(recaptchaError || t('joinUs.error.recaptcha', 'Güvenlik doğrulaması başarısız. Lütfen tekrar deneyin.'));
+      setLoading(false);
+      return;
+    }
+    
     try {
       await createFreelancerApplication({
         full_name: formData.fullName,

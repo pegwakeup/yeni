@@ -248,7 +248,7 @@ export interface Service {
 
 // Memoized ServiceCard for better performance
 const ServiceCard = memo(function ServiceCard({ service }: { service: Service }) {
-  const { language } = useTranslation();
+  const { language, t } = useTranslation();
   const lang = language;
   
   // Construct the lookup path (assuming slugs match Turkish routes)
@@ -288,7 +288,7 @@ const ServiceCard = memo(function ServiceCard({ service }: { service: Service })
         {/* Details Button/Indicator */}
         <div className="absolute bottom-4 right-4 md:bottom-5 md:right-5 z-20">
             <div className="flex items-center gap-2 px-4 py-2.5 min-h-[44px] rounded-full bg-white/80 dark:bg-white/10 backdrop-blur-sm border border-slate-100 dark:border-white/5 shadow-sm group-hover:bg-primary group-hover:border-primary group-hover:text-white transition-colors duration-300">
-                <span className="text-xs font-medium text-slate-600 dark:text-slate-300 group-hover:text-white">İncele</span>
+                <span className="text-xs font-medium text-slate-600 dark:text-slate-300 group-hover:text-white">{t('service.explore', 'İncele')}</span>
                 <ArrowRight className="w-4 h-4 text-slate-600 dark:text-slate-300 group-hover:text-white" />
             </div>
         </div>

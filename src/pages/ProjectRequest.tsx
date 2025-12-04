@@ -27,6 +27,7 @@ import confetti from 'canvas-confetti';
 import { createProjectRequest } from '../lib/api/projectRequests';
 import { usePrivacyTerms } from '../components/ui/modals/privacy-terms-provider';
 import { useTranslation } from '../hooks/useTranslation';
+import { useRecaptcha } from '../hooks/useRecaptcha';
 import Navbar from '../components/Navbar';
 import { CalendlyModal } from '../components/modals/CalendlyModal';
 
@@ -164,6 +165,7 @@ type RequestType = 'selection' | 'form';
 const ProjectRequest = () => {
   const { t } = useTranslation();
   const { openPrivacyPolicy, openTerms } = usePrivacyTerms();
+  const { validateSubmission } = useRecaptcha();
   
   // SEO meta data
   const currentLang = window.location.pathname.startsWith('/en') ? 'en' : 'tr';
@@ -232,6 +234,14 @@ const ProjectRequest = () => {
     }
     setLoading(true);
     setError(null);
+
+    // reCAPTCHA doğrulaması
+    const { valid, error: recaptchaError } = await validateSubmission('project_request_form');
+    if (!valid) {
+      setError(recaptchaError || t('project_request.error.recaptcha', 'Güvenlik doğrulaması başarısız. Lütfen tekrar deneyin.'));
+      setLoading(false);
+      return;
+    }
 
     try {
       let briefUrl = '';

@@ -114,6 +114,7 @@ const About = () => {
                   loop
                   muted
                   playsInline
+                  preload="metadata"
                   className="absolute inset-0 w-full h-full object-cover opacity-40 scale-105"
               >
                 <source src="https://ctncspdgguclpeijikfp.supabase.co/storage/v1/object/public/Landing%20Page/IMG_3968%20(2)%20(1).mp4" type="video/mp4" />

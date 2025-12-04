@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
 import {
@@ -104,6 +104,74 @@ const Home = () => {
     }
     return { text: word };
   });
+
+  // Memoized services array to prevent unnecessary re-renders
+  const digitAllServices = useMemo<Service[]>(() => [
+    {
+      number: "01",
+      title: t("service.webDesign", "Web & Mobil Tasarım"),
+      description: t("home.services.web.desc", "Modern ve responsive web siteleri, mobil uygulamalar ve kullanıcı dostu arayüzler tasarlıyoruz."),
+      icon: Monitor,
+      gradient: "from-cyan-400 to-blue-600",
+      slug: "web-tasarim",
+    },
+    {
+      number: "02",
+      title: t("service.3dAr", "3D & AR"),
+      description: t("home.services.3dar.desc", "Artırılmış gerçeklik ve 3D teknolojileri ile işletmenizi sanal ortama taşıyoruz."),
+      icon: Box,
+      gradient: "from-purple-500 to-indigo-600",
+      slug: "3d-ar",
+    },
+    {
+      number: "03",
+      title: t("service.ecommerce", "E-Ticaret Çözümleri"),
+      description: t("home.services.ecommerce.desc", "Online satış platformları, ödeme sistemleri ve stok yönetimi ile e-ticaret sitenizi kuruyor ve yönetiyoruz."),
+      icon: ShoppingCart,
+      gradient: "from-emerald-400 to-teal-600",
+      slug: "e-ticaret-cozumleri",
+    },
+    {
+      number: "04",
+      title: t("service.marketing", "Dijital Pazarlama"),
+      description: t("home.services.marketing.desc", "SEO, sosyal medya yönetimi, içerik pazarlama ve Google Ads ile markanızı büyütüyoruz."),
+      icon: Target,
+      gradient: "from-orange-400 to-red-600",
+      slug: "pazarlama-reklam",
+    },
+    {
+      number: "05",
+      title: t("service.ai", "Yapay Zeka Çözümleri"),
+      description: t("home.services.ai.desc", "AI destekli chatbot'lar, otomasyon sistemleri ve akıllı veri analitiği ile işlerinizi optimize ediyoruz."),
+      icon: BrainCircuit,
+      gradient: "from-violet-500 to-fuchsia-600",
+      slug: "yapay-zeka-digibot",
+    },
+    {
+      number: "06",
+      title: t("service.development", "Yazılım Geliştirme"),
+      description: t("home.services.development.desc", "Özel yazılımlar, API entegrasyonları ve backend sistemleri ile dijital altyapınızı güçlendiriyoruz."),
+      icon: Code2,
+      gradient: "from-blue-500 to-indigo-600",
+      slug: "yazilim-gelistirme",
+    },
+    {
+      number: "07",
+      title: t("service.branding", "Marka Kimliği"),
+      description: t("home.services.branding.desc", "Logo tasarımı, kurumsal kimlik, marka rehberi ve görsel iletişim stratejileri oluşturuyoruz."),
+      icon: PaintBucket,
+      gradient: "from-pink-500 to-rose-600",
+      slug: "kurumsal-kimlik-marka",
+    },
+    {
+      number: "08",
+      title: t("service.graphics", "Grafik Tasarım"),
+      description: t("home.services.graphics.desc", "Sosyal medya görselleri, reklam tasarımları, broşürler ve tüm görsel ihtiyaçlarınız için profesyonel tasarımlar."),
+      icon: Palette,
+      gradient: "from-amber-400 to-orange-600",
+      slug: "grafik-tasarim",
+    },
+  ], [t]);
 
   // SEO meta data
   const seoTitle = t('seo.home.title', 'Unilancer | Türkiye\'nin En İyi Dijital Ajansı - Web Tasarım, Yazılım, AI');
@@ -369,93 +437,7 @@ const Home = () => {
               </div>
             </div>
 
-            <ServiceCarousel
-              services={(() => {
-                const digitAllServices: Service[] = [
-                  {
-                    number: "01",
-                    title: t("service.webDesign", "Web & Mobil Tasarım"),
-                    description: t(
-                      "home.services.web.desc",
-                      "Modern ve responsive web siteleri, mobil uygulamalar ve kullanıcı dostu arayüzler tasarlıyoruz."
-                    ),
-                    icon: Monitor,
-                    gradient: "from-cyan-400 to-blue-600",
-                  },
-                  {
-                    number: "02",
-                    title: t("service.3dAr", "3D & AR"),
-                    description: t(
-                      "home.services.3dar.desc",
-                      "Artırılmış gerçeklik ve 3D teknolojileri ile işletmenizi sanal ortama taşıyoruz."
-                    ),
-                    icon: Box,
-                    gradient: "from-purple-500 to-indigo-600",
-                  },
-                  {
-                    number: "03",
-                    title: t("service.ecommerce", "E-Ticaret Çözümleri"),
-                    description: t(
-                      "home.services.ecommerce.desc",
-                      "Online satış platformları, ödeme sistemleri ve stok yönetimi ile e-ticaret sitenizi kuruyor ve yönetiyoruz."
-                    ),
-                    icon: ShoppingCart,
-                    gradient: "from-emerald-400 to-teal-600",
-                  },
-                  {
-                    number: "04",
-                    title: t("service.marketing", "Dijital Pazarlama"),
-                    description: t(
-                      "home.services.marketing.desc",
-                      "SEO, sosyal medya yönetimi, içerik pazarlama ve Google Ads ile markanızı büyütüyoruz."
-                    ),
-                    icon: Target,
-                    gradient: "from-orange-400 to-red-600",
-                  },
-                  {
-                    number: "05",
-                    title: t("service.ai", "Yapay Zeka Çözümleri"),
-                    description: t(
-                      "home.services.ai.desc",
-                      "AI destekli chatbot'lar, otomasyon sistemleri ve akıllı veri analitiği ile işlerinizi optimize ediyoruz."
-                    ),
-                    icon: BrainCircuit,
-                    gradient: "from-violet-500 to-fuchsia-600",
-                  },
-                  {
-                    number: "06",
-                    title: t("service.development", "Yazılım Geliştirme"),
-                    description: t(
-                      "home.services.development.desc",
-                      "Özel yazılımlar, API entegrasyonları ve backend sistemleri ile dijital altyapınızı güçlendiriyoruz."
-                    ),
-                    icon: Code2,
-                    gradient: "from-blue-500 to-indigo-600",
-                  },
-                  {
-                    number: "07",
-                    title: t("service.branding", "Marka Kimliği"),
-                    description: t(
-                      "home.services.branding.desc",
-                      "Logo tasarımı, kurumsal kimlik, marka rehberi ve görsel iletişim stratejileri oluşturuyoruz."
-                    ),
-                    icon: PaintBucket,
-                    gradient: "from-pink-500 to-rose-600",
-                  },
-                  {
-                    number: "08",
-                    title: t("service.graphics", "Grafik Tasarım"),
-                    description: t(
-                      "home.services.graphics.desc",
-                      "Sosyal medya görselleri, reklam tasarımları, broşürler ve tüm görsel ihtiyaçlarınız için profesyonel tasarımlar."
-                    ),
-                    icon: Palette,
-                    gradient: "from-amber-400 to-orange-600",
-                  },
-                ];
-                return digitAllServices;
-              })()}
-              />
+            <ServiceCarousel services={digitAllServices} />
           </div>
         </section>        {/* KIMIN ICIN */}
         <section id="kimin-icin" className="py-12 md:py-16">

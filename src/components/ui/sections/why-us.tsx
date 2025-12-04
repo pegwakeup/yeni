@@ -1,6 +1,5 @@
 import { motion } from "framer-motion";
 import { useTranslation } from "@/hooks/useTranslation";
-import { cn } from "@/lib/utils";
 
 export function WhyUsSection() {
   useTranslation(); // Keep for potential future translations
@@ -38,9 +37,10 @@ export function WhyUsSection() {
           
           {/* 1. Kurumsal Kalite, Freelance Esnekliği (Tall Vertical - Left Column) */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.4, ease: "easeOut" }}
             className="md:col-span-1 md:row-span-2 rounded-[24px] sm:rounded-[32px] md:rounded-[48px] bg-[#F0F4FF] dark:bg-zinc-900 p-5 sm:p-6 md:p-8 flex flex-col relative overflow-hidden group hover:shadow-2xl hover:shadow-indigo-500/20 transition-all duration-500 border border-indigo-100 dark:border-white/5 min-h-[380px] sm:min-h-[420px] md:min-h-0"
           >
             {/* Dark Mode Gradient Overlay */}
@@ -65,10 +65,10 @@ export function WhyUsSection() {
 
           {/* 2. Süper Yönetim (Wide Horizontal - Top Right) */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.4, ease: "easeOut", delay: 0.05 }}
             className="md:col-span-2 rounded-[24px] sm:rounded-[32px] md:rounded-[48px] bg-[#FFF0F5] dark:bg-zinc-900 flex flex-col md:flex-row relative overflow-hidden group hover:shadow-2xl hover:shadow-pink-500/20 transition-all duration-500 border border-pink-100 dark:border-white/5"
           >
             {/* Dark Mode Gradient Overlay */}
@@ -92,10 +92,10 @@ export function WhyUsSection() {
 
           {/* 3. Proje Yönetimi (Standard - Middle Right Left) */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.2 }}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.4, ease: "easeOut", delay: 0.1 }}
             className="md:col-span-1 rounded-[24px] sm:rounded-[32px] md:rounded-[48px] bg-[#F0FFF4] dark:bg-zinc-900 p-5 sm:p-6 md:p-8 relative overflow-hidden group hover:shadow-2xl hover:shadow-green-500/20 transition-all duration-500 border border-green-100 dark:border-white/5"
           >
             {/* Dark Mode Gradient Overlay */}
@@ -117,10 +117,10 @@ export function WhyUsSection() {
 
           {/* 4. Tek Muhatap (Standard - Middle Right Right) */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.3 }}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.4, ease: "easeOut", delay: 0.15 }}
             className="md:col-span-1 rounded-[24px] sm:rounded-[32px] md:rounded-[48px] bg-[#EBF8FF] dark:bg-zinc-900 p-5 sm:p-6 md:p-8 relative overflow-hidden group hover:shadow-2xl hover:shadow-sky-500/20 transition-all duration-500 border border-sky-100 dark:border-white/5"
           >
             {/* Dark Mode Gradient Overlay */}
@@ -142,10 +142,10 @@ export function WhyUsSection() {
 
           {/* 5. Sınırları Kaldırıyoruz (Wide - Bottom Left) */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.4 }}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-50px" }}
+            transition={{ duration: 0.4, ease: "easeOut", delay: 0.2 }}
             className="md:col-span-2 rounded-[24px] sm:rounded-[32px] md:rounded-[48px] bg-[#FFF4ED] dark:bg-zinc-900 flex flex-col md:flex-row relative overflow-hidden group hover:shadow-2xl hover:shadow-orange-500/20 transition-all duration-500 border border-orange-100 dark:border-white/5"
           >
             {/* Dark Mode Gradient Overlay */}

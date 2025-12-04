@@ -18,8 +18,23 @@ export function GlitchyText({
   fontFamily = "Orbitron, sans-serif"
 }: GlitchyTextProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [isHovered, setIsHovered] = useState(false);
   const [fontLoaded, setFontLoaded] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+
+  // IntersectionObserver for visibility detection
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsVisible(entry.isIntersecting),
+      { threshold: 0.1, rootMargin: '50px' }
+    );
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     document.fonts.ready.then(() => {
@@ -64,6 +79,12 @@ export function GlitchyText({
     const centerY = height / 2;
 
     const render = () => {
+      // Skip rendering if not visible and not hovered (performance optimization)
+      if (!isVisible && !isHovered) {
+        animationFrameId = requestAnimationFrame(render);
+        return;
+      }
+      
       frameCount++;
       
       // Clear
@@ -143,15 +164,17 @@ export function GlitchyText({
     return () => {
       cancelAnimationFrame(animationFrameId);
     };
-  }, [text, color, fontSize, fontFamily, isHovered, fontLoaded]);
+  }, [text, color, fontSize, fontFamily, isHovered, fontLoaded, isVisible]);
 
   return (
-    <canvas
-      ref={canvasRef}
-      className={`${className}`}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-      style={{ cursor: 'pointer' }}
-    />
+    <div ref={containerRef} className="inline-block">
+      <canvas
+        ref={canvasRef}
+        className={`${className}`}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        style={{ cursor: 'pointer' }}
+      />
+    </div>
   );
 }

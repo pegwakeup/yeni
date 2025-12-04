@@ -237,6 +237,10 @@ export const staticTranslations: Record<string, Record<Language, string>> = {
     tr: 'Grafik ve Tasarım',
     en: 'Graphics and Design'
   },
+  'service.explore': {
+    tr: 'İncele',
+    en: 'Explore'
+  },
   'service.website': {
     tr: 'Web Sitesi',
     en: 'Website'
