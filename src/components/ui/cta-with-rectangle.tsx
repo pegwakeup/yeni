@@ -6,9 +6,9 @@ import { trackCTAClick as gtmTrackCTA } from "@/lib/gtm";
 
 function CTASection() {
   return (
-    <section className="w-full py-12 md:py-16 bg-transparent relative">
+    <section className="w-full py-12 md:py-16 bg-transparent relative overflow-hidden">
       {/* Ambient Lighting Effects - Simplified for Performance */}
-      <div className="absolute inset-0 pointer-events-none">
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
         {/* Top Glow for blending with previous section */}
         <div className="absolute -top-[150px] left-1/2 -translate-x-1/2 w-[800px] h-[300px] bg-primary/10 blur-[100px] rounded-full" />
         
@@ -70,9 +70,9 @@ function CTASection() {
               className="text-white w-full sm:w-auto sm:min-w-[180px] h-12 sm:h-14 text-base sm:text-lg shadow-lg transition-all duration-300 rounded-xl hover:opacity-90"
               style={{ backgroundColor: '#b370ab' }}
               onClick={() => {
-                trackCTAClick('join_us', 'cta_section', '/tr/bize-katil');
-                gtmTrackCTA('join_us', 'Bize Katıl', 'cta_section');
-                window.location.href = '/tr/bize-katil';
+              trackCTAClick('join_us', 'cta_section', '/tr/basvuru');
+              gtmTrackCTA('join_us', 'Bize Katıl', 'cta_section');
+              window.location.href = '/tr/basvuru';
               }}
             >
               Bize Katıl

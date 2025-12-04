@@ -89,7 +89,7 @@ export function WhyUsSection() {
               <h3 className="text-base sm:text-lg md:text-xl font-bold text-slate-900 dark:text-white mb-2">Proje Yönetimi</h3>
               <p className="text-sm md:text-base text-slate-600 dark:text-slate-300 font-medium">Proje yöneticiniz, doğru freelance ekibi kurar ve süreci uçtan uca organize eder.</p>
             </div>
-            <div className="absolute -bottom-20 md:-bottom-40 left-1/2 -translate-x-1/2 w-40 md:w-72 h-40 md:h-72 rotate-6 group-hover:rotate-0 group-hover:-bottom-12 md:group-hover:-bottom-24 transition-all duration-500">
+            <div className="absolute -bottom-20 md:-bottom-40 left-1/2 -translate-x-1/2 w-40 md:w-72 h-40 md:h-72 rotate-6 group-hover:rotate-0 group-hover:-bottom-16 md:group-hover:-bottom-32 transition-all duration-500">
                <div className="absolute inset-0 bg-green-400/10 rounded-lg blur-xl group-hover:scale-125 transition-transform duration-700" />
                <img 
                  src="https://ctncspdgguclpeijikfp.supabase.co/storage/v1/object/public/blog-images/projebildirimi.webp" 
