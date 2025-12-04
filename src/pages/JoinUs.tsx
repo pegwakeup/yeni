@@ -32,6 +32,19 @@ import Navbar from '../components/Navbar';
 import { CalendlyModal } from '../components/modals/CalendlyModal';
 
 /* -------------------------------
+   VALIDATION HELPERS
+-------------------------------- */
+const isValidEmail = (email: string): boolean => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
+const isValidPhone = (phone: string): boolean => {
+  const phoneRegex = /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/;
+  return phone.length >= 10 && phoneRegex.test(phone.replace(/\s/g, ''));
+};
+
+/* -------------------------------
    ADIM TİPLERİ VE FORM DATA YAPISI
 -------------------------------- */
 type FormStep = 1 | 2 | 3 | 4;
@@ -222,6 +235,7 @@ const JoinUs = () => {
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [newTool, setNewTool] = useState<string>('');
   const [acceptedTerms, setAcceptedTerms] = useState<boolean>(false);
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
 
   const categories = useMemo(() => getCategories(t), [t]);
 
@@ -613,10 +627,18 @@ const JoinUs = () => {
                             onChange={(e) =>
                               setFormData((prev) => ({ ...prev, fullName: e.target.value }))
                             }
-                            className="w-full bg-white dark:bg-[#252525] border-2 border-gray-200 dark:border-gray-600 rounded-xl pl-11 pr-4 py-3 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-gray-800 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500"
+                            onBlur={() => setTouched((prev) => ({ ...prev, fullName: true }))}
+                            className={`w-full bg-white dark:bg-[#252525] border-2 rounded-xl pl-11 pr-4 py-3 focus:outline-none focus:ring-2 text-gray-800 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 transition-colors ${
+                              touched.fullName && !formData.fullName
+                                ? 'border-red-400 focus:border-red-400 focus:ring-red-200'
+                                : 'border-gray-200 dark:border-gray-600 focus:border-primary focus:ring-primary/20'
+                            }`}
                             placeholder={t('joinus.form.personal.fullname_placeholder', 'Adınız ve soyadınız')}
                             required
                           />
+                          {touched.fullName && !formData.fullName && (
+                            <p className="text-red-500 text-xs mt-1">Ad soyad zorunludur</p>
+                          )}
                         </div>
                         {/* E-posta */}
                         <div className="relative">
@@ -630,10 +652,23 @@ const JoinUs = () => {
                             onChange={(e) =>
                               setFormData((prev) => ({ ...prev, email: e.target.value }))
                             }
-                            className="w-full bg-white dark:bg-[#252525] border-2 border-gray-200 dark:border-gray-600 rounded-xl pl-11 pr-4 py-3 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-gray-800 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500"
+                            onBlur={() => setTouched((prev) => ({ ...prev, email: true }))}
+                            className={`w-full bg-white dark:bg-[#252525] border-2 rounded-xl pl-11 pr-4 py-3 focus:outline-none focus:ring-2 text-gray-800 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 transition-colors ${
+                              touched.email && (!formData.email || !isValidEmail(formData.email))
+                                ? 'border-red-400 focus:border-red-400 focus:ring-red-200'
+                                : formData.email && isValidEmail(formData.email)
+                                ? 'border-green-400 focus:border-green-400 focus:ring-green-200'
+                                : 'border-gray-200 dark:border-gray-600 focus:border-primary focus:ring-primary/20'
+                            }`}
                             placeholder={t('joinus.form.personal.email_placeholder', 'E-posta adresiniz')}
                             required
                           />
+                          {touched.email && !formData.email && (
+                            <p className="text-red-500 text-xs mt-1">E-posta zorunludur</p>
+                          )}
+                          {touched.email && formData.email && !isValidEmail(formData.email) && (
+                            <p className="text-red-500 text-xs mt-1">Geçerli bir e-posta adresi girin</p>
+                          )}
                         </div>
                         {/* Telefon */}
                         <div className="relative">
@@ -647,10 +682,23 @@ const JoinUs = () => {
                             onChange={(e) =>
                               setFormData((prev) => ({ ...prev, phone: e.target.value }))
                             }
-                            className="w-full bg-white dark:bg-[#252525] border-2 border-gray-200 dark:border-gray-600 rounded-xl pl-11 pr-4 py-3 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-gray-800 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500"
+                            onBlur={() => setTouched((prev) => ({ ...prev, phone: true }))}
+                            className={`w-full bg-white dark:bg-[#252525] border-2 rounded-xl pl-11 pr-4 py-3 focus:outline-none focus:ring-2 text-gray-800 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 transition-colors ${
+                              touched.phone && (!formData.phone || !isValidPhone(formData.phone))
+                                ? 'border-red-400 focus:border-red-400 focus:ring-red-200'
+                                : formData.phone && isValidPhone(formData.phone)
+                                ? 'border-green-400 focus:border-green-400 focus:ring-green-200'
+                                : 'border-gray-200 dark:border-gray-600 focus:border-primary focus:ring-primary/20'
+                            }`}
                             placeholder="+90 555 555 5555"
                             required
                           />
+                          {touched.phone && !formData.phone && (
+                            <p className="text-red-500 text-xs mt-1">Telefon numarası zorunludur</p>
+                          )}
+                          {touched.phone && formData.phone && !isValidPhone(formData.phone) && (
+                            <p className="text-red-500 text-xs mt-1">Geçerli bir telefon numarası girin</p>
+                          )}
                         </div>
                         {/* Konum (Türkiye / Yurt Dışı) */}
                         <div className="space-y-3">

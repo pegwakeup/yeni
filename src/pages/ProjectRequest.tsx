@@ -32,6 +32,20 @@ import Navbar from '../components/Navbar';
 import { CalendlyModal } from '../components/modals/CalendlyModal';
 
 /* -----------------------------
+   VALIDATION HELPERS
+------------------------------ */
+const isValidEmail = (email: string): boolean => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
+const isValidPhone = (phone: string): boolean => {
+  if (!phone) return true; // Phone is optional
+  const phoneRegex = /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/;
+  return phone.length >= 10 && phoneRegex.test(phone.replace(/\s/g, ''));
+};
+
+/* -----------------------------
    Adım Tipleri ve Veri Yapıları
 ------------------------------ */
 type ServiceCategory = 'software' | 'design' | 'digital-strategy';
@@ -197,6 +211,7 @@ const ProjectRequest = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
 
   const handleServiceToggle = (category: ServiceCategory) => {
     setFormData((prev) => ({
@@ -492,10 +507,18 @@ const ProjectRequest = () => {
                   onChange={(e) =>
                     setFormData((prev) => ({ ...prev, company_name: e.target.value }))
                   }
-                  className="w-full bg-white dark:bg-[#252525] border-2 border-gray-200 dark:border-gray-600 rounded-xl pl-11 pr-4 py-3 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-gray-800 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500"
-                  placeholder="Şirket Adı"
+                  onBlur={() => setTouched((prev) => ({ ...prev, company_name: true }))}
+                  className={`w-full bg-white dark:bg-[#252525] border-2 rounded-xl pl-11 pr-4 py-3 focus:outline-none focus:ring-2 text-gray-800 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 transition-colors ${
+                    touched.company_name && !formData.company_name
+                      ? 'border-red-400 focus:border-red-400 focus:ring-red-200'
+                      : 'border-gray-200 dark:border-gray-600 focus:border-primary focus:ring-primary/20'
+                  }`}
+                  placeholder="Şirket / Proje Adı"
                   required
                 />
+                {touched.company_name && !formData.company_name && (
+                  <p className="text-red-500 text-xs mt-1">Şirket/Proje adı zorunludur</p>
+                )}
               </div>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -508,10 +531,18 @@ const ProjectRequest = () => {
                   onChange={(e) =>
                     setFormData((prev) => ({ ...prev, contact_name: e.target.value }))
                   }
-                  className="w-full bg-white dark:bg-[#252525] border-2 border-gray-200 dark:border-gray-600 rounded-xl pl-11 pr-4 py-3 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-gray-800 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500"
+                  onBlur={() => setTouched((prev) => ({ ...prev, contact_name: true }))}
+                  className={`w-full bg-white dark:bg-[#252525] border-2 rounded-xl pl-11 pr-4 py-3 focus:outline-none focus:ring-2 text-gray-800 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 transition-colors ${
+                    touched.contact_name && !formData.contact_name
+                      ? 'border-red-400 focus:border-red-400 focus:ring-red-200'
+                      : 'border-gray-200 dark:border-gray-600 focus:border-primary focus:ring-primary/20'
+                  }`}
                   placeholder="Adınız Soyadınız"
                   required
                 />
+                {touched.contact_name && !formData.contact_name && (
+                  <p className="text-red-500 text-xs mt-1">Ad soyad zorunludur</p>
+                )}
               </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -526,10 +557,23 @@ const ProjectRequest = () => {
                   onChange={(e) =>
                     setFormData((prev) => ({ ...prev, email: e.target.value }))
                   }
-                  className="w-full bg-white dark:bg-[#252525] border-2 border-gray-200 dark:border-gray-600 rounded-xl pl-11 pr-4 py-3 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-gray-800 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500"
+                  onBlur={() => setTouched((prev) => ({ ...prev, email: true }))}
+                  className={`w-full bg-white dark:bg-[#252525] border-2 rounded-xl pl-11 pr-4 py-3 focus:outline-none focus:ring-2 text-gray-800 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 transition-colors ${
+                    touched.email && (!formData.email || !isValidEmail(formData.email))
+                      ? 'border-red-400 focus:border-red-400 focus:ring-red-200'
+                      : formData.email && isValidEmail(formData.email)
+                      ? 'border-green-400 focus:border-green-400 focus:ring-green-200'
+                      : 'border-gray-200 dark:border-gray-600 focus:border-primary focus:ring-primary/20'
+                  }`}
                   placeholder="E-posta Adresi"
                   required
                 />
+                {touched.email && !formData.email && (
+                  <p className="text-red-500 text-xs mt-1">E-posta zorunludur</p>
+                )}
+                {touched.email && formData.email && !isValidEmail(formData.email) && (
+                  <p className="text-red-500 text-xs mt-1">Geçerli bir e-posta adresi girin</p>
+                )}
               </div>
               <div className="relative">
                 <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -542,9 +586,19 @@ const ProjectRequest = () => {
                   onChange={(e) =>
                     setFormData((prev) => ({ ...prev, phone: e.target.value }))
                   }
-                  className="w-full bg-white dark:bg-[#252525] border-2 border-gray-200 dark:border-gray-600 rounded-xl pl-11 pr-4 py-3 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-gray-800 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500"
+                  onBlur={() => setTouched((prev) => ({ ...prev, phone: true }))}
+                  className={`w-full bg-white dark:bg-[#252525] border-2 rounded-xl pl-11 pr-4 py-3 focus:outline-none focus:ring-2 text-gray-800 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 transition-colors ${
+                    touched.phone && formData.phone && !isValidPhone(formData.phone)
+                      ? 'border-red-400 focus:border-red-400 focus:ring-red-200'
+                      : formData.phone && isValidPhone(formData.phone)
+                      ? 'border-green-400 focus:border-green-400 focus:ring-green-200'
+                      : 'border-gray-200 dark:border-gray-600 focus:border-primary focus:ring-primary/20'
+                  }`}
                   placeholder="+90 555 555 55 55"
                 />
+                {touched.phone && formData.phone && !isValidPhone(formData.phone) && (
+                  <p className="text-red-500 text-xs mt-1">Geçerli bir telefon numarası girin</p>
+                )}
               </div>
             </div>
             <label className="flex items-start gap-3 text-sm text-gray-600 dark:text-gray-400 cursor-pointer pt-2">

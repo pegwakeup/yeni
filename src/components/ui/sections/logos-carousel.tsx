@@ -79,11 +79,10 @@ const LogosCarousel = ({
           plugins={[
             AutoScroll({
               playOnInit: true,
-              speed: 1,
-              stopOnInteraction: true,
-              stopOnMouseEnter: true,
-              rootNode: (emblaRoot) => emblaRoot.parentElement as HTMLElement,
-              direction: "rtl"
+              speed: 0.8,
+              stopOnInteraction: false,
+              stopOnMouseEnter: false,
+              rootNode: (emblaRoot) => emblaRoot.parentElement as HTMLElement
             })
           ]}
           className="w-full"
