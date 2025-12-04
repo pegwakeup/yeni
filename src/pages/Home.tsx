@@ -220,9 +220,9 @@ const Home = () => {
         </script>
       </Helmet>
       
-    <div className="relative min-h-screen">
+    <div className="relative min-h-screen overflow-x-hidden">
       {/* Arka plan */}
-      <div className="fixed inset-0 z-0">
+      <div className="fixed inset-0 z-0 overflow-hidden">
         <AuroraBackground />
         <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-cyan-50/20 to-blue-100/20 dark:from-dark dark:via-dark-light dark:to-dark" />
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#5FC8DA10_1px,transparent_1px),linear_gradient(to_bottom,#5FC8DA10_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_at_center,transparent_10%,black_80%)] opacity-70" />

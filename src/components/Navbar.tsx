@@ -172,7 +172,8 @@ const Navbar = () => {
   const isUniversitiesPage = location.pathname.includes('/universities') || location.pathname.includes('/universiteliler');
   // Blog detay sayfasında navbar her zaman solid olsun
   const isBlogDetailPage = /\/blog\/[^/]+$/.test(location.pathname);
-  const shouldBeSolid = isScrolled || isUniversitiesPage || isBlogDetailPage;
+  // Menü açıkken de solid olsun
+  const shouldBeSolid = isScrolled || isUniversitiesPage || isBlogDetailPage || isOpen;
 
   return (
     <motion.nav
@@ -565,10 +566,10 @@ const Navbar = () => {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.25, ease: "easeOut" }}
-                className="fixed inset-0 bg-white dark:bg-dark z-30 md:hidden overflow-y-auto overflow-x-hidden overscroll-contain"
-                style={{ height: '100dvh', WebkitOverflowScrolling: 'touch' }}
+                className="fixed left-0 right-0 top-[72px] bottom-0 bg-white dark:bg-dark z-40 md:hidden overflow-y-auto overflow-x-hidden overscroll-contain"
+                style={{ WebkitOverflowScrolling: 'touch' }}
               >
-                <div className="px-4 pt-24 pb-32">
+                <div className="px-4 py-6 pb-32">
                   <div className="space-y-4 max-w-lg mx-auto">
                     
                     {/* Quick Action Buttons - En üstte */}
