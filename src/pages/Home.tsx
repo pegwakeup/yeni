@@ -300,7 +300,7 @@ const Home = () => {
         {/* HERO */}
         <section
           id="hero"
-          className="relative overflow-hidden min-h-[520px] sm:min-h-[600px] lg:min-h-[750px] flex items-center pt-28 pb-10 sm:pt-32 sm:pb-12 md:pt-36 md:pb-20"
+          className="relative overflow-hidden min-h-[520px] sm:min-h-[600px] lg:min-h-[750px] flex items-center pt-24 pb-10 sm:pt-28 sm:pb-12 md:pt-28 md:pb-20"
         >
           <div className="max-w-[1340px] mx-auto px-4 sm:px-6 lg:px-8 w-full z-10">
             <div className="grid lg:grid-cols-2 gap-10 lg:gap-12 items-center">
@@ -397,7 +397,7 @@ const Home = () => {
                     fetchPriority="high"
                     width={600}
                     height={450}
-                    className="relative w-full h-auto aspect-[4/3] rounded-3xl shadow-2xl object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+                    className="relative w-full h-auto rounded-3xl shadow-2xl object-cover transition-transform duration-300 group-hover:scale-[1.02]"
                   />
                 </div>
               </motion.div>
@@ -434,7 +434,7 @@ const Home = () => {
                 <div className="mb-3">
                    <GlitchyText text="digitAll" fontSize={36} />
                 </div>
-                <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-slate-900 dark:text-white mb-4 max-w-4xl leading-tight mx-auto px-2">
+                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-slate-900 dark:text-white mb-4 max-w-4xl leading-tight mx-auto px-2">
                   {t("home.services.headline", "işletmenizi dijital dünyada öne çıkaracak çözümler")}
                 </h2>
               </div>

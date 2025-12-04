@@ -64,7 +64,7 @@ function CTASection() {
               size="lg" 
               className="text-white w-full sm:w-auto sm:min-w-[180px] h-12 sm:h-14 text-base sm:text-lg shadow-lg transition-all duration-300 rounded-xl hover:opacity-90"
               style={{ backgroundColor: '#b370ab' }}
-              onClick={() => window.location.href = '/join-us'}
+              onClick={() => window.location.href = '/tr/bize-katil'}
             >
               Bize Katıl
             </Button>
