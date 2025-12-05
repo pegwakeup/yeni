@@ -11,7 +11,7 @@ const Team = () => {
   const seoDescription = currentLang === 'tr'
     ? 'Unilancer ekibini tanıyın. Web tasarım, yazılım, 3D, pazarlama ve daha fazlasında uzman genç yeteneklerimizle tanışın.'
     : 'Meet the Unilancer team. Get to know our young talented experts in web design, software, 3D, marketing, and more.';
-  const canonicalUrl = `https://unilancer.co/${currentLang}/ekip`;
+  const canonicalUrl = `https://unilancerlabs.com/${currentLang}/ekip`;
 
   return (
     <>
@@ -25,15 +25,15 @@ const Team = () => {
         <link rel="canonical" href={canonicalUrl} />
         
         {/* Language alternates */}
-        <link rel="alternate" hrefLang="tr" href="https://unilancer.co/tr/ekip" />
-        <link rel="alternate" hrefLang="en" href="https://unilancer.co/en/team" />
+        <link rel="alternate" hrefLang="tr" href="https://unilancerlabs.com/tr/ekip" />
+        <link rel="alternate" hrefLang="en" href="https://unilancerlabs.com/en/team" />
         
         {/* Open Graph */}
         <meta property="og:type" content="website" />
         <meta property="og:url" content={canonicalUrl} />
         <meta property="og:title" content={seoTitle} />
         <meta property="og:description" content={seoDescription} />
-        <meta property="og:image" content="https://unilancer.co/og-team.jpg" />
+        <meta property="og:image" content="https://unilancerlabs.com/og-team.jpg" />
         <meta property="og:site_name" content="Unilancer" />
         <meta property="og:locale" content={currentLang === 'tr' ? 'tr_TR' : 'en_US'} />
         
@@ -41,7 +41,7 @@ const Team = () => {
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={seoTitle} />
         <meta name="twitter:description" content={seoDescription} />
-        <meta name="twitter:image" content="https://unilancer.co/og-team.jpg" />
+        <meta name="twitter:image" content="https://unilancerlabs.com/og-team.jpg" />
         
         {/* BreadcrumbList Schema */}
         <script type="application/ld+json">
@@ -53,7 +53,7 @@ const Team = () => {
                 "@type": "ListItem",
                 "position": 1,
                 "name": currentLang === 'tr' ? "Ana Sayfa" : "Home",
-                "item": `https://unilancer.co/${currentLang}`
+                "item": `https://unilancerlabs.com/${currentLang}`
               },
               {
                 "@type": "ListItem",

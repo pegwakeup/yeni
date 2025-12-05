@@ -137,9 +137,11 @@ const Footer = () => {
             <h3 className="font-semibold mb-6 text-lg text-slate-900 dark:text-white">{t('footer.quickLinks', 'Hızlı Bağlantılar')}</h3>
             <ul className="space-y-4">
               {[
-                { to: '/portfolio', label: t('footer.portfolio', 'Portfolyo') },
                 { to: '/services', label: t('footer.services', 'Hizmetler') },
+                { to: '/portfolio', label: t('footer.portfolio', 'Portfolyo') },
                 { to: '/about', label: t('footer.about', 'Hakkımızda') },
+                { to: '/team', label: t('footer.team', 'Ekibimiz') },
+                { to: '/contact', label: t('footer.contactLink', 'İletişim') },
                 { to: '/blog', label: t('footer.blog', 'Blog') }
               ].map((link, index) => (
                 <li key={index}>
@@ -163,34 +165,34 @@ const Footer = () => {
             <h3 className="font-semibold mb-6 text-lg text-slate-900 dark:text-white">{t('footer.contact', 'İletişim')}</h3>
             <div className="space-y-4">
               <a 
-                href="mailto:contact@unilancerlabs.com" 
+                href="mailto:info@unilancerlabs.com" 
                 className="flex items-start space-x-3 group"
               >
                 <Mail className="h-5 w-5 text-primary mt-0.5" />
                 <span className="text-gray-600 dark:text-gray-400 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">
-                  contact@unilancerlabs.com
+                  info@unilancerlabs.com
                 </span>
               </a>
               <a 
-                href="tel:+902125550000" 
+                href="tel:+905061523255" 
                 className="flex items-start space-x-3 group"
               >
                 <Phone className="h-5 w-5 text-primary mt-0.5" />
                 <span className="text-gray-600 dark:text-gray-400 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">
-                  +90 212 555 0000
+                  +90 506 152 32 55
                 </span>
               </a>
               <a 
-                href="https://maps.google.com/?q=Cube+Beyoğlu" 
+                href="https://maps.app.goo.gl/8KiKNLnQzxPD6DSBA" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="flex items-start space-x-3 group"
               >
                 <MapPin className="h-5 w-5 text-primary mt-0.5" />
                 <span className="text-gray-600 dark:text-gray-400 group-hover:text-slate-900 dark:group-hover:text-white transition-colors">
-                  Cube Beyoğlu<br />
-                  İstiklal Caddesi, Beyoğlu<br />
-                  34435 İstanbul, Türkiye
+                  Şehit Muhtar, Mis Sk. No:24<br />
+                  34435 Beyoğlu/İstanbul<br />
+                  Cube Beyoğlu
                 </span>
               </a>
             </div>

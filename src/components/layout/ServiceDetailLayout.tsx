@@ -46,7 +46,7 @@ const ServiceDetailLayout: React.FC<ServiceDetailLayoutProps> = ({ data }) => {
   const seoTitle = `${data.title} | Unilancer - ${data.heroTitle}`;
   const seoDescription = data.heroDescription;
   const slug = data.slug || data.title.toLowerCase().replace(/\s+/g, '-').replace(/ü/g, 'u').replace(/ı/g, 'i').replace(/ö/g, 'o').replace(/ç/g, 'c').replace(/ş/g, 's').replace(/ğ/g, 'g');
-  const canonicalUrl = `https://unilancer.co/${currentLang}/hizmetler/${slug}`;
+  const canonicalUrl = `https://unilancerlabs.com/${currentLang}/hizmetler/${slug}`;
   const keywords = data.seoKeywords || `${data.title}, ${data.subServices.map(s => s.title).join(', ')}, unilancer, dijital ajans`;
 
   // FAQ Schema
@@ -72,7 +72,7 @@ const ServiceDetailLayout: React.FC<ServiceDetailLayoutProps> = ({ data }) => {
     "provider": {
       "@type": "Organization",
       "name": "Unilancer",
-      "url": "https://unilancer.co"
+      "url": "https://unilancerlabs.com"
     },
     "url": canonicalUrl,
     "image": data.heroImage,
@@ -103,13 +103,13 @@ const ServiceDetailLayout: React.FC<ServiceDetailLayoutProps> = ({ data }) => {
         "@type": "ListItem",
         "position": 1,
         "name": currentLang === 'tr' ? "Ana Sayfa" : "Home",
-        "item": `https://unilancer.co/${currentLang}`
+        "item": `https://unilancerlabs.com/${currentLang}`
       },
       {
         "@type": "ListItem",
         "position": 2,
         "name": currentLang === 'tr' ? "Hizmetler" : "Services",
-        "item": `https://unilancer.co/${currentLang}/hizmetler`
+        "item": `https://unilancerlabs.com/${currentLang}/hizmetler`
       },
       {
         "@type": "ListItem",
@@ -136,7 +136,7 @@ const ServiceDetailLayout: React.FC<ServiceDetailLayoutProps> = ({ data }) => {
         <meta property="og:url" content={canonicalUrl} />
         <meta property="og:title" content={seoTitle} />
         <meta property="og:description" content={seoDescription} />
-        <meta property="og:image" content={data.heroImage || "https://unilancer.co/og-services.jpg"} />
+        <meta property="og:image" content={data.heroImage || "https://unilancerlabs.com/og-services.jpg"} />
         <meta property="og:site_name" content="Unilancer" />
         <meta property="og:locale" content={currentLang === 'tr' ? 'tr_TR' : 'en_US'} />
         
@@ -144,7 +144,7 @@ const ServiceDetailLayout: React.FC<ServiceDetailLayoutProps> = ({ data }) => {
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={seoTitle} />
         <meta name="twitter:description" content={seoDescription} />
-        <meta name="twitter:image" content={data.heroImage || "https://unilancer.co/og-services.jpg"} />
+        <meta name="twitter:image" content={data.heroImage || "https://unilancerlabs.com/og-services.jpg"} />
         
         {/* Service Schema */}
         <script type="application/ld+json">

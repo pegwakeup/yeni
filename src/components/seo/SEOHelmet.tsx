@@ -40,7 +40,7 @@ export function SEOHelmet({
   const finalDescription = description || defaultDescriptions[language];
   const finalKeywords = keywords || defaultKeywords[language];
 
-  const baseUrl = 'https://unilancer.com';
+  const baseUrl = 'https://unilancerlabs.comm';
   const currentPath = location.pathname.replace(/^\/(tr|en)/, '');
 
   const trUrl = `${baseUrl}${getRouteForLanguage(currentPath, 'tr')}`;

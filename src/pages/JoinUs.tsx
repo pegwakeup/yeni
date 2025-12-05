@@ -224,7 +224,7 @@ const JoinUs = () => {
   const seoDescription = currentLang === 'tr'
     ? 'Unilancer ailesine katıl! Yeteneklerini sergile, gerçek projelerde yer al ve kazanmaya başla. Yazılım, tasarım ve dijital pazarlama alanlarında freelancer başvurusu yap.'
     : 'Join the Unilancer family! Showcase your talents, work on real projects and start earning. Apply as a freelancer in software, design and digital marketing.';
-  const canonicalUrl = `https://unilancer.co/${currentLang}/bize-katil`;
+  const canonicalUrl = `https://unilancerlabs.com/${currentLang}/bize-katil`;
 
   /* Calendly Modal State */
   const [isCalendlyModalOpen, setIsCalendlyModalOpen] = useState(false);
@@ -454,15 +454,15 @@ const JoinUs = () => {
         <link rel="canonical" href={canonicalUrl} />
         
         {/* Language alternates */}
-        <link rel="alternate" hrefLang="tr" href="https://unilancer.co/tr/bize-katil" />
-        <link rel="alternate" hrefLang="en" href="https://unilancer.co/en/join-us" />
+        <link rel="alternate" hrefLang="tr" href="https://unilancerlabs.com/tr/bize-katil" />
+        <link rel="alternate" hrefLang="en" href="https://unilancerlabs.com/en/join-us" />
         
         {/* Open Graph */}
         <meta property="og:type" content="website" />
         <meta property="og:url" content={canonicalUrl} />
         <meta property="og:title" content={seoTitle} />
         <meta property="og:description" content={seoDescription} />
-        <meta property="og:image" content="https://unilancer.co/og-joinus.jpg" />
+        <meta property="og:image" content="https://unilancerlabs.com/og-joinus.jpg" />
         <meta property="og:site_name" content="Unilancer" />
         <meta property="og:locale" content={currentLang === 'tr' ? 'tr_TR' : 'en_US'} />
         
@@ -470,7 +470,7 @@ const JoinUs = () => {
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={seoTitle} />
         <meta name="twitter:description" content={seoDescription} />
-        <meta name="twitter:image" content="https://unilancer.co/og-joinus.jpg" />
+        <meta name="twitter:image" content="https://unilancerlabs.com/og-joinus.jpg" />
         
         {/* BreadcrumbList Schema */}
         <script type="application/ld+json">
@@ -482,7 +482,7 @@ const JoinUs = () => {
                 "@type": "ListItem",
                 "position": 1,
                 "name": currentLang === 'tr' ? "Ana Sayfa" : "Home",
-                "item": `https://unilancer.co/${currentLang}`
+                "item": `https://unilancerlabs.com/${currentLang}`
               },
               {
                 "@type": "ListItem",

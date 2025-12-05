@@ -254,7 +254,7 @@ const Login = () => {
                     ? 'border-green-300 focus:border-green-400 focus:ring-green-100'
                     : 'border-gray-200 focus:border-teal-400 focus:ring-teal-100'
                 }`}
-                placeholder="ornek@unilancer.com"
+                placeholder="ornek@unilancerlabs.comm"
                 required
                 disabled={loading || isLockedOut}
                 autoComplete="email"

@@ -1,11 +1,11 @@
 # Unilancer Robots.txt
-# https://unilancer.co
+# https://unilancerlabs.com
 
 User-agent: *
 Allow: /
 
 # Sitemap
-Sitemap: https://unilancer.co/sitemap.xml
+Sitemap: https://unilancerlabs.com/sitemap.xml
 
 # Disallow admin and private pages
 Disallow: /admin

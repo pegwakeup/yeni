@@ -21,7 +21,7 @@ const Digibot = () => {
   const seoDescription = currentLang === 'tr'
     ? 'digiBot, işletmelerin ve freelancerların hayatını kolaylaştıran yapay zeka destekli dijital asistan. İş süreçlerinizi otomatize edin, verimliliğinizi artırın.'
     : 'digiBot is an AI-powered digital assistant that makes life easier for businesses and freelancers. Automate your workflows, increase your productivity.';
-  const canonicalUrl = `https://unilancer.co/${currentLang}/digibot`;
+  const canonicalUrl = `https://unilancerlabs.com/${currentLang}/digibot`;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -82,8 +82,8 @@ const Digibot = () => {
         <meta name="keywords" content="digibot, yapay zeka, AI, chatbot, dijital asistan, otomasyon, verimlilik" />
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href={canonicalUrl} />
-        <link rel="alternate" hrefLang="tr" href="https://unilancer.co/tr/digibot" />
-        <link rel="alternate" hrefLang="en" href="https://unilancer.co/en/digibot" />
+        <link rel="alternate" hrefLang="tr" href="https://unilancerlabs.com/tr/digibot" />
+        <link rel="alternate" hrefLang="en" href="https://unilancerlabs.com/en/digibot" />
       </Helmet>
       
       <div className="relative min-h-screen">

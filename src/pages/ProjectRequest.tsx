@@ -191,7 +191,7 @@ const ProjectRequest = () => {
   const seoDescription = currentLang === 'tr'
     ? 'Web tasarım, yazılım, 3D/AR, e-ticaret, dijital pazarlama projeleriniz için ücretsiz teklif alın. Projenizi detaylandırın, size özel çözümler sunalım.'
     : 'Get a free quote for your web design, software, 3D/AR, e-commerce, digital marketing projects. Describe your project, let us provide tailored solutions.';
-  const canonicalUrl = `https://unilancer.co/${currentLang}/proje-talebi`;
+  const canonicalUrl = `https://unilancerlabs.com/${currentLang}/proje-talebi`;
 
   const services = React.useMemo(() => getServices(t), [t]);
   const solutionTypes = React.useMemo(() => getSolutionTypes(t), [t]);
@@ -867,15 +867,15 @@ const ProjectRequest = () => {
         <link rel="canonical" href={canonicalUrl} />
         
         {/* Language alternates */}
-        <link rel="alternate" hrefLang="tr" href="https://unilancer.co/tr/proje-talebi" />
-        <link rel="alternate" hrefLang="en" href="https://unilancer.co/en/project-request" />
+        <link rel="alternate" hrefLang="tr" href="https://unilancerlabs.com/tr/proje-talebi" />
+        <link rel="alternate" hrefLang="en" href="https://unilancerlabs.com/en/project-request" />
         
         {/* Open Graph */}
         <meta property="og:type" content="website" />
         <meta property="og:url" content={canonicalUrl} />
         <meta property="og:title" content={seoTitle} />
         <meta property="og:description" content={seoDescription} />
-        <meta property="og:image" content="https://unilancer.co/og-project.jpg" />
+        <meta property="og:image" content="https://unilancerlabs.com/og-project.jpg" />
         <meta property="og:site_name" content="Unilancer" />
         <meta property="og:locale" content={currentLang === 'tr' ? 'tr_TR' : 'en_US'} />
         
@@ -883,7 +883,7 @@ const ProjectRequest = () => {
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={seoTitle} />
         <meta name="twitter:description" content={seoDescription} />
-        <meta name="twitter:image" content="https://unilancer.co/og-project.jpg" />
+        <meta name="twitter:image" content="https://unilancerlabs.com/og-project.jpg" />
         
         {/* BreadcrumbList Schema */}
         <script type="application/ld+json">
@@ -895,7 +895,7 @@ const ProjectRequest = () => {
                 "@type": "ListItem",
                 "position": 1,
                 "name": currentLang === 'tr' ? "Ana Sayfa" : "Home",
-                "item": `https://unilancer.co/${currentLang}`
+                "item": `https://unilancerlabs.com/${currentLang}`
               },
               {
                 "@type": "ListItem",

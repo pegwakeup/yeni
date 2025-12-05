@@ -56,7 +56,7 @@ const Portfolio = () => {
   const seoDescription = currentLang === 'tr'
     ? 'Unilancer\'ın tamamladığı web tasarım, yazılım, 3D/AR, e-ticaret, dijital pazarlama ve kurumsal kimlik projelerini keşfedin. Başarılı çalışmalarımızı inceleyin.'
     : 'Discover Unilancer\'s completed web design, software, 3D/AR, e-commerce, digital marketing, and brand identity projects. Explore our successful works.';
-  const canonicalUrl = `https://unilancer.co/${currentLang}/portfolyo`;
+  const canonicalUrl = `https://unilancerlabs.com/${currentLang}/portfolyo`;
 
   const CategoryIcon = ({ category }: { category: string }) => {
     const categoryData = categories[category as keyof typeof categories];
@@ -113,15 +113,15 @@ const Portfolio = () => {
         <link rel="canonical" href={canonicalUrl} />
         
         {/* Language alternates */}
-        <link rel="alternate" hrefLang="tr" href="https://unilancer.co/tr/portfolyo" />
-        <link rel="alternate" hrefLang="en" href="https://unilancer.co/en/portfolio" />
+        <link rel="alternate" hrefLang="tr" href="https://unilancerlabs.com/tr/portfolyo" />
+        <link rel="alternate" hrefLang="en" href="https://unilancerlabs.com/en/portfolio" />
         
         {/* Open Graph */}
         <meta property="og:type" content="website" />
         <meta property="og:url" content={canonicalUrl} />
         <meta property="og:title" content={seoTitle} />
         <meta property="og:description" content={seoDescription} />
-        <meta property="og:image" content="https://unilancer.co/og-portfolio.jpg" />
+        <meta property="og:image" content="https://unilancerlabs.com/og-portfolio.jpg" />
         <meta property="og:site_name" content="Unilancer" />
         <meta property="og:locale" content={currentLang === 'tr' ? 'tr_TR' : 'en_US'} />
         
@@ -129,7 +129,7 @@ const Portfolio = () => {
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={seoTitle} />
         <meta name="twitter:description" content={seoDescription} />
-        <meta name="twitter:image" content="https://unilancer.co/og-portfolio.jpg" />
+        <meta name="twitter:image" content="https://unilancerlabs.com/og-portfolio.jpg" />
         
         {/* CollectionPage Schema */}
         <script type="application/ld+json">
@@ -151,7 +151,7 @@ const Portfolio = () => {
                   "name": item.title,
                   "description": item.description,
                   "image": item.main_image,
-                  "url": `https://unilancer.co/${currentLang}/portfolyo/${item.slug}`
+                  "url": `https://unilancerlabs.com/${currentLang}/portfolyo/${item.slug}`
                 }
               }))
             }
@@ -168,7 +168,7 @@ const Portfolio = () => {
                 "@type": "ListItem",
                 "position": 1,
                 "name": currentLang === 'tr' ? "Ana Sayfa" : "Home",
-                "item": `https://unilancer.co/${currentLang}`
+                "item": `https://unilancerlabs.com/${currentLang}`
               },
               {
                 "@type": "ListItem",

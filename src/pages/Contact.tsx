@@ -23,7 +23,7 @@ const Contact = () => {
   const seoDescription = currentLang === 'tr'
     ? 'Unilancer ile iletişime geçin. Proje talepleriniz, iş birlikleri ve sorularınız için bize ulaşın. İstanbul, Beyoğlu - Cube. Tel: +90 506 152 32 55'
     : 'Contact Unilancer. Reach out for project requests, collaborations, and inquiries. Istanbul, Beyoğlu - Cube. Tel: +90 506 152 32 55';
-  const canonicalUrl = `https://unilancer.co/${currentLang}/iletisim`;
+  const canonicalUrl = `https://unilancerlabs.com/${currentLang}/iletisim`;
 
   const [formData, setFormData] = useState({
     name: '',
@@ -97,15 +97,15 @@ const Contact = () => {
         <link rel="canonical" href={canonicalUrl} />
         
         {/* Language alternates */}
-        <link rel="alternate" hrefLang="tr" href="https://unilancer.co/tr/iletisim" />
-        <link rel="alternate" hrefLang="en" href="https://unilancer.co/en/contact" />
+        <link rel="alternate" hrefLang="tr" href="https://unilancerlabs.com/tr/iletisim" />
+        <link rel="alternate" hrefLang="en" href="https://unilancerlabs.com/en/contact" />
         
         {/* Open Graph */}
         <meta property="og:type" content="website" />
         <meta property="og:url" content={canonicalUrl} />
         <meta property="og:title" content={seoTitle} />
         <meta property="og:description" content={seoDescription} />
-        <meta property="og:image" content="https://unilancer.co/og-contact.jpg" />
+        <meta property="og:image" content="https://unilancerlabs.com/og-contact.jpg" />
         <meta property="og:site_name" content="Unilancer" />
         <meta property="og:locale" content={currentLang === 'tr' ? 'tr_TR' : 'en_US'} />
         
@@ -113,7 +113,7 @@ const Contact = () => {
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={seoTitle} />
         <meta name="twitter:description" content={seoDescription} />
-        <meta name="twitter:image" content="https://unilancer.co/og-contact.jpg" />
+        <meta name="twitter:image" content="https://unilancerlabs.com/og-contact.jpg" />
         
         {/* ContactPage Schema */}
         <script type="application/ld+json">
@@ -127,9 +127,9 @@ const Contact = () => {
               "@type": "LocalBusiness",
               "name": "Unilancer",
               "description": seoDescription,
-              "url": "https://unilancer.co",
-              "logo": "https://unilancer.co/logo.png",
-              "image": "https://unilancer.co/og-image.jpg",
+              "url": "https://unilancerlabs.com",
+              "logo": "https://unilancerlabs.com/logo.png",
+              "image": "https://unilancerlabs.com/og-image.jpg",
               "telephone": "+90-506-152-32-55",
               "email": "info@unilancerlabs.com",
               "address": {
@@ -166,7 +166,7 @@ const Contact = () => {
                 "@type": "ListItem",
                 "position": 1,
                 "name": currentLang === 'tr' ? "Ana Sayfa" : "Home",
-                "item": `https://unilancer.co/${currentLang}`
+                "item": `https://unilancerlabs.com/${currentLang}`
               },
               {
                 "@type": "ListItem",
@@ -188,21 +188,13 @@ const Contact = () => {
       <div className="max-w-7xl mx-auto px-6 lg:px-8 pt-32 pb-24 relative z-10">
         
         {/* Header Section */}
-        <div className="text-center max-w-3xl mx-auto mb-20">
+        <div className="text-center max-w-4xl mx-auto mb-20">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary font-semibold text-sm mb-6">
-              <Sparkles className="w-4 h-4" />
-              <span>{t('contact.bize_ulaşın', 'Bize Ulaşın')}</span>
-            </div>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-slate-900 dark:text-white mb-6 tracking-tight">
-              {t('contact.projelerinizi', 'Projelerinizi')} <br/>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-600">{t('contact.hayata_geçirelim', 'Hayata Geçirelim')}</span>
-            </h1>
-            <p className="text-lg text-slate-600 dark:text-slate-400 leading-relaxed">
+            <p className="text-xl md:text-2xl lg:text-3xl text-slate-600 dark:text-slate-300 leading-relaxed">
               {t('contact.sorularınız_proje_talepleriniz', 'Sorularınız, proje talepleriniz veya iş birlikleri için bizimle iletişime geçin. Ekibimiz en kısa sürede size dönüş yapacaktır.')}
             </p>
           </motion.div>
@@ -432,30 +424,38 @@ const Contact = () => {
               </div>
             </div>
 
-            {/* Map Card */}
-            <div className="bg-slate-50 dark:bg-white/5 rounded-[2rem] overflow-hidden border border-slate-200 dark:border-white/10 h-[300px] relative group">
-              <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3009.3663197525847!2d28.97772937668711!3d41.03473017134433!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14cab9e7a7777c43%3A0x4c76cf3c5e80d90f!2sCube%20Beyo%C4%9Flu!5e0!3m2!1str!2str!4v1707997561783!5m2!1str!2str"
-                width="100%"
-                height="100%"
-                style={{ border: 0 }}
-                allowFullScreen
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                className="grayscale group-hover:grayscale-0 transition-all duration-500"
-              />
-              <a 
-                href="https://maps.app.goo.gl/QjP8fXWYP5awy7qK8"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="absolute bottom-4 right-4 bg-white dark:bg-dark text-slate-900 dark:text-white px-4 py-2 rounded-lg text-sm font-medium shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
-              >
-                {t('contact.open_in_map', 'Haritada Aç')}
-              </a>
-            </div>
-
           </motion.div>
         </div>
+
+        {/* Full Width Map Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.6 }}
+          className="mt-16"
+        >
+          <div className="bg-slate-50 dark:bg-white/5 rounded-[2rem] overflow-hidden border border-slate-200 dark:border-white/10 h-[400px] relative group">
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3009.3663197525847!2d28.97772937668711!3d41.03473017134433!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14cab9e7a7777c43%3A0x4c76cf3c5e80d90f!2sCube%20Beyo%C4%9Flu!5e0!3m2!1str!2str!4v1707997561783!5m2!1str!2str"
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              allowFullScreen
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              className="transition-all duration-500"
+            />
+            <a 
+              href="https://maps.app.goo.gl/8KiKNLnQzxPD6DSBA"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="absolute bottom-6 right-6 bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-xl text-sm font-semibold shadow-lg flex items-center gap-2 transition-colors"
+            >
+              <MapPin className="w-4 h-4" />
+              {t('contact.get_directions', 'Yol Tarifi Al')}
+            </a>
+          </div>
+        </motion.div>
       </div>
     </div>
     </>

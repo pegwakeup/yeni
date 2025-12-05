@@ -133,18 +133,18 @@ const BlogDetail = () => {
     "@type": "BlogPosting",
     "mainEntityOfPage": {
       "@type": "WebPage",
-      "@id": `https://unilancer.co/${language}/blog/${post.slug}`
+      "@id": `https://unilancerlabs.com/${language}/blog/${post.slug}`
     },
     "headline": post.title,
     "description": post.excerpt,
     "image": { "@type": "ImageObject", "url": post.image_url, "width": 1200, "height": 630 },
     "datePublished": post.created_at,
     "dateModified": post.updated_at || post.created_at,
-    "author": { "@type": "Organization", "name": "Unilancer", "url": "https://unilancer.co" },
+    "author": { "@type": "Organization", "name": "Unilancer", "url": "https://unilancerlabs.com" },
     "publisher": {
       "@type": "Organization",
       "name": "Unilancer",
-      "logo": { "@type": "ImageObject", "url": "https://unilancer.co/images/logo.png", "width": 200, "height": 60 }
+      "logo": { "@type": "ImageObject", "url": "https://unilancerlabs.com/images/logo.png", "width": 200, "height": 60 }
     },
     "articleSection": post.category,
     "keywords": post.tags?.join(', ') || post.category,

@@ -80,7 +80,7 @@ const Services = () => {
   const seoDescription = currentLang === 'tr'
     ? 'Web tasarım, 3D modelleme, e-ticaret, dijital pazarlama, yapay zeka chatbot, yazılım geliştirme, kurumsal kimlik ve grafik tasarım hizmetleri. Profesyonel dijital çözümler.'
     : 'Web design, 3D modeling, e-commerce, digital marketing, AI chatbot, software development, brand identity and graphic design services. Professional digital solutions.';
-  const canonicalUrl = `https://unilancer.co/${currentLang}/hizmetler`;
+  const canonicalUrl = `https://unilancerlabs.com/${currentLang}/hizmetler`;
 
   const featuredServices: Service[] = [
     {
@@ -161,7 +161,7 @@ const Services = () => {
         "@type": "Organization",
         "name": "Unilancer"
       },
-      "url": `https://unilancer.co/${currentLang}/hizmetler/${service.slug}`
+      "url": `https://unilancerlabs.com/${currentLang}/hizmetler/${service.slug}`
     }
   }));
 
@@ -177,15 +177,15 @@ const Services = () => {
         <link rel="canonical" href={canonicalUrl} />
         
         {/* Language alternates */}
-        <link rel="alternate" hrefLang="tr" href="https://unilancer.co/tr/hizmetler" />
-        <link rel="alternate" hrefLang="en" href="https://unilancer.co/en/services" />
+        <link rel="alternate" hrefLang="tr" href="https://unilancerlabs.com/tr/hizmetler" />
+        <link rel="alternate" hrefLang="en" href="https://unilancerlabs.com/en/services" />
         
         {/* Open Graph */}
         <meta property="og:type" content="website" />
         <meta property="og:url" content={canonicalUrl} />
         <meta property="og:title" content={seoTitle} />
         <meta property="og:description" content={seoDescription} />
-        <meta property="og:image" content="https://unilancer.co/og-services.jpg" />
+        <meta property="og:image" content="https://unilancerlabs.com/og-services.jpg" />
         <meta property="og:site_name" content="Unilancer" />
         <meta property="og:locale" content={currentLang === 'tr' ? 'tr_TR' : 'en_US'} />
         
@@ -193,7 +193,7 @@ const Services = () => {
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={seoTitle} />
         <meta name="twitter:description" content={seoDescription} />
-        <meta name="twitter:image" content="https://unilancer.co/og-services.jpg" />
+        <meta name="twitter:image" content="https://unilancerlabs.com/og-services.jpg" />
         
         {/* ItemList Schema */}
         <script type="application/ld+json">
@@ -217,7 +217,7 @@ const Services = () => {
                 "@type": "ListItem",
                 "position": 1,
                 "name": currentLang === 'tr' ? "Ana Sayfa" : "Home",
-                "item": `https://unilancer.co/${currentLang}`
+                "item": `https://unilancerlabs.com/${currentLang}`
               },
               {
                 "@type": "ListItem",

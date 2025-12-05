@@ -15,7 +15,7 @@ const About = () => {
   const seoDescription = currentLang === 'tr'
     ? 'Unilancer, Türkiye\'nin en yetenekli üniversite öğrencileri ve mezunları ile işletmeleri buluşturan yeni nesil dijital ajans. Vizyonumuz ve misyonumuz.'
     : 'Unilancer is a next-generation digital agency connecting Turkey\'s most talented university students and graduates with businesses. Our vision and mission.';
-  const canonicalUrl = `https://unilancer.co/${currentLang}/hakkimizda`;
+  const canonicalUrl = `https://unilancerlabs.com/${currentLang}/hakkimizda`;
 
   return (
     <>
@@ -29,15 +29,15 @@ const About = () => {
         <link rel="canonical" href={canonicalUrl} />
         
         {/* Language alternates */}
-        <link rel="alternate" hrefLang="tr" href="https://unilancer.co/tr/hakkimizda" />
-        <link rel="alternate" hrefLang="en" href="https://unilancer.co/en/about" />
+        <link rel="alternate" hrefLang="tr" href="https://unilancerlabs.com/tr/hakkimizda" />
+        <link rel="alternate" hrefLang="en" href="https://unilancerlabs.com/en/about" />
         
         {/* Open Graph */}
         <meta property="og:type" content="website" />
         <meta property="og:url" content={canonicalUrl} />
         <meta property="og:title" content={seoTitle} />
         <meta property="og:description" content={seoDescription} />
-        <meta property="og:image" content="https://unilancer.co/og-about.jpg" />
+        <meta property="og:image" content="https://unilancerlabs.com/og-about.jpg" />
         <meta property="og:site_name" content="Unilancer" />
         <meta property="og:locale" content={currentLang === 'tr' ? 'tr_TR' : 'en_US'} />
         
@@ -45,7 +45,7 @@ const About = () => {
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={seoTitle} />
         <meta name="twitter:description" content={seoDescription} />
-        <meta name="twitter:image" content="https://unilancer.co/og-about.jpg" />
+        <meta name="twitter:image" content="https://unilancerlabs.com/og-about.jpg" />
         
         {/* AboutPage Schema */}
         <script type="application/ld+json">
@@ -59,8 +59,8 @@ const About = () => {
               "@type": "Organization",
               "name": "Unilancer",
               "description": seoDescription,
-              "url": "https://unilancer.co",
-              "logo": "https://unilancer.co/logo.png",
+              "url": "https://unilancerlabs.com",
+              "logo": "https://unilancerlabs.com/logo.png",
               "foundingDate": "2023",
               "address": {
                 "@type": "PostalAddress",
@@ -84,7 +84,7 @@ const About = () => {
                 "@type": "ListItem",
                 "position": 1,
                 "name": currentLang === 'tr' ? "Ana Sayfa" : "Home",
-                "item": `https://unilancer.co/${currentLang}`
+                "item": `https://unilancerlabs.com/${currentLang}`
               },
               {
                 "@type": "ListItem",

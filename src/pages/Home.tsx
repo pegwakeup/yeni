@@ -182,7 +182,7 @@ const Home = () => {
   const seoTitle = t('seo.home.title', 'Unilancer | Türkiye\'nin En İyi Dijital Ajansı - Web Tasarım, Yazılım, AI');
   const seoDescription = t('seo.home.description', 'Web tasarım, yazılım geliştirme, 3D/AR, e-ticaret, dijital pazarlama ve yapay zeka çözümleri. Genç yeteneklerle işletmenizi dijital dünyada öne çıkarın. Ücretsiz teklif alın!');
   const currentLang = window.location.pathname.startsWith('/en') ? 'en' : 'tr';
-  const canonicalUrl = `https://unilancer.co/${currentLang}`;
+  const canonicalUrl = `https://unilancerlabs.com/${currentLang}`;
 
   return (
     <>
@@ -197,16 +197,16 @@ const Home = () => {
         <link rel="canonical" href={canonicalUrl} />
         
         {/* Language alternates */}
-        <link rel="alternate" hrefLang="tr" href="https://unilancer.co/tr" />
-        <link rel="alternate" hrefLang="en" href="https://unilancer.co/en" />
-        <link rel="alternate" hrefLang="x-default" href="https://unilancer.co/tr" />
+        <link rel="alternate" hrefLang="tr" href="https://unilancerlabs.com/tr" />
+        <link rel="alternate" hrefLang="en" href="https://unilancerlabs.com/en" />
+        <link rel="alternate" hrefLang="x-default" href="https://unilancerlabs.com/tr" />
         
         {/* Open Graph / Facebook */}
         <meta property="og:type" content="website" />
         <meta property="og:url" content={canonicalUrl} />
         <meta property="og:title" content={seoTitle} />
         <meta property="og:description" content={seoDescription} />
-        <meta property="og:image" content="https://unilancer.co/og-image.jpg" />
+        <meta property="og:image" content="https://unilancerlabs.com/og-image.jpg" />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta property="og:site_name" content="Unilancer" />
@@ -217,7 +217,7 @@ const Home = () => {
         <meta name="twitter:url" content={canonicalUrl} />
         <meta name="twitter:title" content={seoTitle} />
         <meta name="twitter:description" content={seoDescription} />
-        <meta name="twitter:image" content="https://unilancer.co/og-image.jpg" />
+        <meta name="twitter:image" content="https://unilancerlabs.com/og-image.jpg" />
         
         {/* Organization Schema */}
         <script type="application/ld+json">
@@ -226,8 +226,8 @@ const Home = () => {
             "@type": "Organization",
             "name": "Unilancer",
             "alternateName": "Unilancer Labs",
-            "url": "https://unilancer.co",
-            "logo": "https://unilancer.co/logo.png",
+            "url": "https://unilancerlabs.com",
+            "logo": "https://unilancerlabs.com/logo.png",
             "description": seoDescription,
             "foundingDate": "2023",
             "founders": [
@@ -284,14 +284,14 @@ const Home = () => {
             "@type": "WebSite",
             "name": "Unilancer",
             "alternateName": "Unilancer Labs",
-            "url": "https://unilancer.co",
+            "url": "https://unilancerlabs.com",
             "description": seoDescription,
             "inLanguage": ["tr-TR", "en-US"],
             "potentialAction": {
               "@type": "SearchAction",
               "target": {
                 "@type": "EntryPoint",
-                "urlTemplate": "https://unilancer.co/tr/blog?search={search_term_string}"
+                "urlTemplate": "https://unilancerlabs.com/tr/blog?search={search_term_string}"
               },
               "query-input": "required name=search_term_string"
             }
@@ -309,42 +309,42 @@ const Home = () => {
                 "position": 1,
                 "name": currentLang === 'tr' ? "Hizmetler" : "Services",
                 "description": currentLang === 'tr' ? "Web tasarım, yazılım, 3D/AR, e-ticaret ve dijital pazarlama hizmetleri" : "Web design, software, 3D/AR, e-commerce and digital marketing services",
-                "url": `https://unilancer.co/${currentLang}/${currentLang === 'tr' ? 'hizmetler' : 'services'}`
+                "url": `https://unilancerlabs.com/${currentLang}/${currentLang === 'tr' ? 'hizmetler' : 'services'}`
               },
               {
                 "@type": "SiteNavigationElement",
                 "position": 2,
                 "name": currentLang === 'tr' ? "Hakkımızda" : "About Us",
                 "description": currentLang === 'tr' ? "Unilancer hakkında bilgi edinin" : "Learn about Unilancer",
-                "url": `https://unilancer.co/${currentLang}/${currentLang === 'tr' ? 'hakkimizda' : 'about'}`
+                "url": `https://unilancerlabs.com/${currentLang}/${currentLang === 'tr' ? 'hakkimizda' : 'about'}`
               },
               {
                 "@type": "SiteNavigationElement",
                 "position": 3,
                 "name": "Blog",
                 "description": currentLang === 'tr' ? "Dijital dünya hakkında içerikler" : "Content about the digital world",
-                "url": `https://unilancer.co/${currentLang}/blog`
+                "url": `https://unilancerlabs.com/${currentLang}/blog`
               },
               {
                 "@type": "SiteNavigationElement",
                 "position": 4,
                 "name": currentLang === 'tr' ? "Portfolyo" : "Portfolio",
                 "description": currentLang === 'tr' ? "Tamamladığımız projeler" : "Our completed projects",
-                "url": `https://unilancer.co/${currentLang}/${currentLang === 'tr' ? 'portfolyo' : 'portfolio'}`
+                "url": `https://unilancerlabs.com/${currentLang}/${currentLang === 'tr' ? 'portfolyo' : 'portfolio'}`
               },
               {
                 "@type": "SiteNavigationElement",
                 "position": 5,
                 "name": currentLang === 'tr' ? "İletişim" : "Contact",
                 "description": currentLang === 'tr' ? "Bizimle iletişime geçin" : "Get in touch with us",
-                "url": `https://unilancer.co/${currentLang}/${currentLang === 'tr' ? 'iletisim' : 'contact'}`
+                "url": `https://unilancerlabs.com/${currentLang}/${currentLang === 'tr' ? 'iletisim' : 'contact'}`
               },
               {
                 "@type": "SiteNavigationElement",
                 "position": 6,
                 "name": currentLang === 'tr' ? "Teklif Al" : "Get Quote",
                 "description": currentLang === 'tr' ? "Projeniz için ücretsiz teklif alın" : "Get a free quote for your project",
-                "url": `https://unilancer.co/${currentLang}/${currentLang === 'tr' ? 'teklif-al' : 'project-request'}`
+                "url": `https://unilancerlabs.com/${currentLang}/${currentLang === 'tr' ? 'teklif-al' : 'project-request'}`
               }
             ]
           })}

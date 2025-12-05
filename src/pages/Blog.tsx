@@ -199,13 +199,13 @@ const Blog = () => {
     "description": language === 'tr' 
       ? "Teknoloji, tasarım, yapay zeka ve dijital dönüşüm hakkında güncel blog yazıları."
       : "Latest blog posts about technology, design, AI and digital transformation.",
-    "url": `https://unilancer.co/${language}/blog`,
+    "url": `https://unilancerlabs.com/${language}/blog`,
     "publisher": {
       "@type": "Organization",
       "name": "Unilancer",
       "logo": {
         "@type": "ImageObject",
-        "url": "https://unilancer.co/images/logo.png"
+        "url": "https://unilancerlabs.com/images/logo.png"
       }
     },
     "blogPost": posts.slice(0, 10).map(post => ({
@@ -216,7 +216,7 @@ const Blog = () => {
       "datePublished": post.created_at,
       "dateModified": post.updated_at || post.created_at,
       "author": { "@type": "Organization", "name": "Unilancer" },
-      "url": `https://unilancer.co/${language}/blog/${post.slug}`
+      "url": `https://unilancerlabs.com/${language}/blog/${post.slug}`
     }))
   }), [posts, language]);
 
@@ -254,20 +254,20 @@ const Blog = () => {
         <meta property="og:type" content="website" />
         <meta property="og:title" content={seoTitle} />
         <meta property="og:description" content={seoDescription} />
-        <meta property="og:url" content={`https://unilancer.co/${language}/blog`} />
+        <meta property="og:url" content={`https://unilancerlabs.com/${language}/blog`} />
         <meta property="og:site_name" content="Unilancer" />
-        <meta property="og:image" content={posts[0]?.image_url || 'https://unilancer.co/images/og-blog.jpg'} />
+        <meta property="og:image" content={posts[0]?.image_url || 'https://unilancerlabs.com/images/og-blog.jpg'} />
         <meta property="og:locale" content={language === 'tr' ? 'tr_TR' : 'en_US'} />
         
         {/* Twitter Card */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={seoTitle} />
         <meta name="twitter:description" content={seoDescription} />
-        <meta name="twitter:image" content={posts[0]?.image_url || 'https://unilancer.co/images/og-blog.jpg'} />
+        <meta name="twitter:image" content={posts[0]?.image_url || 'https://unilancerlabs.com/images/og-blog.jpg'} />
         
         {/* Additional SEO */}
         <meta name="robots" content="index, follow, max-image-preview:large" />
-        <link rel="canonical" href={`https://unilancer.co/${language}/blog`} />
+        <link rel="canonical" href={`https://unilancerlabs.com/${language}/blog`} />
         <meta name="keywords" content={language === 'tr' 
           ? "blog, teknoloji, tasarım, yapay zeka, web geliştirme, dijital dönüşüm, yazılım"
           : "blog, technology, design, AI, web development, digital transformation, software"} />
