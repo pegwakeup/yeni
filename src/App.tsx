@@ -40,12 +40,8 @@ const GraphicDesign = lazy(() => import('./pages/services/GraphicDesign'));
 // Admin routes
 const AdminRoutes = lazy(() => import('./features/admin/routes'));
 
-// Platform routes (freelancer & employer)
-const PlatformRoutes = lazy(() => import('./features/platform/routes'));
-
 // Report Viewer (public)
 const ReportViewerPage = lazy(() => import('./features/report-viewer/pages/ReportViewerPage'));
-import { AuthProvider } from './features/platform/context/AuthContext';
 
 // 404 Page
 const NotFound = lazy(() => import('./pages/NotFound'));
@@ -87,7 +83,6 @@ function App() {
         <Router>
           <ThemeProvider>
             <LanguageProvider>
-              <AuthProvider>
               <PrivacyTermsProvider>
                 <ScrollToTop />
                 <CookieConsent />
@@ -161,11 +156,7 @@ function App() {
                       }
                     />
 
-                    {/* Platform routes - freelancer & employer */}
-                    <Route
-                      path="/platform/*"
-                      element={<PlatformRoutes />}
-                    />
+                    {/* Platform routes suspended - will be re-enabled later */}
 
                     {/* Public Report Viewer - accessible without login */}
                     <Route path="/report/:publicId" element={<ReportViewerPage />} />
@@ -190,7 +181,6 @@ function App() {
                 </Suspense>
               </div>
               </PrivacyTermsProvider>
-              </AuthProvider>
             </LanguageProvider>
           </ThemeProvider>
         </Router>
