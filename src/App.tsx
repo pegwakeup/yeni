@@ -42,6 +42,9 @@ const AdminRoutes = lazy(() => import('./features/admin/routes'));
 
 // Platform routes (freelancer & employer)
 const PlatformRoutes = lazy(() => import('./features/platform/routes'));
+
+// Report Viewer (public)
+const ReportViewerPage = lazy(() => import('./features/report-viewer/pages/ReportViewerPage'));
 import { AuthProvider } from './features/platform/context/AuthContext';
 
 // 404 Page
@@ -163,6 +166,9 @@ function App() {
                       path="/platform/*"
                       element={<PlatformRoutes />}
                     />
+
+                    {/* Public Report Viewer - accessible without login */}
+                    <Route path="/report/:publicId" element={<ReportViewerPage />} />
 
                     {/* Legacy routes - redirect to Turkish */}
                     <Route path="/portfolio" element={<Navigate to="/tr/portfolyo" replace />} />
