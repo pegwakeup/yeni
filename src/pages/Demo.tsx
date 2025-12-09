@@ -926,7 +926,7 @@ ${result.recommendations.slice(0, 5).map(r => `• [${r.priority.toUpperCase()}]
                             className="p-4 rounded-xl border border-primary/30 bg-primary/5 dark:bg-primary/10 cursor-pointer transition-all hover:border-primary/50"
                           >
                             <div className="flex flex-col items-center justify-center h-full text-center">
-                              <Bot className="w-5 h-5 text-primary mb-1" />
+                              <img src="https://ctncspdgguclpeijikfp.supabase.co/storage/v1/object/public/Landing%20Page/dijibotuyuk.webp" alt="DigiBot" className="w-5 h-5 mb-1" />
                               <p className="text-xs font-medium text-slate-700 dark:text-slate-300">DigiBot</p>
                               <p className="text-[10px] text-primary mt-0.5">Soru Sor →</p>
                             </div>
@@ -1076,7 +1076,7 @@ ${result.recommendations.slice(0, 5).map(r => `• [${r.priority.toUpperCase()}]
                     onClick={() => setIsChatOpen(true)}
                     className="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-br from-primary to-primary-dark text-white rounded-full shadow-lg shadow-primary/30 flex items-center justify-center z-50 group"
                   >
-                    <Bot className="w-6 h-6 group-hover:scale-110 transition-transform" />
+                    <img src="https://ctncspdgguclpeijikfp.supabase.co/storage/v1/object/public/Landing%20Page/dijibotuyuk.webp" alt="DigiBot" className="w-7 h-7 group-hover:scale-110 transition-transform" />
                     <span className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-white flex items-center justify-center">
                       <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
                     </span>
@@ -1103,19 +1103,11 @@ ${result.recommendations.slice(0, 5).map(r => `• [${r.priority.toUpperCase()}]
                     {/* Chat Header - Gradient */}
                     <div className="p-4 bg-gradient-to-r from-primary to-primary-dark flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                          <Bot className="w-5 h-5 text-white" />
-                        </div>
-                        <div>
-                          <h3 className="text-sm font-bold text-white flex items-center gap-1.5">
-                            DigiBot
-                            <Sparkles className="w-3.5 h-3.5 text-yellow-300" />
-                          </h3>
-                          <p className="text-xs text-white/80 flex items-center gap-1">
-                            <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
-                            AI Destekli Asistan
-                          </p>
-                        </div>
+                        <img 
+                          src="https://ctncspdgguclpeijikfp.supabase.co/storage/v1/object/public/Landing%20Page/dijibotkucuk.webp" 
+                          alt="DigiBot" 
+                          className="w-10 h-10"
+                        />
                       </div>
                       <div className="flex items-center gap-1">
                         {chatMessages.length > 0 && (
@@ -1161,7 +1153,7 @@ ${result.recommendations.slice(0, 5).map(r => `• [${r.priority.toUpperCase()}]
                                 {msg.role === 'user' ? (
                                   <User className="w-4 h-4 text-slate-600 dark:text-slate-300" />
                                 ) : (
-                                  <Bot className="w-4 h-4 text-white" />
+                                  <img src="https://ctncspdgguclpeijikfp.supabase.co/storage/v1/object/public/Landing%20Page/dijibotuyuk.webp" alt="DigiBot" className="w-4 h-4" />
                                 )}
                               </div>
                               <div className="flex flex-col max-w-[80%]">
@@ -1215,7 +1207,7 @@ ${result.recommendations.slice(0, 5).map(r => `• [${r.priority.toUpperCase()}]
                               className="flex gap-2.5"
                             >
                               <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center">
-                                <Bot className="w-4 h-4 text-white" />
+                                <img src="https://ctncspdgguclpeijikfp.supabase.co/storage/v1/object/public/Landing%20Page/dijibotuyuk.webp" alt="DigiBot" className="w-4 h-4" />
                               </div>
                               <div className="bg-white dark:bg-slate-800 px-4 py-3 rounded-2xl rounded-bl-md shadow-sm border border-slate-100 dark:border-slate-700">
                                 <div className="flex gap-1.5 items-center">

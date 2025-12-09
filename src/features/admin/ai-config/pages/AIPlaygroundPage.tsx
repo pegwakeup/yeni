@@ -503,7 +503,7 @@ const AIPlaygroundPage: React.FC = () => {
                   {msg.role === 'user' ? (
                     <User className="w-4 h-4 text-slate-600 dark:text-slate-300" />
                   ) : (
-                    <Bot className="w-4 h-4 text-white" />
+                    <img src="https://ctncspdgguclpeijikfp.supabase.co/storage/v1/object/public/Landing%20Page/dijibotuyuk.webp" alt="DigiBot" className="w-4 h-4" />
                   )}
                 </div>
 
@@ -546,7 +546,7 @@ const AIPlaygroundPage: React.FC = () => {
               className="flex gap-3"
             >
               <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center">
-                <Bot className="w-4 h-4 text-white" />
+                <img src="https://ctncspdgguclpeijikfp.supabase.co/storage/v1/object/public/Landing%20Page/dijibotuyuk.webp" alt="DigiBot" className="w-4 h-4" />
               </div>
               <div className="bg-white dark:bg-slate-800 px-4 py-3 rounded-2xl rounded-bl-md shadow-sm border border-slate-100 dark:border-slate-700">
                 <div className="flex gap-1.5 items-center">

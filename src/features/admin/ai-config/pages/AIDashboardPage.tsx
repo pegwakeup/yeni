@@ -258,7 +258,7 @@ const AIDashboardPage: React.FC = () => {
           to="/admin/ai-config"
           className="flex items-center gap-2 px-4 py-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg transition-colors whitespace-nowrap"
         >
-          <Bot className="w-4 h-4" />
+          <img src="https://ctncspdgguclpeijikfp.supabase.co/storage/v1/object/public/Landing%20Page/dijibotuyuk.webp" alt="DigiBot" className="w-4 h-4" />
           AI Ayarları
         </Link>
         <Link

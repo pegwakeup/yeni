@@ -118,7 +118,7 @@ const ConversationDetail: React.FC<ConversationDetailProps> = ({ conversation, o
                   {msg.role === 'user' ? (
                     <User className="w-4 h-4 text-slate-600 dark:text-slate-300" />
                   ) : (
-                    <Bot className="w-4 h-4 text-white" />
+                    <img src="https://ctncspdgguclpeijikfp.supabase.co/storage/v1/object/public/Landing%20Page/dijibotuyuk.webp" alt="DigiBot" className="w-4 h-4" />
                   )}
                 </div>
 

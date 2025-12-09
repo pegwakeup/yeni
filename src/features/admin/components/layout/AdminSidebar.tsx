@@ -52,7 +52,7 @@ const sidebarLinks: SidebarLink[] = [
     href: '/admin/digital-analysis'
   },
   {
-    icon: Bot,
+    icon: () => <img src="https://ctncspdgguclpeijikfp.supabase.co/storage/v1/object/public/Landing%20Page/dijibotuyuk.webp" alt="DigiBot" className="w-6 h-6" />,
     label: 'DigiBot AI',
     href: '/admin/ai-dashboard',
     subItems: [
