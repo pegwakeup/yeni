@@ -23,6 +23,8 @@ export async function sendDigiBotMessage(
   viewerId?: string
 ): Promise<ChatResponse> {
   try {
+    console.log('[DigiBot] Sending message to AI...', { reportId, sessionId, message: message.substring(0, 50) });
+    
     const response = await fetch(`${SUPABASE_URL}/functions/v1/report-chat`, {
       method: 'POST',
       headers: {
@@ -39,9 +41,16 @@ export async function sendDigiBotMessage(
     });
 
     const data = await response.json();
+    console.log('[DigiBot] Response received:', { success: data.success, hasMessage: !!data.message, error: data.error });
+    
+    if (!response.ok) {
+      console.error('[DigiBot] API error:', response.status, data);
+      return { success: false, error: data.error || `HTTP ${response.status}` };
+    }
+    
     return data;
   } catch (error) {
-    console.error('DigiBot API error:', error);
+    console.error('[DigiBot] Network error:', error);
     return { 
       success: false, 
       error: 'Bağlantı hatası. Lütfen tekrar deneyin.' 
