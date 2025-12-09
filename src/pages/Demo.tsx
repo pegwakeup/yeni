@@ -40,6 +40,8 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { generateDigiBotResponse } from '../data/unilancerKnowledge';
+import { sendDigiBotMessage, buildReportContext } from '../lib/api/digibot';
+import { AI_CONFIG } from '../lib/config/ai';
 import { signOut } from '../lib/auth';
 import { useTheme } from '../contexts/ThemeContext';
 
@@ -207,6 +209,7 @@ const Demo = () => {
   const [isChatLoading, setIsChatLoading] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isChatMinimized, setIsChatMinimized] = useState(false);
+  const [chatSessionId] = useState(() => crypto.randomUUID());
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   // Handle logout
@@ -289,7 +292,7 @@ const Demo = () => {
     }]);
   };
 
-  // Handle chat message
+  // Handle chat message - AI entegrasyonu ile
   const handleSendMessage = async () => {
     if (!chatInput.trim() || isChatLoading) return;
 
@@ -305,16 +308,58 @@ const Demo = () => {
     setChatInput('');
     setIsChatLoading(true);
 
-    setTimeout(() => {
-      const response = generateDigiBotResponse(question, analysisResult);
+    try {
+      // Rapor bağlamını oluştur
+      const reportContext = buildReportContext(analysisResult);
+      const reportId = analysisResult?.id || 'demo-report';
+
+      // AI API çağrısı yap
+      const response = await sendDigiBotMessage(
+        reportId,
+        chatSessionId,
+        question,
+        reportContext
+      );
+
+      if (response.success && response.message) {
+        setChatMessages(prev => [...prev, {
+          id: crypto.randomUUID(),
+          role: 'assistant',
+          content: response.message,
+          timestamp: new Date()
+        }]);
+      } else {
+        // AI başarısız olursa fallback kullan
+        if (AI_CONFIG.enableFallback) {
+          const fallbackResponse = generateDigiBotResponse(question, analysisResult);
+          setChatMessages(prev => [...prev, {
+            id: crypto.randomUUID(),
+            role: 'assistant',
+            content: fallbackResponse,
+            timestamp: new Date()
+          }]);
+        } else {
+          setChatMessages(prev => [...prev, {
+            id: crypto.randomUUID(),
+            role: 'assistant',
+            content: 'Üzgünüm, şu anda yanıt veremiyorum. Lütfen daha sonra tekrar deneyin.',
+            timestamp: new Date()
+          }]);
+        }
+      }
+    } catch (error) {
+      console.error('Chat error:', error);
+      // Hata durumunda fallback
+      const fallbackResponse = generateDigiBotResponse(question, analysisResult);
       setChatMessages(prev => [...prev, {
         id: crypto.randomUUID(),
         role: 'assistant',
-        content: response,
+        content: fallbackResponse,
         timestamp: new Date()
       }]);
+    } finally {
       setIsChatLoading(false);
-    }, 800 + Math.random() * 600);
+    }
   };
 
   // Score helpers
@@ -886,135 +931,180 @@ const Demo = () => {
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     exit={{ scale: 0 }}
-                    whileHover={{ scale: 1.05 }}
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
                     onClick={() => setIsChatOpen(true)}
-                    className="fixed bottom-5 right-5 w-12 h-12 bg-primary hover:bg-primary-dark text-white rounded-full shadow-lg flex items-center justify-center z-50"
+                    className="fixed bottom-6 right-6 w-14 h-14 bg-gradient-to-br from-primary to-primary-dark text-white rounded-full shadow-lg shadow-primary/30 flex items-center justify-center z-50 group"
                   >
-                    <Bot className="w-5 h-5" />
-                    <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-emerald-500 rounded-full border-2 border-white" />
+                    <Bot className="w-6 h-6 group-hover:scale-110 transition-transform" />
+                    <span className="absolute -top-1 -right-1 w-4 h-4 bg-emerald-500 rounded-full border-2 border-white flex items-center justify-center">
+                      <span className="w-2 h-2 bg-white rounded-full animate-pulse" />
+                    </span>
+                    {/* Tooltip */}
+                    <span className="absolute right-full mr-3 px-3 py-1.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                      DigiBot'a Sor
+                    </span>
                   </motion.button>
                 )}
               </AnimatePresence>
 
-              {/* DigiBot Chat Window */}
+              {/* DigiBot Chat Window - Enhanced */}
               <AnimatePresence>
                 {isChatOpen && (
                   <motion.div
                     initial={{ opacity: 0, y: 20, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 20, scale: 0.95 }}
-                    className={`fixed bottom-5 right-5 z-50 bg-white dark:bg-dark-card rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xl overflow-hidden ${
-                      isChatMinimized ? 'w-64' : 'w-80 sm:w-96'
+                    transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                    className={`fixed bottom-6 right-6 z-50 bg-white dark:bg-dark-card rounded-2xl border border-slate-200 dark:border-slate-700 shadow-2xl shadow-slate-900/10 dark:shadow-black/30 overflow-hidden ${
+                      isChatMinimized ? 'w-72' : 'w-[360px] sm:w-[400px]'
                     }`}
                   >
-                    {/* Chat Header */}
-                    <div className="p-3 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-dark-light flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-                          <Bot className="w-4 h-4 text-white" />
+                    {/* Chat Header - Gradient */}
+                    <div className="p-4 bg-gradient-to-r from-primary to-primary-dark flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
+                          <Bot className="w-5 h-5 text-white" />
                         </div>
                         <div>
-                          <h3 className="text-sm font-semibold text-slate-900 dark:text-white">DigiBot</h3>
-                          <p className="text-[10px] text-emerald-500">Çevrimiçi</p>
+                          <h3 className="text-sm font-bold text-white flex items-center gap-1.5">
+                            DigiBot
+                            <Sparkles className="w-3.5 h-3.5 text-yellow-300" />
+                          </h3>
+                          <p className="text-xs text-white/80 flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
+                            AI Destekli Asistan
+                          </p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-0.5">
+                      <div className="flex items-center gap-1">
                         <button 
                           onClick={() => setIsChatMinimized(!isChatMinimized)}
-                          className="p-1.5 hover:bg-slate-200 dark:hover:bg-slate-700 rounded transition-colors"
+                          className="p-2 hover:bg-white/10 rounded-lg transition-colors"
                         >
-                          <Minus className="w-3.5 h-3.5 text-slate-500" />
+                          <Minus className="w-4 h-4 text-white" />
                         </button>
                         <button 
                           onClick={() => setIsChatOpen(false)}
-                          className="p-1.5 hover:bg-slate-200 dark:hover:bg-slate-700 rounded transition-colors"
+                          className="p-2 hover:bg-white/10 rounded-lg transition-colors"
                         >
-                          <X className="w-3.5 h-3.5 text-slate-500" />
+                          <X className="w-4 h-4 text-white" />
                         </button>
                       </div>
                     </div>
 
                     {!isChatMinimized && (
                       <>
-                        {/* Messages */}
-                        <div className="h-72 overflow-y-auto p-3 space-y-2.5">
+                        {/* Messages - Enhanced */}
+                        <div className="h-80 overflow-y-auto p-4 space-y-3 bg-slate-50/50 dark:bg-slate-900/50">
                           {chatMessages.map((msg) => (
-                            <div
+                            <motion.div
                               key={msg.id}
-                              className={`flex gap-2 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              className={`flex gap-2.5 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}
                             >
-                              <div className={`w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                                msg.role === 'user' ? 'bg-slate-200 dark:bg-slate-700' : 'bg-primary'
+                              <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                                msg.role === 'user' 
+                                  ? 'bg-slate-200 dark:bg-slate-700' 
+                                  : 'bg-gradient-to-br from-primary to-primary-dark'
                               }`}>
                                 {msg.role === 'user' ? (
-                                  <User className="w-3 h-3 text-slate-600 dark:text-slate-300" />
+                                  <User className="w-4 h-4 text-slate-600 dark:text-slate-300" />
                                 ) : (
-                                  <Bot className="w-3 h-3 text-white" />
+                                  <Bot className="w-4 h-4 text-white" />
                                 )}
                               </div>
-                              <div className={`max-w-[80%] px-3 py-2 rounded-lg text-xs ${
+                              <div className={`max-w-[80%] px-4 py-2.5 rounded-2xl text-sm ${
                                 msg.role === 'user' 
-                                  ? 'bg-primary text-white' 
-                                  : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200'
+                                  ? 'bg-primary text-white rounded-br-md' 
+                                  : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-bl-md shadow-sm border border-slate-100 dark:border-slate-700'
                               }`}>
-                                <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+                                {/* Markdown rendering */}
+                                <div 
+                                  className="whitespace-pre-wrap leading-relaxed prose prose-sm dark:prose-invert max-w-none
+                                    [&_strong]:font-semibold [&_strong]:text-inherit
+                                    [&_ul]:list-disc [&_ul]:ml-4 [&_ul]:my-1
+                                    [&_li]:my-0.5"
+                                  dangerouslySetInnerHTML={{ 
+                                    __html: msg.content
+                                      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                                      .replace(/^• /gm, '<li>')
+                                      .replace(/<li>(.+)$/gm, '<li>$1</li>')
+                                      .replace(/\n/g, '<br/>')
+                                  }} 
+                                />
                               </div>
-                            </div>
+                            </motion.div>
                           ))}
                           {isChatLoading && (
-                            <div className="flex gap-2">
-                              <div className="w-6 h-6 rounded-lg bg-primary flex items-center justify-center">
-                                <Bot className="w-3 h-3 text-white" />
+                            <motion.div 
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              className="flex gap-2.5"
+                            >
+                              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center">
+                                <Bot className="w-4 h-4 text-white" />
                               </div>
-                              <div className="bg-slate-100 dark:bg-slate-800 px-3 py-2 rounded-lg">
-                                <div className="flex gap-1">
-                                  <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" />
-                                  <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                                  <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                              <div className="bg-white dark:bg-slate-800 px-4 py-3 rounded-2xl rounded-bl-md shadow-sm border border-slate-100 dark:border-slate-700">
+                                <div className="flex gap-1.5 items-center">
+                                  <span className="w-2 h-2 bg-primary/60 rounded-full animate-bounce" />
+                                  <span className="w-2 h-2 bg-primary/60 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                                  <span className="w-2 h-2 bg-primary/60 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                                  <span className="text-xs text-slate-400 ml-2">AI düşünüyor...</span>
                                 </div>
                               </div>
-                            </div>
+                            </motion.div>
                           )}
                           <div ref={chatEndRef} />
                         </div>
 
-                        {/* Quick Actions */}
-                        <div className="px-3 py-1.5 border-t border-slate-200 dark:border-slate-700">
-                          <div className="flex gap-1 overflow-x-auto no-scrollbar">
-                            {['Skorumu açıkla', 'Fiyat', 'İletişim'].map((action) => (
+                        {/* Quick Actions - Styled */}
+                        <div className="px-4 py-2.5 bg-white dark:bg-dark-card border-t border-slate-100 dark:border-slate-800">
+                          <div className="flex gap-2 overflow-x-auto no-scrollbar pb-0.5">
+                            {[
+                              { text: 'Skorumu açıkla', icon: '📊' },
+                              { text: 'Öneriler ver', icon: '💡' },
+                              { text: 'Fiyatlar', icon: '💰' },
+                              { text: 'İletişim', icon: '📞' }
+                            ].map((action) => (
                               <button
-                                key={action}
+                                key={action.text}
                                 onClick={() => {
-                                  setChatInput(action);
+                                  setChatInput(action.text);
                                   setTimeout(() => handleSendMessage(), 100);
                                 }}
-                                className="px-2 py-1 text-[10px] font-medium text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 rounded-full whitespace-nowrap hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                                className="px-3 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 rounded-full whitespace-nowrap hover:bg-primary hover:text-white dark:hover:bg-primary transition-all flex items-center gap-1.5 border border-transparent hover:border-primary/20"
                               >
-                                {action}
+                                <span>{action.icon}</span>
+                                {action.text}
                               </button>
                             ))}
                           </div>
                         </div>
 
-                        {/* Input */}
-                        <div className="p-3 border-t border-slate-200 dark:border-slate-700">
+                        {/* Input - Enhanced */}
+                        <div className="p-4 bg-white dark:bg-dark-card border-t border-slate-100 dark:border-slate-800">
                           <div className="flex gap-2">
                             <input
                               type="text"
                               value={chatInput}
                               onChange={(e) => setChatInput(e.target.value)}
-                              onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                              placeholder="Mesaj yazın..."
-                              className="flex-1 px-3 py-2 bg-slate-100 dark:bg-slate-800 rounded-lg text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-primary"
+                              onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
+                              placeholder="DigiBot'a bir şey sorun..."
+                              className="flex-1 px-4 py-2.5 bg-slate-100 dark:bg-slate-800 rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-shadow"
                             />
                             <button
                               onClick={handleSendMessage}
                               disabled={isChatLoading || !chatInput.trim()}
-                              className="px-3 py-2 bg-primary hover:bg-primary-dark text-white rounded-lg transition-colors disabled:opacity-50"
+                              className="px-4 py-2.5 bg-gradient-to-r from-primary to-primary-dark hover:shadow-lg hover:shadow-primary/30 text-white rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none"
                             >
-                              <Send className="w-3.5 h-3.5" />
+                              <Send className="w-4 h-4" />
                             </button>
                           </div>
+                          <p className="text-[10px] text-slate-400 mt-2 text-center">
+                            Powered by OpenAI GPT-4 • Unilancer Labs
+                          </p>
                         </div>
                       </>
                     )}
