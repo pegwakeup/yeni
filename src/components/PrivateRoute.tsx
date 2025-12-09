@@ -9,9 +9,22 @@ const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     const checkUser = async () => {
-      const currentUser = await getCurrentUser();
-      setUser(currentUser);
-      setLoading(false);
+      try {
+        // Timeout to prevent infinite loading
+        const timeoutPromise = new Promise<null>((resolve) => 
+          setTimeout(() => resolve(null), 8000)
+        );
+        
+        const userPromise = getCurrentUser();
+        
+        const currentUser = await Promise.race([userPromise, timeoutPromise]);
+        setUser(currentUser);
+      } catch (error) {
+        console.error('Auth check error:', error);
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
     };
     checkUser();
   }, []);
