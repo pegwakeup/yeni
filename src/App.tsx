@@ -84,6 +84,7 @@ function App() {
         <Router>
           <ThemeProvider>
             <LanguageProvider>
+              <AuthProvider>
               <PrivacyTermsProvider>
                 <ScrollToTop />
                 <CookieConsent />
@@ -160,11 +161,7 @@ function App() {
                     {/* Platform routes - freelancer & employer */}
                     <Route
                       path="/platform/*"
-                      element={
-                        <AuthProvider>
-                          <PlatformRoutes />
-                        </AuthProvider>
-                      }
+                      element={<PlatformRoutes />}
                     />
 
                     {/* Legacy routes - redirect to Turkish */}
@@ -187,6 +184,7 @@ function App() {
                 </Suspense>
               </div>
               </PrivacyTermsProvider>
+              </AuthProvider>
             </LanguageProvider>
           </ThemeProvider>
         </Router>

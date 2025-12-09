@@ -1,16 +1,18 @@
 import { useState, useCallback, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   Menu, X, Rocket, Users, ChevronDown, Code2, Palette,
   Globe, BrainCircuit, PaintBucket,
   Target, Monitor, ArrowRight, MessageSquare, FileText, Sun, Moon,
-  ShoppingCart, Box, Sparkles, Calendar, ShieldCheck
+  ShoppingCart, Box, Sparkles, Calendar, ShieldCheck, LogIn, UserPlus, LogOut, User, LayoutDashboard
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../contexts/ThemeContext';
 import { useTranslation } from '../hooks/useTranslation';
 import { getRouteForLanguage } from '../contexts/LanguageContext';
 import { CalendlyModal } from './modals/CalendlyModal';
+import { useAuth } from '../features/platform/context/AuthContext';
+import { PLATFORM_ROUTES } from '../features/platform/config';
 
 const getDigitAllServices = (t: (key: string) => string, lang: string) => [
   { icon: Monitor, label: t('service.webDesign'), path: getRouteForLanguage('/hizmetler/web-tasarim', lang as 'tr' | 'en') },
@@ -102,11 +104,25 @@ const Navbar = () => {
   const [mobileServicesOpen, setMobileServicesOpen] = useState(false);
   const [mobileCorporateOpen, setMobileCorporateOpen] = useState(false);
   const [isCalendlyOpen, setIsCalendlyOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
   const { language, toggleLanguage, t } = useTranslation();
+  const { isAuthenticated, profile, signOut, userType } = useAuth();
 
   const digitAllServices = getDigitAllServices(t, language);
+
+  const handleSignOut = async () => {
+    await signOut();
+    setIsUserMenuOpen(false);
+    navigate('/');
+  };
+
+  const getDashboardRoute = () => {
+    if (userType === 'employer') return PLATFORM_ROUTES.EMPLOYER_DASHBOARD;
+    return PLATFORM_ROUTES.FREELANCER_DASHBOARD;
+  };
 
   const handleScroll = useCallback(() => {
     const scrolled = window.scrollY > 50;
@@ -526,12 +542,93 @@ const Navbar = () => {
                 )}
               </AnimatePresence>
             </motion.button>
-            <ActionButton href={getRouteForLanguage('/project-request', language)} icon={Rocket} primary isLink>
-              {t('nav.getQuote')}
-            </ActionButton>
-            <ActionButton href={getRouteForLanguage('/join', language)} icon={Users} onClick={scrollToTop} isLink>
-              {t('nav.joinUs')}
-            </ActionButton>
+            
+            {/* Auth Buttons - Desktop */}
+            {isAuthenticated && profile ? (
+              /* Logged In: User Menu */
+              <div className="relative">
+                <motion.button
+                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${isDarkHero ? 'hover:bg-white/10' : 'hover:bg-slate-100 dark:hover:bg-white/10'}`}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-r from-primary to-purple-600 flex items-center justify-center text-white font-medium text-sm">
+                    {profile.full_name?.charAt(0) || 'U'}
+                  </div>
+                  <span className={`text-sm font-medium hidden lg:block ${isDarkHero ? 'text-white' : 'text-slate-700 dark:text-white'}`}>
+                    {profile.full_name?.split(' ')[0] || t('nav.myAccount')}
+                  </span>
+                  <ChevronDown className={`w-4 h-4 ${isDarkHero ? 'text-gray-400' : 'text-slate-500 dark:text-gray-400'} transition-transform ${isUserMenuOpen ? 'rotate-180' : ''}`} />
+                </motion.button>
+
+                <AnimatePresence>
+                  {isUserMenuOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-slate-200 dark:border-gray-700 py-2 z-50"
+                    >
+                      {/* User Info */}
+                      <div className="px-4 py-3 border-b border-slate-100 dark:border-gray-700">
+                        <p className="text-sm font-semibold text-slate-900 dark:text-white">{profile.full_name}</p>
+                        <p className="text-xs text-slate-500 dark:text-gray-400">{profile.email}</p>
+                        <span className={`inline-block mt-1 px-2 py-0.5 text-xs font-medium rounded-full ${
+                          userType === 'employer' 
+                            ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
+                            : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                        }`}>
+                          {userType === 'employer' ? 'İşveren' : 'Freelancer'}
+                        </span>
+                      </div>
+                      
+                      {/* Menu Items */}
+                      <div className="py-1">
+                        <Link
+                          to={getDashboardRoute()}
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-700/50 transition-colors"
+                          onClick={() => setIsUserMenuOpen(false)}
+                        >
+                          <LayoutDashboard className="w-4 h-4" />
+                          {t('nav.dashboard')}
+                        </Link>
+                        <Link
+                          to={`${getDashboardRoute()}/profile`}
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 dark:text-gray-300 hover:bg-slate-50 dark:hover:bg-gray-700/50 transition-colors"
+                          onClick={() => setIsUserMenuOpen(false)}
+                        >
+                          <User className="w-4 h-4" />
+                          {t('nav.profile')}
+                        </Link>
+                      </div>
+                      
+                      {/* Logout */}
+                      <div className="border-t border-slate-100 dark:border-gray-700 py-1">
+                        <button
+                          onClick={handleSignOut}
+                          className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                        >
+                          <LogOut className="w-4 h-4" />
+                          {t('nav.logout')}
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            ) : (
+              /* Not Logged In: Login/Register Buttons */
+              <>
+                <ActionButton href={PLATFORM_ROUTES.LOGIN} icon={LogIn} isLink>
+                  {t('nav.login')}
+                </ActionButton>
+                <ActionButton href={PLATFORM_ROUTES.REGISTER} icon={UserPlus} primary isLink>
+                  {t('nav.register')}
+                </ActionButton>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -581,28 +678,67 @@ const Navbar = () => {
           <div className="px-4 py-6 pb-32">
             <div className="space-y-4 max-w-lg mx-auto">
               
-              {/* Quick Action Buttons */}
-              <div className="grid grid-cols-2 gap-3">
-                <Link
-                  to={getRouteForLanguage('/project-request', language)}
-                  className="flex items-center justify-center gap-2 px-4 py-3.5 min-h-[52px] bg-primary text-white rounded-xl active:scale-[0.98] transition-all font-semibold shadow-lg shadow-primary/25"
-                  onClick={() => setIsOpen(false)}
-                >
-                  <Rocket className="w-5 h-5" />
-                  <span>{t('nav.getQuote')}</span>
-                </Link>
-                <Link
-                  to={getRouteForLanguage('/join', language)}
-                  className="flex items-center justify-center gap-2 px-4 py-3.5 min-h-[52px] bg-slate-100 dark:bg-white/10 text-slate-900 dark:text-white rounded-xl active:scale-[0.98] transition-all font-semibold"
-                  onClick={() => {
-                    setIsOpen(false);
-                    scrollToTop();
-                  }}
-                >
-                  <Users className="w-5 h-5" />
-                  <span>{t('nav.joinUs')}</span>
-                </Link>
-              </div>
+              {/* User Info or Auth Buttons - Mobile */}
+              {isAuthenticated && profile ? (
+                /* Logged In User */
+                <div className="rounded-2xl overflow-hidden bg-gradient-to-r from-primary/10 to-purple-500/10 border border-primary/20">
+                  <div className="px-4 py-4 flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-full bg-gradient-to-r from-primary to-purple-600 flex items-center justify-center text-white font-bold text-lg">
+                      {profile.full_name?.charAt(0) || 'U'}
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-semibold text-slate-900 dark:text-white">{profile.full_name}</p>
+                      <span className={`inline-block mt-0.5 px-2 py-0.5 text-xs font-medium rounded-full ${
+                        userType === 'employer' 
+                          ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
+                          : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                      }`}>
+                        {userType === 'employer' ? 'İşveren' : 'Freelancer'}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 px-3 pb-3">
+                    <Link
+                      to={getDashboardRoute()}
+                      className="flex items-center justify-center gap-2 px-4 py-3 bg-primary text-white rounded-xl font-semibold"
+                      onClick={() => setIsOpen(false)}
+                    >
+                      <LayoutDashboard className="w-5 h-5" />
+                      <span>{t('nav.dashboard')}</span>
+                    </Link>
+                    <button
+                      onClick={() => {
+                        handleSignOut();
+                        setIsOpen(false);
+                      }}
+                      className="flex items-center justify-center gap-2 px-4 py-3 bg-slate-100 dark:bg-white/10 text-red-600 dark:text-red-400 rounded-xl font-semibold"
+                    >
+                      <LogOut className="w-5 h-5" />
+                      <span>{t('nav.logout')}</span>
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                /* Not Logged In: Login/Register Buttons */
+                <div className="grid grid-cols-2 gap-3">
+                  <Link
+                    to={PLATFORM_ROUTES.LOGIN}
+                    className="flex items-center justify-center gap-2 px-4 py-3.5 min-h-[52px] bg-slate-100 dark:bg-white/10 text-slate-900 dark:text-white rounded-xl active:scale-[0.98] transition-all font-semibold"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <LogIn className="w-5 h-5" />
+                    <span>{t('nav.login')}</span>
+                  </Link>
+                  <Link
+                    to={PLATFORM_ROUTES.REGISTER}
+                    className="flex items-center justify-center gap-2 px-4 py-3.5 min-h-[52px] bg-primary text-white rounded-xl active:scale-[0.98] transition-all font-semibold shadow-lg shadow-primary/25"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    <UserPlus className="w-5 h-5" />
+                    <span>{t('nav.register')}</span>
+                  </Link>
+                </div>
+              )}
 
               {/* Divider */}
               <div className="h-px bg-slate-200 dark:bg-white/10" />

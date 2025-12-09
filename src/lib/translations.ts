@@ -37,6 +37,30 @@ export const staticTranslations: Record<string, Record<Language, string>> = {
     tr: 'Koyu Tema',
     en: 'Dark Theme'
   },
+  'nav.login': {
+    tr: 'Giriş Yap',
+    en: 'Login'
+  },
+  'nav.register': {
+    tr: 'Kayıt Ol',
+    en: 'Sign Up'
+  },
+  'nav.myAccount': {
+    tr: 'Hesabım',
+    en: 'My Account'
+  },
+  'nav.dashboard': {
+    tr: 'Panel',
+    en: 'Dashboard'
+  },
+  'nav.profile': {
+    tr: 'Profilim',
+    en: 'My Profile'
+  },
+  'nav.logout': {
+    tr: 'Çıkış Yap',
+    en: 'Logout'
+  },
   'home.hero.badge': {
     tr: "Türkiye'nin Yeni Nesil Freelance Platformu",
     en: "Turkey's Next Generation Freelance Platform"
