@@ -16,7 +16,13 @@ const ProjectRequestDetailPage = lazy(() => import('./project-requests/pages/Pro
 const TranslationManager = lazy(() => import('./translations/pages/TranslationManager'));
 const CookieStatsPage = lazy(() => import('./pages/CookieStatsPage'));
 const DigitalAnalysisPage = lazy(() => import('./digital-analysis/pages/DigitalAnalysisPage'));
+
+// AI Admin Pages
 const AIConfigPage = lazy(() => import('./ai-config/pages/AIConfigPage'));
+const AIDashboardPage = lazy(() => import('./ai-config/pages/AIDashboardPage'));
+const AIConversationsPage = lazy(() => import('./ai-config/pages/AIConversationsPage'));
+const AIPlaygroundPage = lazy(() => import('./ai-config/pages/AIPlaygroundPage'));
+const AICostPage = lazy(() => import('./ai-config/pages/AICostPage'));
 
 const AdminRoutes = () => {
   return (
@@ -55,6 +61,10 @@ const AdminRoutes = () => {
 
       {/* AI Config routes */}
       <Route path="/ai-config" element={<AIConfigPage />} />
+      <Route path="/ai-dashboard" element={<AIDashboardPage />} />
+      <Route path="/ai-conversations" element={<AIConversationsPage />} />
+      <Route path="/ai-playground" element={<AIPlaygroundPage />} />
+      <Route path="/ai-costs" element={<AICostPage />} />
 
       {/* Cookie Stats routes */}
       <Route path="/cookie-stats" element={<CookieStatsPage />} />

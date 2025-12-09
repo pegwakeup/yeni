@@ -3,7 +3,8 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FileText, Users, LogOut, X, ChevronLeft, Briefcase,
-  Image, Globe, Cookie, LayoutDashboard, Brain, Bot
+  Image, Globe, Cookie, LayoutDashboard, Brain, Bot,
+  ChevronDown, Settings, MessageSquare, TestTube2, DollarSign, BarChart3
 } from 'lucide-react';
 import { signOut } from '../../../../lib/auth';
 
@@ -16,7 +17,20 @@ interface AdminSidebarProps {
   onToggle: () => void;
 }
 
-const sidebarLinks = [
+interface SubMenuItem {
+  icon: React.ElementType;
+  label: string;
+  href: string;
+}
+
+interface SidebarLink {
+  icon: React.ElementType;
+  label: string;
+  href: string;
+  subItems?: SubMenuItem[];
+}
+
+const sidebarLinks: SidebarLink[] = [
   {
     icon: LayoutDashboard,
     label: 'Dashboard',
@@ -39,8 +53,15 @@ const sidebarLinks = [
   },
   {
     icon: Bot,
-    label: 'DigiBot Ayarları',
-    href: '/admin/ai-config'
+    label: 'DigiBot AI',
+    href: '/admin/ai-dashboard',
+    subItems: [
+      { icon: BarChart3, label: 'Dashboard', href: '/admin/ai-dashboard' },
+      { icon: MessageSquare, label: 'Konuşmalar', href: '/admin/ai-conversations' },
+      { icon: TestTube2, label: 'Playground', href: '/admin/ai-playground' },
+      { icon: DollarSign, label: 'Maliyet', href: '/admin/ai-costs' },
+      { icon: Settings, label: 'Ayarlar', href: '/admin/ai-config' }
+    ]
   },
   {
     icon: FileText,
@@ -68,6 +89,19 @@ const AdminSidebar = ({ isOpen, onToggle }: AdminSidebarProps) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isHovered, setIsHovered] = useState(false);
+  const [expandedMenu, setExpandedMenu] = useState<string | null>(null);
+
+  // Auto-expand menu if current path is in sub-items
+  useEffect(() => {
+    sidebarLinks.forEach(link => {
+      if (link.subItems) {
+        const isInSubMenu = link.subItems.some(sub => location.pathname === sub.href);
+        if (isInSubMenu) {
+          setExpandedMenu(link.label);
+        }
+      }
+    });
+  }, [location.pathname]);
 
   const handleLogout = async () => {
     try {
@@ -76,6 +110,17 @@ const AdminSidebar = ({ isOpen, onToggle }: AdminSidebarProps) => {
     } catch (error) {
       console.error('Çıkış yapılırken hata:', error);
     }
+  };
+
+  const toggleSubMenu = (label: string) => {
+    setExpandedMenu(expandedMenu === label ? null : label);
+  };
+
+  const isMenuActive = (link: SidebarLink) => {
+    if (link.subItems) {
+      return link.subItems.some(sub => location.pathname === sub.href);
+    }
+    return location.pathname === link.href;
   };
 
   useEffect(() => {
@@ -137,52 +182,148 @@ const AdminSidebar = ({ isOpen, onToggle }: AdminSidebarProps) => {
         <nav className="relative flex-1 p-4 space-y-2 overflow-y-auto">
           {sidebarLinks.map((link) => {
             const Icon = link.icon;
-            const isActive = location.pathname === link.href;
+            const isActive = isMenuActive(link);
+            const hasSubItems = link.subItems && link.subItems.length > 0;
+            const isExpanded = expandedMenu === link.label;
             
             return (
-              <Link
-                key={link.href}
-                to={link.href}
-                className="group flex items-center rounded-xl transition-all overflow-hidden relative"
-              >
-                {/* Active Indicator */}
-                {isActive && (
-                  <motion.div
-                    layoutId="activeIndicator"
-                    className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-[calc(100%-16px)] bg-primary rounded-r-full"
-                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                  />
+              <div key={link.href}>
+                {hasSubItems ? (
+                  // Menu with sub-items
+                  <button
+                    onClick={() => toggleSubMenu(link.label)}
+                    className="w-full group flex items-center rounded-xl transition-all overflow-hidden relative"
+                  >
+                    {/* Active Indicator */}
+                    {isActive && (
+                      <motion.div
+                        layoutId="activeIndicator"
+                        className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-[calc(100%-16px)] bg-primary rounded-r-full"
+                        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                      />
+                    )}
+
+                    {/* Icon Container */}
+                    <div className="flex-shrink-0 w-[72px] h-[72px] p-2">
+                      <div 
+                        className={`
+                          w-full h-full rounded-xl flex items-center justify-center transition-all duration-200
+                          ${isActive 
+                            ? 'bg-primary/20 text-primary' 
+                            : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-gray-400 group-hover:bg-slate-200 dark:group-hover:bg-white/10 group-hover:text-slate-900 dark:group-hover:text-white'
+                          }
+                        `}
+                      >
+                        <Icon className="w-6 h-6" />
+                      </div>
+                    </div>
+                    
+                    {/* Label */}
+                    <motion.span
+                      animate={{
+                        opacity: isOpen ? 1 : 0,
+                        width: isOpen ? 'auto' : 0,
+                      }}
+                      transition={{ duration: 0.2 }}
+                      className={`text-sm font-medium whitespace-nowrap overflow-hidden flex-1 text-left ${
+                        isActive ? 'text-slate-900 dark:text-white' : 'text-slate-600 dark:text-gray-400 group-hover:text-slate-900 dark:group-hover:text-white'
+                      }`}
+                    >
+                      {link.label}
+                    </motion.span>
+
+                    {/* Chevron */}
+                    {isOpen && (
+                      <motion.div
+                        animate={{ rotate: isExpanded ? 180 : 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="pr-4"
+                      >
+                        <ChevronDown className={`w-4 h-4 ${isActive ? 'text-primary' : 'text-slate-400'}`} />
+                      </motion.div>
+                    )}
+                  </button>
+                ) : (
+                  // Regular menu item
+                  <Link
+                    to={link.href}
+                    className="group flex items-center rounded-xl transition-all overflow-hidden relative"
+                  >
+                    {/* Active Indicator */}
+                    {isActive && (
+                      <motion.div
+                        layoutId="activeIndicator"
+                        className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-[calc(100%-16px)] bg-primary rounded-r-full"
+                        transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                      />
+                    )}
+
+                    {/* Icon Container */}
+                    <div className="flex-shrink-0 w-[72px] h-[72px] p-2">
+                      <div 
+                        className={`
+                          w-full h-full rounded-xl flex items-center justify-center transition-all duration-200
+                          ${isActive 
+                            ? 'bg-primary/20 text-primary' 
+                            : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-gray-400 group-hover:bg-slate-200 dark:group-hover:bg-white/10 group-hover:text-slate-900 dark:group-hover:text-white'
+                          }
+                        `}
+                      >
+                        <Icon className="w-6 h-6" />
+                      </div>
+                    </div>
+                    
+                    {/* Label */}
+                    <motion.span
+                      animate={{
+                        opacity: isOpen ? 1 : 0,
+                        width: isOpen ? 'auto' : 0,
+                      }}
+                      transition={{ duration: 0.2 }}
+                      className={`text-sm font-medium whitespace-nowrap overflow-hidden pr-4 ${
+                        isActive ? 'text-slate-900 dark:text-white' : 'text-slate-600 dark:text-gray-400 group-hover:text-slate-900 dark:group-hover:text-white'
+                      }`}
+                    >
+                      {link.label}
+                    </motion.span>
+                  </Link>
                 )}
 
-                {/* Icon Container */}
-                <div className="flex-shrink-0 w-[72px] h-[72px] p-2">
-                  <div 
-                    className={`
-                      w-full h-full rounded-xl flex items-center justify-center transition-all duration-200
-                      ${isActive 
-                        ? 'bg-primary/20 text-primary' 
-                        : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-gray-400 group-hover:bg-slate-200 dark:group-hover:bg-white/10 group-hover:text-slate-900 dark:group-hover:text-white'
-                      }
-                    `}
-                  >
-                    <Icon className="w-6 h-6" />
-                  </div>
-                </div>
-                
-                {/* Label */}
-                <motion.span
-                  animate={{
-                    opacity: isOpen ? 1 : 0,
-                    width: isOpen ? 'auto' : 0,
-                  }}
-                  transition={{ duration: 0.2 }}
-                  className={`text-sm font-medium whitespace-nowrap overflow-hidden pr-4 ${
-                    isActive ? 'text-slate-900 dark:text-white' : 'text-slate-600 dark:text-gray-400 group-hover:text-slate-900 dark:group-hover:text-white'
-                  }`}
-                >
-                  {link.label}
-                </motion.span>
-              </Link>
+                {/* Sub-menu items */}
+                {hasSubItems && isOpen && (
+                  <AnimatePresence>
+                    {isExpanded && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="overflow-hidden ml-[28px] border-l-2 border-slate-200 dark:border-white/10"
+                      >
+                        {link.subItems?.map((subItem) => {
+                          const SubIcon = subItem.icon;
+                          const isSubActive = location.pathname === subItem.href;
+                          
+                          return (
+                            <Link
+                              key={subItem.href}
+                              to={subItem.href}
+                              className={`flex items-center gap-3 py-2.5 px-4 ml-4 my-1 rounded-lg transition-all ${
+                                isSubActive
+                                  ? 'bg-primary/10 text-primary'
+                                  : 'text-slate-600 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white'
+                              }`}
+                            >
+                              <SubIcon className="w-4 h-4" />
+                              <span className="text-sm font-medium">{subItem.label}</span>
+                            </Link>
+                          );
+                        })}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                )}
+              </div>
             );
           })}
         </nav>
@@ -251,36 +392,105 @@ const AdminSidebar = ({ isOpen, onToggle }: AdminSidebarProps) => {
                 <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
                   {sidebarLinks.map((link) => {
                     const Icon = link.icon;
-                    const isActive = location.pathname === link.href;
+                    const isActive = isMenuActive(link);
+                    const hasSubItems = link.subItems && link.subItems.length > 0;
+                    const isExpanded = expandedMenu === link.label;
                     
                     return (
-                      <Link
-                        key={link.href}
-                        to={link.href}
-                        onClick={onToggle}
-                        className="group flex items-center space-x-3 p-4 rounded-xl transition-all relative"
-                      >
-                        {/* Active Indicator */}
-                        {isActive && (
-                          <motion.div
-                            layoutId="mobileActiveIndicator"
-                            className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-[calc(100%-16px)] bg-primary rounded-r-full"
-                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                          />
+                      <div key={link.href}>
+                        {hasSubItems ? (
+                          <>
+                            <button
+                              onClick={() => toggleSubMenu(link.label)}
+                              className="w-full group flex items-center space-x-3 p-4 rounded-xl transition-all relative"
+                            >
+                              {isActive && (
+                                <motion.div
+                                  layoutId="mobileActiveIndicator"
+                                  className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-[calc(100%-16px)] bg-primary rounded-r-full"
+                                  transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                                />
+                              )}
+                              <div className={`w-[72px] h-[72px] rounded-xl flex items-center justify-center transition-all duration-200 ${
+                                isActive 
+                                  ? 'bg-primary/20 text-primary' 
+                                  : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-gray-400 group-hover:bg-slate-200 dark:group-hover:bg-white/10 group-hover:text-slate-900 dark:group-hover:text-white'
+                              }`}>
+                                <Icon className="w-6 h-6" />
+                              </div>
+                              <span className={`text-base font-medium flex-1 text-left ${
+                                isActive ? 'text-slate-900 dark:text-white' : 'text-slate-600 dark:text-gray-400 group-hover:text-slate-900 dark:group-hover:text-white'
+                              }`}>
+                                {link.label}
+                              </span>
+                              <motion.div
+                                animate={{ rotate: isExpanded ? 180 : 0 }}
+                                transition={{ duration: 0.2 }}
+                              >
+                                <ChevronDown className={`w-5 h-5 ${isActive ? 'text-primary' : 'text-slate-400'}`} />
+                              </motion.div>
+                            </button>
+                            <AnimatePresence>
+                              {isExpanded && (
+                                <motion.div
+                                  initial={{ height: 0, opacity: 0 }}
+                                  animate={{ height: 'auto', opacity: 1 }}
+                                  exit={{ height: 0, opacity: 0 }}
+                                  transition={{ duration: 0.2 }}
+                                  className="overflow-hidden ml-[28px] border-l-2 border-slate-200 dark:border-white/10"
+                                >
+                                  {link.subItems?.map((subItem) => {
+                                    const SubIcon = subItem.icon;
+                                    const isSubActive = location.pathname === subItem.href;
+                                    
+                                    return (
+                                      <Link
+                                        key={subItem.href}
+                                        to={subItem.href}
+                                        onClick={onToggle}
+                                        className={`flex items-center gap-3 py-3 px-4 ml-4 my-1 rounded-lg transition-all ${
+                                          isSubActive
+                                            ? 'bg-primary/10 text-primary'
+                                            : 'text-slate-600 dark:text-gray-400 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white'
+                                        }`}
+                                      >
+                                        <SubIcon className="w-5 h-5" />
+                                        <span className="text-sm font-medium">{subItem.label}</span>
+                                      </Link>
+                                    );
+                                  })}
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </>
+                        ) : (
+                          <Link
+                            to={link.href}
+                            onClick={onToggle}
+                            className="group flex items-center space-x-3 p-4 rounded-xl transition-all relative"
+                          >
+                            {isActive && (
+                              <motion.div
+                                layoutId="mobileActiveIndicator"
+                                className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-[calc(100%-16px)] bg-primary rounded-r-full"
+                                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                              />
+                            )}
+                            <div className={`w-[72px] h-[72px] rounded-xl flex items-center justify-center transition-all duration-200 ${
+                              isActive 
+                                ? 'bg-primary/20 text-primary' 
+                                : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-gray-400 group-hover:bg-slate-200 dark:group-hover:bg-white/10 group-hover:text-slate-900 dark:group-hover:text-white'
+                            }`}>
+                              <Icon className="w-6 h-6" />
+                            </div>
+                            <span className={`text-base font-medium ${
+                              isActive ? 'text-slate-900 dark:text-white' : 'text-slate-600 dark:text-gray-400 group-hover:text-slate-900 dark:group-hover:text-white'
+                            }`}>
+                              {link.label}
+                            </span>
+                          </Link>
                         )}
-                        <div className={`w-[72px] h-[72px] rounded-xl flex items-center justify-center transition-all duration-200 ${
-                          isActive 
-                            ? 'bg-primary/20 text-primary' 
-                            : 'bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-gray-400 group-hover:bg-slate-200 dark:group-hover:bg-white/10 group-hover:text-slate-900 dark:group-hover:text-white'
-                        }`}>
-                          <Icon className="w-6 h-6" />
-                        </div>
-                        <span className={`text-base font-medium ${
-                          isActive ? 'text-slate-900 dark:text-white' : 'text-slate-600 dark:text-gray-400 group-hover:text-slate-900 dark:group-hover:text-white'
-                        }`}>
-                          {link.label}
-                        </span>
-                      </Link>
+                      </div>
                     );
                   })}
                 </nav>
