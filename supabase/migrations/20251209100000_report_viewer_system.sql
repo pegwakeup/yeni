@@ -1,7 +1,24 @@
 -- Report Viewer System Migration
 -- Extends digital_analysis_reports for public viewing with AI chatbot
 
--- Add new columns for public viewing
+-- First, check if digital_analysis_reports table exists, if not create it
+CREATE TABLE IF NOT EXISTS digital_analysis_reports (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  company_name TEXT NOT NULL,
+  company_website TEXT,
+  contact_email TEXT,
+  contact_name TEXT,
+  industry TEXT,
+  status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'processing', 'completed', 'failed')),
+  digital_score INTEGER,
+  analysis_result JSONB,
+  webhook_id TEXT,
+  webhook_response JSONB,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Add new columns for public viewing (IF NOT EXISTS handles already existing columns)
 ALTER TABLE digital_analysis_reports
 ADD COLUMN IF NOT EXISTS public_id UUID DEFAULT gen_random_uuid() UNIQUE,
 ADD COLUMN IF NOT EXISTS is_public BOOLEAN DEFAULT false,
@@ -17,8 +34,11 @@ CREATE INDEX IF NOT EXISTS idx_digital_analysis_reports_public_id
 ON digital_analysis_reports(public_id) 
 WHERE is_public = true;
 
+-- Drop and recreate report_viewers table to ensure correct schema
+DROP TABLE IF EXISTS report_viewers CASCADE;
+
 -- Report Viewers table - tracks who viewed the report
-CREATE TABLE IF NOT EXISTS report_viewers (
+CREATE TABLE report_viewers (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   report_id UUID REFERENCES digital_analysis_reports(id) ON DELETE CASCADE,
   viewer_email TEXT NOT NULL,
@@ -32,12 +52,15 @@ CREATE TABLE IF NOT EXISTS report_viewers (
   last_access_at TIMESTAMPTZ
 );
 
-CREATE INDEX IF NOT EXISTS idx_report_viewers_report_id ON report_viewers(report_id);
-CREATE INDEX IF NOT EXISTS idx_report_viewers_email ON report_viewers(viewer_email);
-CREATE INDEX IF NOT EXISTS idx_report_viewers_access_token ON report_viewers(access_token);
+CREATE INDEX idx_report_viewers_report_id ON report_viewers(report_id);
+CREATE INDEX idx_report_viewers_email ON report_viewers(viewer_email);
+CREATE INDEX idx_report_viewers_access_token ON report_viewers(access_token);
+
+-- Drop and recreate report_chat_conversations table
+DROP TABLE IF EXISTS report_chat_conversations CASCADE;
 
 -- Report Chat Conversations table - stores chat history with DigiBot
-CREATE TABLE IF NOT EXISTS report_chat_conversations (
+CREATE TABLE report_chat_conversations (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   report_id UUID REFERENCES digital_analysis_reports(id) ON DELETE CASCADE,
   viewer_id UUID REFERENCES report_viewers(id) ON DELETE SET NULL,
@@ -48,11 +71,14 @@ CREATE TABLE IF NOT EXISTS report_chat_conversations (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS idx_report_chat_report_id ON report_chat_conversations(report_id);
-CREATE INDEX IF NOT EXISTS idx_report_chat_session_id ON report_chat_conversations(session_id);
+CREATE INDEX idx_report_chat_report_id ON report_chat_conversations(report_id);
+CREATE INDEX idx_report_chat_session_id ON report_chat_conversations(session_id);
+
+-- Drop and recreate report_analytics table
+DROP TABLE IF EXISTS report_analytics CASCADE;
 
 -- Report Analytics table - tracks detailed analytics
-CREATE TABLE IF NOT EXISTS report_analytics (
+CREATE TABLE report_analytics (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   report_id UUID REFERENCES digital_analysis_reports(id) ON DELETE CASCADE,
   viewer_id UUID REFERENCES report_viewers(id) ON DELETE SET NULL,
@@ -61,8 +87,8 @@ CREATE TABLE IF NOT EXISTS report_analytics (
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS idx_report_analytics_report_id ON report_analytics(report_id);
-CREATE INDEX IF NOT EXISTS idx_report_analytics_event_type ON report_analytics(event_type);
+CREATE INDEX idx_report_analytics_report_id ON report_analytics(report_id);
+CREATE INDEX idx_report_analytics_event_type ON report_analytics(event_type);
 
 -- Enable RLS on new tables
 ALTER TABLE report_viewers ENABLE ROW LEVEL SECURITY;
