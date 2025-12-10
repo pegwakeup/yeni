@@ -740,6 +740,104 @@ export function exportAnalysisReportToPDF(
     `;
   }
 
+  // Build UI/UX Review Section
+  let uiuxHtml = '';
+  if (analysisResult.ui_ux_review) {
+    const ux = analysisResult.ui_ux_review;
+    const categories = [
+      { key: 'visual_design', label: 'Görsel Tasarım', icon: '🎨' },
+      { key: 'navigation', label: 'Navigasyon', icon: '🧭' },
+      { key: 'mobile_experience', label: 'Mobil Deneyim', icon: '📱' },
+      { key: 'accessibility', label: 'Erişilebilirlik', icon: '♿' },
+      { key: 'cta_effectiveness', label: 'CTA Etkinliği', icon: '🎯' }
+    ];
+    
+    uiuxHtml = `
+      <div class="section page-break">
+        <div class="section-header">
+          <span class="section-icon">🖼️</span>
+          <h2 class="section-title">UI/UX İnceleme</h2>
+        </div>
+        
+        <!-- Two Column Layout -->
+        <div class="uiux-layout">
+          <!-- Left: Analysis -->
+          <div class="uiux-analysis">
+            <!-- Overall Assessment -->
+            <div class="uiux-overall">
+              <div class="uiux-overall-icon">👁️</div>
+              <div class="uiux-overall-content">
+                <div class="uiux-overall-title">Genel Değerlendirme</div>
+                <div class="uiux-overall-text">${escapeHtml(ux.overall_assessment)}</div>
+              </div>
+            </div>
+            
+            <!-- Score Cards -->
+            <div class="uiux-scores">
+              ${categories.map(cat => {
+                const data = ux[cat.key as keyof typeof ux] as { score: number; feedback: string };
+                if (!data || typeof data !== 'object') return '';
+                const colors = getScoreColor(data.score);
+                return `
+                  <div class="uiux-score-card" style="background: ${colors.bg}; border-color: ${colors.border};">
+                    <div class="uiux-score-header">
+                      <span class="uiux-score-icon">${cat.icon}</span>
+                      <span class="uiux-score-label">${cat.label}</span>
+                    </div>
+                    <div class="uiux-score-value" style="color: ${colors.text};">${data.score}<span>/100</span></div>
+                    <div class="uiux-score-bar">
+                      <div class="uiux-score-bar-fill" style="width: ${data.score}%; background: ${colors.ring};"></div>
+                    </div>
+                    <div class="uiux-score-feedback">${escapeHtml(data.feedback)}</div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+          
+          <!-- Right: Screenshot -->
+          <div class="uiux-screenshot">
+            <div class="browser-frame">
+              <div class="browser-header">
+                <div class="browser-dots">
+                  <span class="dot red"></span>
+                  <span class="dot yellow"></span>
+                  <span class="dot green"></span>
+                </div>
+                <div class="browser-url">${escapeHtml(websiteUrl)}</div>
+              </div>
+              <div class="browser-content">
+                ${ux.screenshot_url ? `<img src="${escapeHtml(ux.screenshot_url)}" alt="Website Screenshot" onerror="this.style.display='none'" />` : ''}
+                <div class="screenshot-placeholder">
+                  <span>🌐</span>
+                  <p>Ekran Görüntüsü</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Improvement Suggestions -->
+        ${ux.improvement_suggestions && ux.improvement_suggestions.length > 0 ? `
+          <div class="uiux-suggestions">
+            <div class="uiux-suggestions-header">
+              <span>💡</span>
+              <span>İyileştirme Önerileri</span>
+            </div>
+            <div class="uiux-suggestions-grid">
+              ${ux.improvement_suggestions.map((s: string, i: number) => `
+                <div class="uiux-suggestion-item">
+                  <span class="uiux-suggestion-num">${i + 1}</span>
+                  <span class="uiux-suggestion-text">${escapeHtml(s)}</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
+      </div>
+    `;
+  }
+
   // Build Pain Points Section
   let painPointsHtml = '';
   if (analysisResult.pain_points && analysisResult.pain_points.length > 0) {
@@ -1606,6 +1704,243 @@ export function exportAnalysisReportToPDF(
           color: #5FC8DA;
         }
         
+        /* UI/UX Review Styles */
+        .uiux-layout {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 24px;
+          margin-bottom: 20px;
+        }
+        
+        .uiux-analysis {
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+        }
+        
+        .uiux-overall {
+          background: linear-gradient(135deg, #f3e8ff 0%, #e0e7ff 100%);
+          border: 1px solid #c4b5fd;
+          border-radius: 12px;
+          padding: 16px;
+          display: flex;
+          gap: 12px;
+        }
+        
+        .uiux-overall-icon {
+          width: 32px;
+          height: 32px;
+          background: rgba(139, 92, 246, 0.2);
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 16px;
+          flex-shrink: 0;
+        }
+        
+        .uiux-overall-title {
+          font-size: 11px;
+          font-weight: 600;
+          color: #6b21a8;
+          margin-bottom: 4px;
+        }
+        
+        .uiux-overall-text {
+          font-size: 11px;
+          color: #7c3aed;
+          line-height: 1.5;
+        }
+        
+        .uiux-scores {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+        
+        .uiux-score-card {
+          border: 1px solid #e2e8f0;
+          border-radius: 10px;
+          padding: 12px;
+        }
+        
+        .uiux-score-header {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          margin-bottom: 6px;
+        }
+        
+        .uiux-score-icon {
+          font-size: 14px;
+        }
+        
+        .uiux-score-label {
+          font-size: 11px;
+          font-weight: 500;
+          color: #64748b;
+        }
+        
+        .uiux-score-value {
+          font-size: 22px;
+          font-weight: 700;
+          margin-bottom: 6px;
+        }
+        
+        .uiux-score-value span {
+          font-size: 12px;
+          font-weight: 400;
+          color: #94a3b8;
+        }
+        
+        .uiux-score-bar {
+          height: 4px;
+          background: #e2e8f0;
+          border-radius: 2px;
+          margin-bottom: 8px;
+          overflow: hidden;
+        }
+        
+        .uiux-score-bar-fill {
+          height: 100%;
+          border-radius: 2px;
+        }
+        
+        .uiux-score-feedback {
+          font-size: 10px;
+          color: #64748b;
+          line-height: 1.4;
+        }
+        
+        .uiux-screenshot {
+          position: relative;
+        }
+        
+        .browser-frame {
+          border: 2px solid #e2e8f0;
+          border-radius: 12px;
+          overflow: hidden;
+          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        .browser-header {
+          background: #f1f5f9;
+          padding: 8px 12px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .browser-dots {
+          display: flex;
+          gap: 4px;
+        }
+        
+        .browser-dots .dot {
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+        }
+        
+        .browser-dots .dot.red { background: #f87171; }
+        .browser-dots .dot.yellow { background: #fbbf24; }
+        .browser-dots .dot.green { background: #4ade80; }
+        
+        .browser-url {
+          flex: 1;
+          background: white;
+          border-radius: 4px;
+          padding: 4px 10px;
+          font-size: 10px;
+          color: #64748b;
+          margin-left: 12px;
+        }
+        
+        .browser-content {
+          background: #f8fafc;
+          min-height: 300px;
+          position: relative;
+        }
+        
+        .browser-content img {
+          width: 100%;
+          height: auto;
+          display: block;
+        }
+        
+        .screenshot-placeholder {
+          position: absolute;
+          inset: 0;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          color: #94a3b8;
+        }
+        
+        .screenshot-placeholder span {
+          font-size: 48px;
+          margin-bottom: 12px;
+        }
+        
+        .screenshot-placeholder p {
+          font-size: 14px;
+          font-weight: 500;
+        }
+        
+        .uiux-suggestions {
+          background: linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%);
+          border: 1px solid #93c5fd;
+          border-radius: 12px;
+          padding: 16px;
+        }
+        
+        .uiux-suggestions-header {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 12px;
+          font-weight: 600;
+          color: #1e40af;
+          margin-bottom: 12px;
+        }
+        
+        .uiux-suggestions-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 8px;
+        }
+        
+        .uiux-suggestion-item {
+          display: flex;
+          align-items: flex-start;
+          gap: 8px;
+          background: rgba(255, 255, 255, 0.6);
+          padding: 8px 10px;
+          border-radius: 8px;
+        }
+        
+        .uiux-suggestion-num {
+          width: 20px;
+          height: 20px;
+          background: rgba(59, 130, 246, 0.2);
+          color: #2563eb;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 10px;
+          font-weight: 700;
+          flex-shrink: 0;
+        }
+        
+        .uiux-suggestion-text {
+          font-size: 10px;
+          color: #1e40af;
+          line-height: 1.4;
+        }
+        
         /* Print Styles */
         @media print {
           body {
@@ -1623,6 +1958,10 @@ export function exportAnalysisReportToPDF(
           
           .section {
             page-break-inside: avoid;
+          }
+          
+          .uiux-layout {
+            grid-template-columns: 1fr 1fr;
           }
         }
       </style>
@@ -1681,6 +2020,9 @@ export function exportAnalysisReportToPDF(
         
         <!-- Social Media -->
         ${socialMediaHtml}
+        
+        <!-- UI/UX Review -->
+        ${uiuxHtml}
         
         <!-- Pain Points -->
         ${painPointsHtml}

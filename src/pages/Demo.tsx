@@ -50,7 +50,11 @@ import {
   FileSearch,
   ListChecks,
   Download,
-  History
+  History,
+  Layout,
+  Eye,
+  MousePointer,
+  Accessibility
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { generateDigiBotResponse } from '../data/unilancerKnowledge';
@@ -112,6 +116,32 @@ interface Roadmap {
   description: string;
 }
 
+interface UiUxReview {
+  screenshot_url: string;
+  overall_assessment: string;
+  visual_design: {
+    score: number;
+    feedback: string;
+  };
+  navigation: {
+    score: number;
+    feedback: string;
+  };
+  mobile_experience: {
+    score: number;
+    feedback: string;
+  };
+  accessibility: {
+    score: number;
+    feedback: string;
+  };
+  cta_effectiveness: {
+    score: number;
+    feedback: string;
+  };
+  improvement_suggestions: string[];
+}
+
 interface AnalysisResult {
   id: string;
   company_name: string;
@@ -140,6 +170,7 @@ interface AnalysisResult {
   opportunities?: Opportunity[];
   pain_points?: PainPoint[];
   roadmap?: Roadmap[];
+  ui_ux_review?: UiUxReview;
   recommendations: {
     title: string;
     description: string;
@@ -290,6 +321,44 @@ const generateMockAnalysis = (companyName: string, websiteUrl: string, email: st
         description: "B2B müşteri portalı, online sipariş sistemi, stok entegrasyonu. Dijital satış kanalının açılması."
       }
     ],
+    
+    // UI/UX İnceleme
+    ui_ux_review: {
+      screenshot_url: websiteUrl ? `https://api.microlink.io/?url=${encodeURIComponent(websiteUrl.startsWith('http') ? websiteUrl : 'https://' + websiteUrl)}&screenshot=true&meta=false&embed=screenshot.url` : '',
+      overall_assessment: "Web sitesi tasarımı 2010'lu yılların başındaki teknolojileri yansıtmaktadır. Modern web standartlarının çok gerisinde kalan tasarım, kullanıcı deneyimini olumsuz etkilemektedir. Tek sayfalık basit yapı, görsel hiyerarşi eksikliği ve mobil uyumsuzluk ana sorunlardır.",
+      visual_design: {
+        score: 35,
+        feedback: "Görsel tasarım oldukça eski ve kurumsal kimliği yansıtmıyor. Renk paleti tutarsız, tipografi hiyerarşisi yok. Logo kalitesi düşük, görseller optimize edilmemiş. Modern tasarım trendlerinden (gradient, shadow, micro-interactions) hiçbiri kullanılmamış."
+      },
+      navigation: {
+        score: 40,
+        feedback: "Navigasyon menüsü basit ama yetersiz. Tek sayfalık yapıda kullanıcı yönlendirmesi zayıf. Breadcrumb yok, arama fonksiyonu yok. Mobilde hamburger menü düzgün çalışmıyor. Footer'da bağlantılar eksik."
+      },
+      mobile_experience: {
+        score: 30,
+        feedback: "Mobil deneyim kritik seviyede kötü. Responsive tasarım tam uygulanmamış, metin boyutları çok küçük, dokunmatik hedefler yetersiz. Yatay scroll sorunu var. Mobil kullanıcılar için tamamen yeniden tasarım gerekli."
+      },
+      accessibility: {
+        score: 25,
+        feedback: "Erişilebilirlik standartları karşılanmıyor. Alt etiketleri eksik, kontrast oranları yetersiz, klavye navigasyonu çalışmıyor. WCAG 2.1 uyumluluğu sağlanmalı. Görme engelli kullanıcılar için ekran okuyucu desteği yok."
+      },
+      cta_effectiveness: {
+        score: 30,
+        feedback: "Call-to-action butonları belirsiz ve etkisiz. 'İletişim' butonu var ancak öne çıkmıyor. Teklif al, fiyat sorgula gibi kritik aksiyonlar yok. Kullanıcıyı dönüşüme yönlendiren bir akış kurulmamış."
+      },
+      improvement_suggestions: [
+        "Modern, responsive tasarıma geçiş yapılmalı (Tailwind CSS veya Bootstrap 5)",
+        "Görsel hiyerarşi oluşturulmalı - başlıklar, alt başlıklar net ayrılmalı",
+        "Hero section eklenmeli - ana değer önerisi net gösterilmeli",
+        "CTA butonları belirginleştirilmeli - kontrast renkler kullanılmalı",
+        "Mobil-first yaklaşımla yeniden tasarım yapılmalı",
+        "Lazy loading ile görsel yükleme optimize edilmeli",
+        "Micro-interactions eklenmeli (hover efektleri, animasyonlar)",
+        "Whitespace kullanımı artırılmalı - daha nefes alan tasarım",
+        "Güven rozetleri eklenmeli (SSL, müşteri logoları, sertifikalar)",
+        "Footer zenginleştirilmeli (sosyal medya, hızlı bağlantılar, iletişim)"
+      ]
+    },
     
     scores: {
       web_presence: webScore,
@@ -1758,6 +1827,194 @@ digiBot bu rapora tam erişime sahiptir ve tüm detayları bilmektedir.
                                     {analysisResult.social_media.ai_analysis}
                                   </p>
                                 </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* UI/UX İnceleme Section */}
+                      {analysisResult.ui_ux_review && (
+                        <div className="bg-white dark:bg-dark-card rounded-xl border border-slate-200 dark:border-slate-700 p-5">
+                          <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                            <Layout className="w-4 h-4 text-primary" />
+                            UI/UX İnceleme
+                          </h3>
+                          
+                          {/* Main Layout - Screenshot Right, Analysis Left */}
+                          <div className="grid lg:grid-cols-2 gap-5">
+                            {/* Left Side - Analysis */}
+                            <div className="space-y-4 order-2 lg:order-1">
+                              {/* Overall Assessment */}
+                              <div className="p-4 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-xl border border-purple-200 dark:border-purple-800/50">
+                                <div className="flex items-start gap-3">
+                                  <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center flex-shrink-0">
+                                    <Eye className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                                  </div>
+                                  <div>
+                                    <p className="text-xs font-semibold text-purple-800 dark:text-purple-300 mb-1">Genel Değerlendirme</p>
+                                    <p className="text-xs text-purple-700 dark:text-purple-400 leading-relaxed">
+                                      {analysisResult.ui_ux_review.overall_assessment}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              {/* Score Cards Grid */}
+                              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                {[
+                                  { key: 'visual_design', label: 'Görsel Tasarım', icon: Palette, data: analysisResult.ui_ux_review.visual_design },
+                                  { key: 'navigation', label: 'Navigasyon', icon: MousePointer, data: analysisResult.ui_ux_review.navigation },
+                                  { key: 'mobile_experience', label: 'Mobil Deneyim', icon: Smartphone, data: analysisResult.ui_ux_review.mobile_experience },
+                                  { key: 'accessibility', label: 'Erişilebilirlik', icon: Accessibility, data: analysisResult.ui_ux_review.accessibility },
+                                  { key: 'cta_effectiveness', label: 'CTA Etkinliği', icon: Target, data: analysisResult.ui_ux_review.cta_effectiveness }
+                                ].map(({ key, label, icon: Icon, data }) => (
+                                  <div 
+                                    key={key}
+                                    className={`p-3 rounded-xl border cursor-pointer transition-all hover:shadow-md ${
+                                      data.score >= 70 ? 'bg-emerald-50 border-emerald-200 dark:bg-emerald-900/20 dark:border-emerald-800' :
+                                      data.score >= 50 ? 'bg-amber-50 border-amber-200 dark:bg-amber-900/20 dark:border-amber-800' :
+                                      'bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800'
+                                    }`}
+                                    title={data.feedback}
+                                  >
+                                    <div className="flex items-center gap-2 mb-2">
+                                      <Icon className={`w-4 h-4 ${
+                                        data.score >= 70 ? 'text-emerald-600 dark:text-emerald-400' :
+                                        data.score >= 50 ? 'text-amber-600 dark:text-amber-400' :
+                                        'text-red-600 dark:text-red-400'
+                                      }`} />
+                                      <span className="text-[10px] font-medium text-slate-600 dark:text-slate-400">{label}</span>
+                                    </div>
+                                    <div className="flex items-baseline gap-1">
+                                      <span className={`text-xl font-bold ${
+                                        data.score >= 70 ? 'text-emerald-600 dark:text-emerald-400' :
+                                        data.score >= 50 ? 'text-amber-600 dark:text-amber-400' :
+                                        'text-red-600 dark:text-red-400'
+                                      }`}>{data.score}</span>
+                                      <span className="text-[10px] text-slate-400">/100</span>
+                                    </div>
+                                    <div className="mt-2 h-1 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                                      <div 
+                                        className={`h-full rounded-full transition-all ${
+                                          data.score >= 70 ? 'bg-emerald-500' :
+                                          data.score >= 50 ? 'bg-amber-500' :
+                                          'bg-red-500'
+                                        }`}
+                                        style={{ width: `${data.score}%` }}
+                                      />
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                              
+                              {/* Detailed Feedbacks (Expandable) */}
+                              <div className="space-y-2">
+                                {[
+                                  { key: 'visual_design', label: 'Görsel Tasarım', icon: Palette, data: analysisResult.ui_ux_review.visual_design },
+                                  { key: 'navigation', label: 'Navigasyon', icon: MousePointer, data: analysisResult.ui_ux_review.navigation },
+                                  { key: 'mobile_experience', label: 'Mobil Deneyim', icon: Smartphone, data: analysisResult.ui_ux_review.mobile_experience },
+                                  { key: 'accessibility', label: 'Erişilebilirlik', icon: Accessibility, data: analysisResult.ui_ux_review.accessibility },
+                                  { key: 'cta_effectiveness', label: 'CTA Etkinliği', icon: Target, data: analysisResult.ui_ux_review.cta_effectiveness }
+                                ].map(({ key, label, icon: Icon, data }) => (
+                                  <div key={key} className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <Icon className="w-3.5 h-3.5 text-slate-500" />
+                                      <span className="text-xs font-medium text-slate-700 dark:text-slate-300">{label}</span>
+                                      <span className={`ml-auto text-xs font-bold ${
+                                        data.score >= 70 ? 'text-emerald-600' :
+                                        data.score >= 50 ? 'text-amber-600' :
+                                        'text-red-600'
+                                      }`}>{data.score}/100</span>
+                                    </div>
+                                    <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">{data.feedback}</p>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                            
+                            {/* Right Side - Screenshot */}
+                            <div className="order-1 lg:order-2">
+                              <div className="sticky top-4">
+                                {/* Screenshot Container */}
+                                <div className="relative rounded-xl overflow-hidden border-2 border-slate-200 dark:border-slate-700 shadow-lg">
+                                  {/* Browser Header */}
+                                  <div className="bg-slate-100 dark:bg-slate-800 px-4 py-2 flex items-center gap-2 border-b border-slate-200 dark:border-slate-700">
+                                    <div className="flex gap-1.5">
+                                      <div className="w-3 h-3 rounded-full bg-red-400" />
+                                      <div className="w-3 h-3 rounded-full bg-amber-400" />
+                                      <div className="w-3 h-3 rounded-full bg-emerald-400" />
+                                    </div>
+                                    <div className="flex-1 mx-4">
+                                      <div className="bg-white dark:bg-slate-900 rounded-md px-3 py-1 text-[10px] text-slate-500 dark:text-slate-400 truncate">
+                                        {analysisResult.website_url}
+                                      </div>
+                                    </div>
+                                  </div>
+                                  
+                                  {/* Screenshot Image */}
+                                  <div className="relative bg-slate-100 dark:bg-slate-900 aspect-[4/3] overflow-hidden">
+                                    {analysisResult.ui_ux_review.screenshot_url ? (
+                                      <img 
+                                        src={analysisResult.ui_ux_review.screenshot_url}
+                                        alt={`${analysisResult.company_name} web sitesi ekran görüntüsü`}
+                                        className="w-full h-full object-cover object-top"
+                                        onError={(e) => {
+                                          const target = e.target as HTMLImageElement;
+                                          target.style.display = 'none';
+                                          const fallback = target.nextElementSibling as HTMLElement;
+                                          if (fallback) fallback.style.display = 'flex';
+                                        }}
+                                      />
+                                    ) : null}
+                                    {/* Fallback */}
+                                    <div className={`absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 ${analysisResult.ui_ux_review.screenshot_url ? 'hidden' : ''}`}>
+                                      <Globe className="w-12 h-12 text-slate-400 mb-3" />
+                                      <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Ekran Görüntüsü</p>
+                                      <p className="text-xs text-slate-400">{analysisResult.website_url}</p>
+                                    </div>
+                                  </div>
+                                </div>
+                                
+                                {/* Quick Stats Under Screenshot */}
+                                <div className="mt-4 grid grid-cols-2 gap-2">
+                                  <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 text-center">
+                                    <p className={`text-2xl font-bold ${
+                                      analysisResult.scores.user_experience >= 70 ? 'text-emerald-600' :
+                                      analysisResult.scores.user_experience >= 50 ? 'text-amber-600' :
+                                      'text-red-600'
+                                    }`}>{analysisResult.scores.user_experience}</p>
+                                    <p className="text-[10px] text-slate-500 dark:text-slate-400">UX Skoru</p>
+                                  </div>
+                                  <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700 text-center">
+                                    <p className={`text-2xl font-bold ${
+                                      (analysisResult.technical_status?.mobile_score || 0) >= 70 ? 'text-emerald-600' :
+                                      (analysisResult.technical_status?.mobile_score || 0) >= 50 ? 'text-amber-600' :
+                                      'text-red-600'
+                                    }`}>{analysisResult.technical_status?.mobile_score || 0}</p>
+                                    <p className="text-[10px] text-slate-500 dark:text-slate-400">Mobil Skor</p>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {/* Improvement Suggestions */}
+                          {analysisResult.ui_ux_review.improvement_suggestions && analysisResult.ui_ux_review.improvement_suggestions.length > 0 && (
+                            <div className="mt-5 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-xl border border-blue-200 dark:border-blue-800/50">
+                              <div className="flex items-center gap-2 mb-3">
+                                <Lightbulb className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                                <h4 className="text-xs font-semibold text-blue-800 dark:text-blue-300">İyileştirme Önerileri</h4>
+                              </div>
+                              <div className="grid sm:grid-cols-2 gap-2">
+                                {analysisResult.ui_ux_review.improvement_suggestions.map((suggestion, idx) => (
+                                  <div key={idx} className="flex items-start gap-2 p-2 bg-white/60 dark:bg-slate-800/40 rounded-lg">
+                                    <span className="flex-shrink-0 w-5 h-5 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center text-[10px] font-bold text-blue-600 dark:text-blue-400">
+                                      {idx + 1}
+                                    </span>
+                                    <p className="text-[11px] text-blue-700 dark:text-blue-300 leading-relaxed">{suggestion}</p>
+                                  </div>
+                                ))}
                               </div>
                             </div>
                           )}
