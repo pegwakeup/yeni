@@ -303,10 +303,12 @@ const generateMockAnalysis = (companyName: string, websiteUrl: string, email: st
     ],
     
     // UI/UX İnceleme - Sadeleştirilmiş
-    // Screenshot API: https://image.thum.io - ücretsiz, API key gerektirmez
+    // Screenshot API: https://api.apiflash.com - ücretsiz, bekleme süresi destekler
     ui_ux_review: {
-      desktop_screenshot_url: websiteUrl ? `https://image.thum.io/get/width/1280/crop/800/noanimate/${websiteUrl.startsWith('http') ? websiteUrl : 'https://' + websiteUrl}` : '',
-      mobile_screenshot_url: websiteUrl ? `https://image.thum.io/get/width/375/crop/667/viewportWidth/375/noanimate/${websiteUrl.startsWith('http') ? websiteUrl : 'https://' + websiteUrl}` : '',
+      // Masaüstü: 1280x800, 3 saniye bekleme (sayfa tam yüklensin)
+      desktop_screenshot_url: websiteUrl ? `https://api.apiflash.com/v1/urltoimage?access_key=e74dc54152e84a07aa5d04ddf3a0c6e2&url=${encodeURIComponent(websiteUrl.startsWith('http') ? websiteUrl : 'https://' + websiteUrl)}&width=1280&height=800&delay=3&format=jpeg&quality=90` : '',
+      // Mobil: iPhone viewport (375x812), 3 saniye bekleme
+      mobile_screenshot_url: websiteUrl ? `https://api.apiflash.com/v1/urltoimage?access_key=e74dc54152e84a07aa5d04ddf3a0c6e2&url=${encodeURIComponent(websiteUrl.startsWith('http') ? websiteUrl : 'https://' + websiteUrl)}&width=375&height=812&delay=3&format=jpeg&quality=90` : '',
       overall_assessment: "Web sitesi tasarımı eski teknolojileri yansıtmaktadır. Modern web standartlarının gerisinde kalan tasarım, kullanıcı deneyimini olumsuz etkilemektedir.",
       highlights: [
         "Görsel tasarım güncel değil, kurumsal kimlik zayıf",
@@ -1924,13 +1926,13 @@ digiBot bu rapora tam erişime sahiptir ve tüm detayları bilmektedir.
                                     <p className="text-[10px] font-medium text-slate-500 dark:text-slate-400 mb-2 flex items-center gap-1">
                                       <Smartphone className="w-3 h-3" /> Mobil
                                     </p>
-                                    <div className="relative rounded-lg overflow-hidden border-2 border-slate-200 dark:border-slate-700 shadow-md mx-auto" style={{ maxWidth: '120px' }}>
+                                    <div className="relative rounded-2xl overflow-hidden border-4 border-slate-800 dark:border-slate-700 shadow-lg mx-auto bg-slate-800" style={{ width: '100px' }}>
                                       {/* Phone Notch */}
-                                      <div className="bg-slate-800 dark:bg-slate-900 px-2 py-1 flex items-center justify-center">
-                                        <div className="w-12 h-1.5 bg-slate-700 rounded-full" />
+                                      <div className="bg-slate-800 dark:bg-slate-900 px-2 py-1.5 flex items-center justify-center">
+                                        <div className="w-10 h-3 bg-slate-900 rounded-full" />
                                       </div>
-                                      {/* Screenshot */}
-                                      <div className="relative bg-slate-100 dark:bg-slate-900 aspect-[9/16] overflow-hidden">
+                                      {/* Screenshot - iPhone aspect ratio 375:812 ≈ 9:19.5 */}
+                                      <div className="relative bg-white dark:bg-slate-900 overflow-hidden" style={{ aspectRatio: '375/812' }}>
                                         {analysisResult.ui_ux_review.mobile_screenshot_url ? (
                                           <img 
                                             src={analysisResult.ui_ux_review.mobile_screenshot_url}
@@ -1954,6 +1956,10 @@ digiBot bu rapora tam erişime sahiptir ve tüm detayları bilmektedir.
                                           <Smartphone className="w-6 h-6 text-slate-300 dark:text-slate-600 mb-1" />
                                           <p className="text-[8px] text-slate-400">Yükleniyor...</p>
                                         </div>
+                                      </div>
+                                      {/* Home Bar */}
+                                      <div className="bg-slate-800 dark:bg-slate-900 px-2 py-1.5 flex items-center justify-center">
+                                        <div className="w-8 h-1 bg-slate-600 rounded-full" />
                                       </div>
                                     </div>
                                     {/* Mobile Score */}
