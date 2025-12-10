@@ -46,6 +46,57 @@ import { signOut } from '../lib/auth';
 import { useTheme } from '../contexts/ThemeContext';
 
 // Types
+interface TechnicalStatus {
+  design_score: number;
+  mobile_score: number;
+  desktop_score: number;
+  lcp_mobile: number;
+  lcp_desktop: number;
+  cls_mobile: number;
+  cls_desktop: number;
+  ssl_status: boolean;
+  ssl_note?: string;
+}
+
+interface Compliance {
+  kvkk: boolean;
+  cookie_policy: boolean;
+  etbis: boolean;
+}
+
+interface SocialMedia {
+  website: string;
+  linkedin: string;
+  instagram: string;
+  facebook: string;
+  ai_analysis: string;
+}
+
+interface SocialMediaProfile {
+  platform: 'linkedin' | 'instagram' | 'facebook' | 'twitter' | 'youtube';
+  url: string | null;
+  status: 'active' | 'inactive' | 'not_found';
+  note?: string;
+}
+
+interface Opportunity {
+  area: string;
+  description: string;
+  impact: 'high' | 'medium' | 'low';
+}
+
+interface PainPoint {
+  issue: string;
+  solution: string;
+  service: string;
+}
+
+interface Roadmap {
+  category: string;
+  title: string;
+  description: string;
+}
+
 interface AnalysisResult {
   id: string;
   company_name: string;
@@ -54,6 +105,7 @@ interface AnalysisResult {
   sector: string;
   location: string;
   digital_score: number;
+  crm_readiness_score?: number;
   scores: {
     web_presence: number;
     social_media: number;
@@ -61,15 +113,26 @@ interface AnalysisResult {
     digital_marketing: number;
     user_experience: number;
   };
-  summary: string;
+  executive_summary?: string;
+  sector_summary?: string;
+  company_description?: string;
+  technical_status?: TechnicalStatus;
+  compliance?: Compliance;
+  social_media?: SocialMedia;
+  social_media_profiles?: SocialMediaProfile[];
   strengths: string[];
   weaknesses: string[];
+  opportunities?: Opportunity[];
+  pain_points?: PainPoint[];
+  roadmap?: Roadmap[];
   recommendations: {
     title: string;
     description: string;
     priority: 'high' | 'medium' | 'low';
     category: string;
   }[];
+  // Legacy fields for compatibility
+  summary: string;
   detailed_report: string;
 }
 
@@ -80,23 +143,130 @@ interface ChatMessage {
   timestamp: Date;
 }
 
-// Mock data generator
+// Mock data generator - İnşaat Sektörü Örneği (Sayılı Beton Benzeri)
 const generateMockAnalysis = (companyName: string, websiteUrl: string, email: string): AnalysisResult => {
-  const webScore = Math.floor(Math.random() * 30) + 50;
-  const socialScore = Math.floor(Math.random() * 35) + 40;
-  const brandScore = Math.floor(Math.random() * 25) + 55;
-  const marketingScore = Math.floor(Math.random() * 30) + 45;
-  const uxScore = Math.floor(Math.random() * 25) + 55;
+  // Gerçekçi skorlar - inşaat sektörü için tipik değerler
+  const webScore = 45; // Basit site, eksik optimizasyonlar
+  const socialScore = 35; // Zayıf sosyal medya varlığı
+  const brandScore = 55; // Orta seviye marka kimliği
+  const marketingScore = 30; // Dijital pazarlama yok
+  const uxScore = 40; // Kullanıcı deneyimi zayıf
   const overallScore = Math.round((webScore + socialScore + brandScore + marketingScore + uxScore) / 5);
+  const crmReadinessScore = 2; // 5 üzerinden CRM hazırlık skoru
 
   return {
     id: crypto.randomUUID(),
-    company_name: companyName,
-    website_url: websiteUrl,
-    email: email,
-    sector: "Teknoloji / E-ticaret",
+    company_name: companyName || "Örnek İnşaat A.Ş.",
+    website_url: websiteUrl || "www.ornekinsaat.com.tr",
+    email: email || "info@ornekinsaat.com.tr",
+    sector: "İnşaat Malzemeleri / Hazır Beton",
     location: "İstanbul, Türkiye",
     digital_score: overallScore,
+    crm_readiness_score: crmReadinessScore,
+    
+    // Yönetici Özeti
+    executive_summary: `${companyName || "Örnek İnşaat A.Ş."}, inşaat malzemeleri sektöründe faaliyet gösteren köklü bir firma olmasına rağmen, dijital varlık açısından ciddi eksiklikler barındırmaktadır. Web sitesi oldukça basit ve tek sayfalık bir yapıya sahip olup, SEO optimizasyonu yapılmamış, KVKK/Çerez politikası bulunmamakta ve SSL sertifikası aktif değildir. Mobil performans skoru 41, masaüstü performans skoru 65 seviyesindedir. LCP (Largest Contentful Paint) değerleri kritik seviyede yüksektir (mobil: 80.8s, masaüstü: 7.7s). Sosyal medya hesapları mevcut ancak aktif kullanılmamaktadır. CRM hazırlık skoru 5 üzerinden 2'dir.`,
+    
+    // Sektör Özeti
+    sector_summary: `İnşaat malzemeleri sektörü, B2B ağırlıklı olmakla birlikte B2C satışları da içeren rekabetçi bir pazardır. Dijital dönüşüm bu sektörde hız kazanmış durumda. Rakip firmalar artık online sipariş sistemleri, müşteri portalları ve dijital pazarlama stratejileri kullanmaktadır. ${companyName || "Örnek İnşaat A.Ş."} bu dönüşümde geride kalmış durumdadır ve acil dijital aksiyon alması gerekmektedir.`,
+    
+    // Teknik Durum
+    technical_status: {
+      design_score: 5.5,
+      mobile_score: 41,
+      desktop_score: 65,
+      lcp_mobile: 80.8,
+      lcp_desktop: 7.7,
+      cls_mobile: 0.15,
+      cls_desktop: 0.08,
+      ssl_status: false,
+      ssl_note: "SSL sertifikası aktif değil - Güvenlik riski yüksek"
+    },
+    
+    // Sosyal Medya
+    social_media: {
+      website: websiteUrl || "www.ornekinsaat.com.tr",
+      linkedin: "linkedin.com/company/ornekinsaat (Sayfa mevcut, karakter kodlama sorunu var, içerik güncel değil)",
+      instagram: "Geçersiz veya erişilemeyen hesap",
+      facebook: "Sayfa bulunamadı veya mevcut değil",
+      ai_analysis: "Sosyal medya varlığı son derece zayıf. LinkedIn sayfası mevcut ancak Türkçe karakter sorunu yaşıyor ve son paylaşım 8 ay önce. Instagram hesabı erişilemiyor veya kapalı. Facebook sayfası bulunamıyor. Potansiyel müşteriler ve iş ortakları ile dijital iletişim kurulamıyor. Acil sosyal medya stratejisi oluşturulması önerilir."
+    },
+    
+    // Yasal Uyumluluk
+    compliance: {
+      kvkk: false,
+      cookie_policy: false,
+      etbis: false
+    },
+    
+    // Ağrı Noktaları
+    pain_points: [
+      {
+        issue: "Kritik Düzeyde Yavaş Sayfa Yükleme",
+        solution: "LCP değeri mobilde 80.8 saniye, masaüstünde 7.7 saniye. Görsel optimizasyonu, lazy loading, CDN kullanımı ve sunucu iyileştirmesi gerekli.",
+        service: "Web Performans Optimizasyonu"
+      },
+      {
+        issue: "SSL Sertifikası Eksik",
+        solution: "HTTPS olmadan site güvensiz görünüyor. Müşteri güveni ve SEO için SSL sertifikası şart.",
+        service: "SSL Kurulumu ve Güvenlik"
+      },
+      {
+        issue: "SEO Altyapısı Yok",
+        solution: "Meta etiketler, başlık yapısı, anahtar kelimeler ve site haritası eksik. Arama motorlarında görünürlük çok düşük.",
+        service: "SEO Danışmanlığı"
+      },
+      {
+        issue: "Yasal Uyumluluk Eksiklikleri",
+        solution: "KVKK aydınlatma metni, çerez politikası ve ETBİS kaydı bulunmuyor. Yasal yaptırım riski mevcut.",
+        service: "KVKK ve Yasal Uyumluluk"
+      },
+      {
+        issue: "Mobil Deneyim Yetersiz",
+        solution: "Mobil performans skoru 41/100. Responsive tasarım iyileştirmesi ve mobil optimizasyon gerekli.",
+        service: "Mobil Web Geliştirme"
+      },
+      {
+        issue: "Sosyal Medya Pasif",
+        solution: "LinkedIn karakter sorunu, Instagram erişilemiyor, Facebook yok. Profesyonel sosyal medya yönetimi gerekli.",
+        service: "Sosyal Medya Yönetimi"
+      }
+    ],
+    
+    // Dijital Dönüşüm Yol Haritası
+    roadmap: [
+      {
+        category: "Acil (0-30 Gün)",
+        title: "Kritik Güvenlik ve Yasal Uyumluluk",
+        description: "SSL sertifikası kurulumu, KVKK aydınlatma metni ve çerez politikası eklenmesi. Bu adımlar yasal zorunluluk ve müşteri güveni için kritik öneme sahiptir."
+      },
+      {
+        category: "Kısa Vade (1-3 Ay)",
+        title: "Web Sitesi Performans İyileştirmesi",
+        description: "Görsel optimizasyonu, kod minifikasyonu, CDN entegrasyonu. Hedef: LCP < 2.5 saniye, mobil skor > 70."
+      },
+      {
+        category: "Kısa Vade (1-3 Ay)",
+        title: "Sosyal Medya Aktivasyonu",
+        description: "LinkedIn profil düzeltmesi, yeni Instagram ve Facebook sayfaları oluşturma. Haftalık içerik planı başlatma."
+      },
+      {
+        category: "Orta Vade (3-6 Ay)",
+        title: "SEO ve İçerik Stratejisi",
+        description: "Anahtar kelime araştırması, meta etiket optimizasyonu, blog bölümü oluşturma. Organik trafik hedefi: aylık %50 artış."
+      },
+      {
+        category: "Orta Vade (3-6 Ay)",
+        title: "CRM Sistemi Kurulumu",
+        description: "Müşteri veritabanı oluşturma, teklif takip sistemi, otomatik e-posta akışları. Satış süreçlerinin dijitalleştirilmesi."
+      },
+      {
+        category: "Uzun Vade (6-12 Ay)",
+        title: "E-ticaret ve Online Sipariş",
+        description: "B2B müşteri portalı, online sipariş sistemi, stok entegrasyonu. Dijital satış kanalının açılması."
+      }
+    ],
+    
     scores: {
       web_presence: webScore,
       social_media: socialScore,
@@ -104,83 +274,207 @@ const generateMockAnalysis = (companyName: string, websiteUrl: string, email: st
       digital_marketing: marketingScore,
       user_experience: uxScore
     },
-    summary: `${companyName}, dijital varlık açısından orta seviyede bir performans sergiliyor. Web sitesi temel gereksinimleri karşılıyor ancak modern kullanıcı deneyimi standartlarının gerisinde kalıyor. Sosyal medya varlığı mevcut ancak aktif ve stratejik bir içerik planlaması eksik. Marka kimliği tutarlı görünse de dijital kanallarda yeterince güçlü yansıtılmıyor. SEO ve dijital pazarlama alanında önemli iyileştirme fırsatları bulunuyor.`,
+    
+    summary: `${companyName || "Örnek İnşaat A.Ş."}, inşaat malzemeleri sektöründe faaliyet gösteren ancak dijital varlık açısından ciddi eksiklikler barındıran bir firmadır. Web sitesi basit ve tek sayfalık, SSL sertifikası yok, KVKK uyumu sağlanmamış. Mobil performans skoru 41/100, masaüstü 65/100 seviyesinde. LCP değerleri kritik (mobil: 80.8s). Sosyal medya hesapları pasif ve sorunlu. CRM hazırlık skoru 2/5. Acil dijital dönüşüm aksiyonları alınması önerilir.`,
+    
     strengths: [
-      "Kurumsal kimlik ve logo tasarımı profesyonel görünüyor",
-      "Web sitesinde temel bilgiler (iletişim, hakkımızda) mevcut",
-      "SSL sertifikası aktif, temel güvenlik sağlanmış",
-      "Mobil uyumlu tasarım mevcut",
-      "Google My Business kaydı aktif"
+      "Sektörde köklü ve tanınan bir marka",
+      "Fiziksel altyapı ve üretim kapasitesi güçlü",
+      "Web sitesinde temel iletişim bilgileri mevcut",
+      "LinkedIn kurumsal sayfası oluşturulmuş",
+      "Masaüstü performansı mobil'e göre daha iyi (65 vs 41)"
     ],
+    
     weaknesses: [
-      "Sosyal medya hesapları düzensiz ve az takipçili",
-      "Web sitesi yükleme hızı optimizasyona ihtiyaç duyuyor",
-      "Blog veya içerik pazarlaması stratejisi yok",
-      "SEO meta etiketleri ve yapılandırılmış veri eksik",
+      "SSL sertifikası yok - Güvenlik riski",
+      "KVKK ve çerez politikası eksik - Yasal risk",
+      "Mobil performans çok düşük (41/100)",
+      "LCP değerleri kritik seviyede yüksek (mobil 80.8s)",
+      "Sosyal medya hesapları pasif ve sorunlu",
+      "SEO çalışması hiç yapılmamış",
+      "İçerik pazarlaması stratejisi yok",
       "E-posta pazarlama altyapısı kurulmamış",
-      "Müşteri yorumları ve sosyal kanıt yetersiz"
+      "Online sipariş veya müşteri portalı yok"
     ],
+    
     recommendations: [
       {
-        title: "Sosyal Medya Stratejisi Oluşturun",
-        description: "Düzenli içerik takvimi, hedef kitle analizi ve etkileşim stratejisi ile sosyal medya varlığınızı güçlendirin. Haftada en az 3-4 paylaşım hedefleyin.",
-        priority: "high",
-        category: "social_media"
-      },
-      {
-        title: "Web Sitesi Hızını Optimize Edin",
-        description: "Görsel optimizasyonu, lazy loading ve caching stratejileri ile sayfa yükleme süresini 3 saniyenin altına düşürün.",
+        title: "Acil: SSL Sertifikası Kurulumu",
+        description: "Web sitesi güvenliği ve müşteri güveni için SSL sertifikası derhal kurulmalı. Google sıralamalarını da etkileyen kritik bir faktör.",
         priority: "high",
         category: "web"
       },
       {
-        title: "SEO Çalışması Başlatın",
-        description: "Anahtar kelime araştırması yapın, meta etiketleri optimize edin ve düzenli blog içerikleri ile organik trafiği artırın.",
+        title: "Acil: KVKK ve Yasal Uyumluluk",
+        description: "KVKK aydınlatma metni, çerez politikası ve gizlilik sözleşmesi eklenmeli. ETBİS kaydı kontrol edilmeli. Yasal yaptırım riski yüksek.",
         priority: "high",
+        category: "compliance"
+      },
+      {
+        title: "Kritik: Web Performans Optimizasyonu",
+        description: "LCP değerleri kabul edilemez seviyede. Görsel optimizasyonu, lazy loading, kod minifikasyonu ve CDN kullanımı ile sayfa hızı iyileştirilmeli.",
+        priority: "high",
+        category: "web"
+      },
+      {
+        title: "Sosyal Medya Yeniden Yapılandırma",
+        description: "LinkedIn karakter sorunu düzeltilmeli, Instagram ve Facebook hesapları profesyonelce kurulmalı. Düzenli içerik paylaşımı başlatılmalı.",
+        priority: "high",
+        category: "social_media"
+      },
+      {
+        title: "SEO Temel Çalışmaları",
+        description: "Meta etiketler, başlık yapısı, site haritası ve robots.txt düzenlenmeli. Sektörel anahtar kelimeler için içerik üretilmeli.",
+        priority: "medium",
         category: "marketing"
       },
       {
-        title: "İçerik Pazarlaması Stratejisi",
-        description: "Sektörünüzle ilgili değerli içerikler üreterek potansiyel müşterilerinize ulaşın ve uzmanlığınızı gösterin.",
+        title: "CRM Sistemi Kurulumu",
+        description: "Müşteri ilişkileri yönetimi için CRM yazılımı kurulmalı. Teklif takibi, müşteri iletişimi ve satış süreçleri dijitalleştirilmeli.",
         priority: "medium",
-        category: "content"
+        category: "crm"
       },
       {
-        title: "E-posta Pazarlama Altyapısı",
-        description: "Newsletter sistemi kurun, müşteri segmentasyonu yapın ve otomatik e-posta akışları oluşturun.",
-        priority: "medium",
-        category: "marketing"
-      },
-      {
-        title: "Müşteri Yorumları Toplayın",
-        description: "Google, sosyal medya ve web sitenizde müşteri yorumları toplayarak sosyal kanıt oluşturun.",
-        priority: "medium",
-        category: "brand"
+        title: "B2B Müşteri Portalı",
+        description: "İnşaat sektörü B2B ağırlıklı. Bayiler ve kurumsal müşteriler için online sipariş ve takip portalı oluşturulmalı.",
+        priority: "low",
+        category: "web"
       }
     ],
+    
     detailed_report: `
-# ${companyName} Dijital Varlık Analiz Raporu
+# ${companyName || "Örnek İnşaat A.Ş."} Dijital Varlık Analiz Raporu
 
-## Yönetici Özeti
-${companyName}, dijital dünyada var olmak için temel adımları atmış ancak rekabetçi bir dijital varlık için önemli geliştirmeler yapması gereken bir işletmedir. Genel dijital skorunuz ${overallScore}/100 olarak hesaplanmıştır.
+## 📋 Yönetici Özeti
+${companyName || "Örnek İnşaat A.Ş."}, inşaat malzemeleri sektöründe faaliyet gösteren köklü bir firma olmasına rağmen, dijital varlık açısından ciddi eksiklikler barındırmaktadır. 
 
-## Web Sitesi Analizi
-Web siteniz temel gereksinimleri karşılıyor. SSL sertifikası aktif ve mobil uyumlu bir tasarıma sahipsiniz. Ancak sayfa yükleme hızı, SEO optimizasyonu ve kullanıcı deneyimi açısından iyileştirme alanları mevcut.
+**Genel Dijital Skor: ${overallScore}/100**
+**CRM Hazırlık Skoru: ${crmReadinessScore}/5**
 
-## Sosyal Medya Değerlendirmesi  
-Sosyal medya hesaplarınız mevcut ancak düzenli ve stratejik bir içerik planlaması eksik. Takipçi sayıları sektör ortalamasının altında ve etkileşim oranları düşük.
+### Kritik Bulgular:
+- ❌ SSL Sertifikası: Yok
+- ❌ KVKK Uyumu: Eksik
+- ❌ Çerez Politikası: Yok
+- ⚠️ Mobil Performans: 41/100
+- ⚠️ Masaüstü Performans: 65/100
+- 🔴 LCP Mobil: 80.8 saniye (kritik!)
+- 🔴 LCP Masaüstü: 7.7 saniye (kötü)
 
-## Marka Kimliği
-Kurumsal kimliğiniz profesyonel görünüyor. Logo ve renk paleti tutarlı kullanılmış. Ancak bu kimlik dijital kanallarda yeterince güçlü yansıtılmıyor.
+---
 
-## Dijital Pazarlama
-SEO çalışması yapılmamış, Google Ads veya sosyal medya reklamları aktif değil. İçerik pazarlaması stratejisi bulunmuyor.
+## 🏢 Firma ve Sektör Özeti
+**Sektör:** İnşaat Malzemeleri / Hazır Beton
+**İş Modeli:** B2B Ağırlıklı, B2C Satışları Mevcut
+**Konum:** İstanbul, Türkiye
 
-## Önerilen Aksiyon Planı
-1. İlk 30 gün: Sosyal medya içerik takvimi oluşturun
-2. 30-60 gün: Web sitesi hız optimizasyonu yapın
-3. 60-90 gün: SEO temel çalışmalarını tamamlayın
-4. 90+ gün: İçerik pazarlaması ve e-posta stratejisi başlatın
+İnşaat malzemeleri sektörü dijital dönüşüm sürecindedir. Rakip firmalar online sipariş sistemleri, müşteri portalları ve aktif sosyal medya stratejileri kullanmaktadır. ${companyName || "Örnek İnşaat A.Ş."} bu dönüşümde geride kalmış durumdadır.
+
+---
+
+## 🖥️ Genel Teknik Durum
+
+### Performans Metrikleri
+| Metrik | Mobil | Masaüstü | Durum |
+|--------|-------|----------|-------|
+| Performans Skoru | 41/100 | 65/100 | ⚠️ İyileştirme Gerekli |
+| LCP (Largest Contentful Paint) | 80.8s | 7.7s | 🔴 Kritik |
+| CLS (Cumulative Layout Shift) | 0.15 | 0.08 | ⚠️ Orta |
+| Tasarım Skoru | 5.5/10 | 5.5/10 | ⚠️ Zayıf |
+
+### Güvenlik Durumu
+- **SSL Sertifikası:** ❌ Aktif Değil
+- **Risk:** Yüksek - Müşteri güveni ve SEO olumsuz etkileniyor
+
+### Yasal Uyumluluk
+- **KVKK Aydınlatma Metni:** ❌ Yok
+- **Çerez Politikası:** ❌ Yok  
+- **ETBİS Kaydı:** ❌ Kontrol Edilemedi
+
+---
+
+## 📱 Sosyal Medya Değerlendirmesi
+
+### Platform Durumu
+| Platform | Durum | Notlar |
+|----------|-------|--------|
+| LinkedIn | ⚠️ Sorunlu | Karakter kodlama sorunu, içerik eski |
+| Instagram | ❌ Erişilemiyor | Hesap geçersiz veya kapalı |
+| Facebook | ❌ Yok | Sayfa bulunamadı |
+| Twitter/X | ❌ Yok | Hesap yok |
+| YouTube | ❌ Yok | Kanal yok |
+
+### AI Değerlendirmesi
+Sosyal medya varlığı son derece zayıf. İnşaat sektöründe bile sosyal medya artık önemli bir iş geliştirme kanalı haline gelmiştir. Proje görselleri, referanslar ve firma haberleri düzenli paylaşılmalıdır.
+
+---
+
+## 💡 Fırsatlar ve Öneriler
+
+### Acil Aksiyon (0-30 Gün)
+1. **SSL Sertifikası Kurulumu** - Güvenlik ve güven için şart
+2. **KVKK ve Çerez Politikası** - Yasal zorunluluk
+3. **Kritik Görsel Optimizasyonu** - LCP iyileştirmesi için
+
+### Kısa Vade (1-3 Ay)
+4. **Sosyal Medya Aktivasyonu** - LinkedIn düzeltme, yeni hesaplar
+5. **Web Performans Optimizasyonu** - Hız iyileştirmeleri
+6. **Temel SEO Çalışmaları** - Meta etiketler, site haritası
+
+### Orta Vade (3-6 Ay)
+7. **İçerik Stratejisi** - Blog, referans projeleri
+8. **CRM Sistemi** - Müşteri yönetimi
+9. **E-posta Pazarlama** - Newsletter altyapısı
+
+### Uzun Vade (6-12 Ay)
+10. **B2B Portal** - Online sipariş sistemi
+11. **Dijital Pazarlama** - Google Ads, sosyal medya reklamları
+
+---
+
+## 📊 Ağrı Noktaları ve Çözüm Önerileri
+
+### 1. Kritik Düzeyde Yavaş Sayfa
+**Sorun:** LCP mobilde 80.8 saniye - kullanıcılar beklemeden ayrılıyor
+**Çözüm:** CDN, görsel optimizasyon, lazy loading
+**Hizmet:** Web Performans Optimizasyonu
+
+### 2. Güvenlik Açığı
+**Sorun:** SSL yok - tarayıcılar "Güvensiz" uyarısı veriyor
+**Çözüm:** SSL sertifikası kurulumu
+**Hizmet:** SSL ve Güvenlik Danışmanlığı
+
+### 3. Yasal Risk
+**Sorun:** KVKK, çerez politikası eksik
+**Çözüm:** Yasal metinlerin hazırlanması ve entegrasyonu
+**Hizmet:** KVKK Uyumluluk Danışmanlığı
+
+### 4. Görünmezlik
+**Sorun:** SEO yok, Google'da bulunamıyor
+**Çözüm:** Teknik SEO ve içerik stratejisi
+**Hizmet:** SEO Danışmanlığı
+
+### 5. Sosyal Medya Boşluğu
+**Sorun:** Hesaplar pasif veya erişilemiyor
+**Çözüm:** Profesyonel sosyal medya yönetimi
+**Hizmet:** Sosyal Medya Yönetimi
+
+---
+
+## 🎯 Sonuç ve Önerilen Aksiyon Planı
+
+${companyName || "Örnek İnşaat A.Ş."} dijital dönüşüm için acil adımlar atmalıdır. Mevcut durumda:
+
+- Potansiyel müşteriler web sitesine güvenmiyor (SSL yok)
+- Google aramalarda görünmüyor (SEO yok)
+- Sosyal medyada ulaşılamıyor (hesaplar pasif)
+- Yasal yaptırım riski taşıyor (KVKK eksik)
+
+**Önerilen İlk Adım:** SSL kurulumu + KVKK uyumu + Web performans optimizasyonu paketi ile başlanması önerilir.
+
+**Tahmini ROI:** Dijital optimizasyon sonrası 6 ay içinde:
+- Web trafiği: %200+ artış beklentisi
+- Online talep: %150+ artış beklentisi
+- Marka bilinirliği: Ölçülebilir iyileşme
     `
   };
 };
@@ -389,29 +683,120 @@ const Demo = () => {
     }]);
   };
 
-  // Rapor bağlamı oluştur
+  // Rapor bağlamı oluştur - DigiBot için kapsamlı rapor bilgisi
   const buildReportContext = (result: AnalysisResult | null): string => {
     if (!result) return '';
+    
+    // Teknik durum bilgisi
+    const technicalInfo = result.technical_status ? `
+TEKNİK DURUM:
+- Tasarım Skoru: ${result.technical_status.design_score}/10
+- Mobil Performans: ${result.technical_status.mobile_score}/100
+- Masaüstü Performans: ${result.technical_status.desktop_score}/100
+- LCP (Mobil): ${result.technical_status.lcp_mobile} saniye
+- LCP (Masaüstü): ${result.technical_status.lcp_desktop} saniye
+- CLS (Mobil): ${result.technical_status.cls_mobile}
+- CLS (Masaüstü): ${result.technical_status.cls_desktop}
+- SSL Durumu: ${result.technical_status.ssl_status ? 'Aktif ✓' : 'Aktif Değil ✗'}
+- SSL Notu: ${result.technical_status.ssl_note || 'Yok'}
+` : '';
+
+    // Sosyal medya bilgisi
+    const socialMediaInfo = result.social_media ? `
+SOSYAL MEDYA DURUMU:
+- Website: ${result.social_media.website}
+- LinkedIn: ${result.social_media.linkedin}
+- Instagram: ${result.social_media.instagram}
+- Facebook: ${result.social_media.facebook}
+- AI Analizi: ${result.social_media.ai_analysis}
+` : '';
+
+    // Yasal uyumluluk bilgisi
+    const complianceInfo = result.compliance ? `
+YASAL UYUMLULUK:
+- KVKK Aydınlatma Metni: ${result.compliance.kvkk ? 'Var ✓' : 'Yok ✗'}
+- Çerez Politikası: ${result.compliance.cookie_policy ? 'Var ✓' : 'Yok ✗'}
+- ETBİS Kaydı: ${result.compliance.etbis ? 'Var ✓' : 'Yok ✗'}
+` : '';
+
+    // Ağrı noktaları
+    const painPointsInfo = result.pain_points ? `
+AĞRI NOKTALARI:
+${result.pain_points.map(p => `• SORUN: ${p.issue}
+  ÇÖZÜM: ${p.solution}
+  HİZMET: ${p.service}`).join('\n\n')}
+` : '';
+
+    // Yol haritası
+    const roadmapInfo = result.roadmap ? `
+DİJİTAL DÖNÜŞÜM YOL HARİTASI:
+${result.roadmap.map(r => `• [${r.category}] ${r.title}: ${r.description}`).join('\n')}
+` : '';
+
     return `
-ŞİRKET: ${result.company_name}
+═══════════════════════════════════════════════════════════════
+DİJİTAL ANALİZ RAPORU - ${result.company_name}
+═══════════════════════════════════════════════════════════════
+
+FİRMA BİLGİLERİ:
+- Şirket: ${result.company_name}
+- Website: ${result.website_url}
+- E-posta: ${result.email}
+- Sektör: ${result.sector}
+- Lokasyon: ${result.location}
+
+═══════════════════════════════════════════════════════════════
+SKORLAR VE DEĞERLENDİRME
+═══════════════════════════════════════════════════════════════
+
 GENEL DİJİTAL SKOR: ${result.digital_score}/100
-SKORLAR:
+CRM HAZIRLIK SKORU: ${result.crm_readiness_score || 'N/A'}/5
+
+DETAY SKORLAR:
 - Web Varlığı: ${result.scores.web_presence}/100
 - Sosyal Medya: ${result.scores.social_media}/100
 - Marka Kimliği: ${result.scores.brand_identity}/100
 - Dijital Pazarlama: ${result.scores.digital_marketing}/100
 - Kullanıcı Deneyimi: ${result.scores.user_experience}/100
 
-ÖZET: ${result.summary}
+═══════════════════════════════════════════════════════════════
+YÖNETİCİ ÖZETİ
+═══════════════════════════════════════════════════════════════
+${result.executive_summary || result.summary}
 
-GÜÇLÜ YÖNLER:
-${result.strengths.map(s => `• ${s}`).join('\n')}
+═══════════════════════════════════════════════════════════════
+SEKTÖR ÖZETİ
+═══════════════════════════════════════════════════════════════
+${result.sector_summary || 'Sektör analizi mevcut değil.'}
 
-ZAYIF YÖNLER:
-${result.weaknesses.map(w => `• ${w}`).join('\n')}
+${technicalInfo}
+${socialMediaInfo}
+${complianceInfo}
 
-ÖNERİLER:
-${result.recommendations.slice(0, 5).map(r => `• [${r.priority.toUpperCase()}] ${r.title}: ${r.description}`).join('\n')}
+═══════════════════════════════════════════════════════════════
+GÜÇLÜ YÖNLER
+═══════════════════════════════════════════════════════════════
+${result.strengths.map(s => `✓ ${s}`).join('\n')}
+
+═══════════════════════════════════════════════════════════════
+ZAYIF YÖNLER
+═══════════════════════════════════════════════════════════════
+${result.weaknesses.map(w => `✗ ${w}`).join('\n')}
+
+${painPointsInfo}
+${roadmapInfo}
+
+═══════════════════════════════════════════════════════════════
+ÖNERİLER
+═══════════════════════════════════════════════════════════════
+${result.recommendations.map(r => `• [${r.priority.toUpperCase()}] ${r.title}
+  ${r.description}
+  Kategori: ${r.category}`).join('\n\n')}
+
+═══════════════════════════════════════════════════════════════
+NOT: Bu rapor ${result.company_name} firması için hazırlanmış dijital analiz raporudur.
+DigiBot bu rapora tam erişime sahiptir ve tüm detayları bilmektedir.
+═══════════════════════════════════════════════════════════════
     `.trim();
   };
 
@@ -1094,18 +1479,21 @@ ${result.recommendations.slice(0, 5).map(r => `• [${r.priority.toUpperCase()}]
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 20, scale: 0.95 }}
                     transition={{ type: "spring", damping: 25, stiffness: 300 }}
-                    className="fixed bottom-6 right-6 z-50 bg-white dark:bg-dark-card rounded-2xl border border-slate-200 dark:border-slate-700 shadow-2xl shadow-slate-900/20 dark:shadow-black/40 overflow-hidden w-[380px] sm:w-[420px]"
+                    className="fixed bottom-6 right-6 z-50 bg-white dark:bg-dark-card rounded-2xl border border-slate-200 dark:border-slate-700 shadow-2xl shadow-slate-900/20 dark:shadow-black/40 overflow-hidden w-[420px] sm:w-[500px]"
                   >
-                    {/* Chat Header - Clean White Design */}
+                    {/* Chat Header - Clean White Design with Centered Logo */}
                     <div className="px-4 py-3 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
-                      {/* Logo - no frame */}
+                      {/* Empty space for balance */}
+                      <div className="w-9"></div>
+                      
+                      {/* Centered Logo */}
                       <img 
                         src="https://ctncspdgguclpeijikfp.supabase.co/storage/v1/object/public/Landing%20Page/dijibotkucuk.webp" 
                         alt="DigiBot" 
-                        className="w-10 h-10 object-contain"
+                        className="w-14 h-14 object-contain"
                       />
                       
-                      {/* Close button only */}
+                      {/* Close button */}
                       <button 
                         onClick={() => setIsChatOpen(false)}
                         className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
@@ -1115,40 +1503,40 @@ ${result.recommendations.slice(0, 5).map(r => `• [${r.priority.toUpperCase()}]
                     </div>
 
                     {/* Messages */}
-                    <div className="h-[340px] overflow-y-auto p-4 space-y-4 bg-slate-50 dark:bg-slate-900/80">
+                    <div className="h-[400px] overflow-y-auto p-4 space-y-3 bg-slate-50 dark:bg-slate-900/80">
                       {chatMessages.map((msg) => (
                         <motion.div
                           key={msg.id}
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
-                          className={`flex gap-3 group ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}
+                          className={`flex gap-2.5 group ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}
                         >
                           {/* Avatar */}
-                              <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                              <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 ${
                                 msg.role === 'user' 
                                   ? 'bg-slate-100 dark:bg-slate-700' 
                                   : 'bg-white dark:bg-slate-800'
                               }`}>
                                 {msg.role === 'user' ? (
-                                  <User className="w-5 h-5 text-slate-500 dark:text-slate-400" />
+                                  <User className="w-4 h-4 text-slate-500 dark:text-slate-400" />
                                 ) : (
                                   <img 
                                     src="https://ctncspdgguclpeijikfp.supabase.co/storage/v1/object/public/Landing%20Page/dijibotuyuk.webp" 
                                     alt="DigiBot" 
-                                    className="w-7 h-7 object-contain" 
+                                    className="w-6 h-6 object-contain" 
                                   />
                                 )}
                               </div>
                               
                               {/* Message Content */}
-                              <div className="flex flex-col max-w-[75%]">
-                                <div className={`px-4 py-3 text-sm leading-relaxed ${
+                              <div className="flex flex-col max-w-[80%]">
+                                <div className={`px-3 py-2.5 text-[13px] leading-relaxed ${
                                   msg.role === 'user' 
                                     ? 'bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-2xl rounded-br-md' 
                                     : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-2xl rounded-bl-md shadow-sm border border-slate-100 dark:border-slate-700'
                                 }`}>
                                   <div 
-                                    className="whitespace-pre-wrap prose prose-sm dark:prose-invert max-w-none
+                                    className="whitespace-pre-wrap prose prose-xs dark:prose-invert max-w-none
                                       [&_strong]:font-semibold [&_strong]:text-inherit
                                       [&_ul]:list-disc [&_ul]:ml-4 [&_ul]:my-1
                                       [&_li]:my-0.5"
@@ -1162,9 +1550,9 @@ ${result.recommendations.slice(0, 5).map(r => `• [${r.priority.toUpperCase()}]
                                   />
                                 </div>
                                 {/* Timestamp and actions */}
-                                <div className={`flex items-center gap-2 mt-1.5 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
-                                  <span className="text-[10px] text-slate-400 flex items-center gap-1">
-                                    <Clock className="w-3 h-3" />
+                                <div className={`flex items-center gap-2 mt-1 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
+                                  <span className="text-[9px] text-slate-400 flex items-center gap-1">
+                                    <Clock className="w-2.5 h-2.5" />
                                     {formatTime(msg.timestamp)}
                                   </span>
                                   {msg.role === 'assistant' && msg.content && (
@@ -1174,9 +1562,9 @@ ${result.recommendations.slice(0, 5).map(r => `• [${r.priority.toUpperCase()}]
                                       title="Mesajı kopyala"
                                     >
                                       {copiedMessageId === msg.id ? (
-                                        <Check className="w-3 h-3 text-emerald-500" />
+                                        <Check className="w-2.5 h-2.5 text-emerald-500" />
                                       ) : (
-                                        <Copy className="w-3 h-3 text-slate-400" />
+                                        <Copy className="w-2.5 h-2.5 text-slate-400" />
                                       )}
                                     </button>
                                   )}
@@ -1190,21 +1578,21 @@ ${result.recommendations.slice(0, 5).map(r => `• [${r.priority.toUpperCase()}]
                             <motion.div 
                               initial={{ opacity: 0 }}
                               animate={{ opacity: 1 }}
-                              className="flex gap-3"
+                              className="flex gap-2.5"
                             >
-                              <div className="w-9 h-9 rounded-xl bg-white dark:bg-slate-800 flex items-center justify-center">
+                              <div className="w-8 h-8 rounded-xl bg-white dark:bg-slate-800 flex items-center justify-center">
                                 <img 
                                   src="https://ctncspdgguclpeijikfp.supabase.co/storage/v1/object/public/Landing%20Page/dijibotuyuk.webp" 
                                   alt="DigiBot" 
-                                  className="w-7 h-7 object-contain animate-pulse" 
+                                  className="w-6 h-6 object-contain animate-pulse" 
                                 />
                               </div>
-                              <div className="bg-white dark:bg-slate-800 px-4 py-3 rounded-2xl rounded-bl-md shadow-sm border border-slate-100 dark:border-slate-700">
-                                <div className="flex gap-1.5 items-center">
-                                  <span className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" />
-                                  <span className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                                  <span className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                                  <span className="text-xs text-slate-400 ml-2">Yazıyor...</span>
+                              <div className="bg-white dark:bg-slate-800 px-3 py-2.5 rounded-2xl rounded-bl-md shadow-sm border border-slate-100 dark:border-slate-700">
+                                <div className="flex gap-1 items-center">
+                                  <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" />
+                                  <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                                  <span className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                                  <span className="text-[11px] text-slate-400 ml-1.5">Yazıyor...</span>
                                 </div>
                               </div>
                             </motion.div>
@@ -1213,9 +1601,9 @@ ${result.recommendations.slice(0, 5).map(r => `• [${r.priority.toUpperCase()}]
                         </div>
 
                         {/* Quick Actions - Modern chips */}
-                        <div className="px-4 py-3 bg-white dark:bg-dark-card border-t border-slate-100 dark:border-slate-800">
-                          <p className="text-[10px] text-slate-400 mb-2 font-medium uppercase tracking-wide">Hızlı sorular</p>
-                          <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+                        <div className="px-3 py-2.5 bg-white dark:bg-dark-card border-t border-slate-100 dark:border-slate-800">
+                          <p className="text-[9px] text-slate-400 mb-1.5 font-medium uppercase tracking-wide">Hızlı sorular</p>
+                          <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-1">
                             {getDynamicSuggestions().map((action) => (
                               <button
                                 key={action.text}
@@ -1224,9 +1612,9 @@ ${result.recommendations.slice(0, 5).map(r => `• [${r.priority.toUpperCase()}]
                                   setTimeout(() => handleSendMessage(), 100);
                                 }}
                                 disabled={isChatLoading}
-                                className="px-3.5 py-2 text-xs font-medium text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl whitespace-nowrap transition-all flex items-center gap-2 border border-slate-200 dark:border-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="px-2.5 py-1.5 text-[11px] font-medium text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg whitespace-nowrap transition-all flex items-center gap-1.5 border border-slate-200 dark:border-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
                               >
-                                <span className="text-base">{action.icon}</span>
+                                <span className="text-sm">{action.icon}</span>
                                 {action.text}
                               </button>
                             ))}
@@ -1234,8 +1622,8 @@ ${result.recommendations.slice(0, 5).map(r => `• [${r.priority.toUpperCase()}]
                         </div>
 
                         {/* Input - Clean design */}
-                        <div className="p-4 bg-white dark:bg-dark-card border-t border-slate-100 dark:border-slate-800">
-                          <div className="flex gap-3 items-end">
+                        <div className="p-3 bg-white dark:bg-dark-card border-t border-slate-100 dark:border-slate-800">
+                          <div className="flex gap-2 items-end">
                             <div className="flex-1 relative">
                               <input
                                 type="text"
@@ -1243,7 +1631,7 @@ ${result.recommendations.slice(0, 5).map(r => `• [${r.priority.toUpperCase()}]
                                 onChange={(e) => setChatInput(e.target.value)}
                                 onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
                                 placeholder="Mesajınızı yazın..."
-                                className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-300 dark:focus:ring-slate-600 focus:bg-white dark:focus:bg-slate-700 transition-all border border-slate-200 dark:border-slate-700"
+                                className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-800 rounded-xl text-[13px] text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-300 dark:focus:ring-slate-600 focus:bg-white dark:focus:bg-slate-700 transition-all border border-slate-200 dark:border-slate-700"
                               />
                             </div>
                             <button
