@@ -9,6 +9,7 @@ import {
   Building2, 
   Loader2, 
   CheckCircle,
+  XCircle,
   TrendingUp,
   Shield,
   Zap,
@@ -115,11 +116,14 @@ interface Roadmap {
 }
 
 interface UiUxReview {
-  desktop_screenshot_url: string;
-  mobile_screenshot_url: string;
+  overall_score: number;
+  design_score: number;
+  usability_score: number;
+  mobile_score: number;
+  performance_score: number;
   overall_assessment: string;
-  highlights: string[];
-  suggestions: string[];
+  strengths: string[];
+  weaknesses: string[];
 }
 
 interface AnalysisResult {
@@ -302,23 +306,23 @@ const generateMockAnalysis = (companyName: string, websiteUrl: string, email: st
       }
     ],
     
-    // UI/UX İnceleme - Sadeleştirilmiş
-    // Screenshot API: https://api.apiflash.com - ücretsiz, bekleme süresi destekler
+    // UI/UX İnceleme - Skor bazlı değerlendirme
     ui_ux_review: {
-      // Masaüstü: 1280x800, 3 saniye bekleme (sayfa tam yüklensin)
-      desktop_screenshot_url: websiteUrl ? `https://api.apiflash.com/v1/urltoimage?access_key=e74dc54152e84a07aa5d04ddf3a0c6e2&url=${encodeURIComponent(websiteUrl.startsWith('http') ? websiteUrl : 'https://' + websiteUrl)}&width=1280&height=800&delay=3&format=jpeg&quality=90` : '',
-      // Mobil: iPhone viewport (375x812), 3 saniye bekleme
-      mobile_screenshot_url: websiteUrl ? `https://api.apiflash.com/v1/urltoimage?access_key=e74dc54152e84a07aa5d04ddf3a0c6e2&url=${encodeURIComponent(websiteUrl.startsWith('http') ? websiteUrl : 'https://' + websiteUrl)}&width=375&height=812&delay=3&format=jpeg&quality=90` : '',
-      overall_assessment: "Web sitesi tasarımı eski teknolojileri yansıtmaktadır. Modern web standartlarının gerisinde kalan tasarım, kullanıcı deneyimini olumsuz etkilemektedir.",
-      highlights: [
+      overall_score: 42,
+      design_score: 45,
+      usability_score: 38,
+      mobile_score: 41,
+      performance_score: 44,
+      overall_assessment: "Web sitesi tasarımı eski teknolojileri yansıtmaktadır. Modern web standartlarının gerisinde kalan tasarım, kullanıcı deneyimini olumsuz etkilemektedir. Acil güncelleme ve optimizasyon gereklidir.",
+      strengths: [
+        "Temel firma bilgileri mevcut",
+        "İletişim bilgilerine erişilebilir"
+      ],
+      weaknesses: [
         "Görsel tasarım güncel değil, kurumsal kimlik zayıf",
         "Mobil uyumluluk yetersiz, responsive tasarım eksik",
-        "Navigasyon ve kullanıcı yönlendirmesi zayıf"
-      ],
-      suggestions: [
-        "Modern, mobil-uyumlu tasarıma geçiş yapılmalı",
-        "Görsel hiyerarşi ve CTA butonları iyileştirilmeli",
-        "Sayfa yükleme hızı optimize edilmeli"
+        "Navigasyon ve kullanıcı yönlendirmesi zayıf",
+        "Sayfa yükleme hızı çok düşük"
       ]
     },
     
@@ -1800,181 +1804,119 @@ digiBot bu rapora tam erişime sahiptir ve tüm detayları bilmektedir.
                         <div className="bg-white dark:bg-dark-card rounded-xl border border-slate-200 dark:border-slate-700 p-5">
                           <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
                             <Layout className="w-4 h-4 text-primary" />
-                            UI/UX İnceleme
+                            UI/UX Değerlendirmesi
                           </h3>
                           
-                          {/* Main Layout - Analysis Left, Screenshots Right */}
-                          <div className="grid lg:grid-cols-2 gap-5">
-                            {/* Left Side - Analysis */}
-                            <div className="space-y-4 order-2 lg:order-1">
-                              {/* Overall Assessment */}
-                              <div className="p-4 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 rounded-xl border border-purple-200 dark:border-purple-800/50">
-                                <div className="flex items-start gap-3">
-                                  <div className="w-8 h-8 rounded-lg bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center flex-shrink-0">
-                                    <Eye className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-                                  </div>
-                                  <div>
-                                    <p className="text-xs font-semibold text-purple-800 dark:text-purple-300 mb-1">Genel Değerlendirme</p>
-                                    <p className="text-xs text-purple-700 dark:text-purple-400 leading-relaxed">
-                                      {analysisResult.ui_ux_review.overall_assessment}
-                                    </p>
-                                  </div>
-                                </div>
+                          {/* Score Cards Grid */}
+                          <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-5">
+                            {/* Overall Score - Larger */}
+                            <div className="col-span-2 md:col-span-1 bg-gradient-to-br from-slate-900 to-slate-800 dark:from-slate-800 dark:to-slate-900 rounded-xl p-4 text-center">
+                              <div className="relative inline-flex items-center justify-center">
+                                <svg className="w-20 h-20 transform -rotate-90">
+                                  <circle cx="40" cy="40" r="35" stroke="currentColor" strokeWidth="6" fill="none" className="text-slate-700" />
+                                  <circle 
+                                    cx="40" cy="40" r="35" 
+                                    stroke="url(#scoreGradient)" 
+                                    strokeWidth="6" 
+                                    fill="none" 
+                                    strokeLinecap="round"
+                                    strokeDasharray={`${(analysisResult.ui_ux_review.overall_score / 100) * 220} 220`}
+                                  />
+                                  <defs>
+                                    <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                      <stop offset="0%" stopColor={analysisResult.ui_ux_review.overall_score >= 70 ? '#10b981' : analysisResult.ui_ux_review.overall_score >= 50 ? '#f59e0b' : '#ef4444'} />
+                                      <stop offset="100%" stopColor={analysisResult.ui_ux_review.overall_score >= 70 ? '#34d399' : analysisResult.ui_ux_review.overall_score >= 50 ? '#fbbf24' : '#f87171'} />
+                                    </linearGradient>
+                                  </defs>
+                                </svg>
+                                <span className={`absolute text-2xl font-bold ${
+                                  analysisResult.ui_ux_review.overall_score >= 70 ? 'text-emerald-400' :
+                                  analysisResult.ui_ux_review.overall_score >= 50 ? 'text-amber-400' : 'text-red-400'
+                                }`}>{analysisResult.ui_ux_review.overall_score}</span>
                               </div>
-                              
-                              {/* Highlights */}
-                              {analysisResult.ui_ux_review.highlights && analysisResult.ui_ux_review.highlights.length > 0 && (
-                                <div className="space-y-2">
-                                  <p className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                                    <AlertCircle className="w-3.5 h-3.5 text-amber-500" />
-                                    Önemli Bulgular
-                                  </p>
-                                  {analysisResult.ui_ux_review.highlights.map((highlight, idx) => (
-                                    <div key={idx} className="flex items-start gap-2 p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg border border-amber-200 dark:border-amber-800/50">
-                                      <span className="flex-shrink-0 w-5 h-5 rounded-full bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center text-[10px] font-bold text-amber-600 dark:text-amber-400">
-                                        {idx + 1}
-                                      </span>
-                                      <p className="text-xs text-amber-700 dark:text-amber-300">{highlight}</p>
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
-                              
-                              {/* Suggestions */}
-                              {analysisResult.ui_ux_review.suggestions && analysisResult.ui_ux_review.suggestions.length > 0 && (
-                                <div className="space-y-2">
-                                  <p className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                                    <Lightbulb className="w-3.5 h-3.5 text-blue-500" />
-                                    İyileştirme Önerileri
-                                  </p>
-                                  {analysisResult.ui_ux_review.suggestions.map((suggestion, idx) => (
-                                    <div key={idx} className="flex items-start gap-2 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800/50">
-                                      <span className="flex-shrink-0 w-5 h-5 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center text-[10px] font-bold text-blue-600 dark:text-blue-400">
-                                        {idx + 1}
-                                      </span>
-                                      <p className="text-xs text-blue-700 dark:text-blue-300">{suggestion}</p>
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
+                              <p className="text-[10px] text-slate-400 mt-2 font-medium">GENEL SKOR</p>
                             </div>
                             
-                            {/* Right Side - Screenshots */}
-                            <div className="order-1 lg:order-2">
-                              <div className="sticky top-4 space-y-4">
-                                {/* Desktop & Mobile Screenshots Side by Side */}
-                                <div className="grid grid-cols-3 gap-3">
-                                  {/* Desktop Screenshot - Larger */}
-                                  <div className="col-span-2">
-                                    <p className="text-[10px] font-medium text-slate-500 dark:text-slate-400 mb-2 flex items-center gap-1">
-                                      <Monitor className="w-3 h-3" /> Masaüstü Görünüm
-                                    </p>
-                                    <div className="relative rounded-lg overflow-hidden border-2 border-slate-200 dark:border-slate-700 shadow-md">
-                                      {/* Browser Header */}
-                                      <div className="bg-slate-100 dark:bg-slate-800 px-2 py-1.5 flex items-center gap-1.5 border-b border-slate-200 dark:border-slate-700">
-                                        <div className="flex gap-1">
-                                          <div className="w-2 h-2 rounded-full bg-red-400" />
-                                          <div className="w-2 h-2 rounded-full bg-amber-400" />
-                                          <div className="w-2 h-2 rounded-full bg-emerald-400" />
-                                        </div>
-                                        <div className="flex-1 mx-2">
-                                          <div className="bg-white dark:bg-slate-900 rounded px-2 py-0.5 text-[8px] text-slate-400 truncate">
-                                            {analysisResult.website_url}
-                                          </div>
-                                        </div>
-                                      </div>
-                                      {/* Screenshot */}
-                                      <div className="relative bg-slate-100 dark:bg-slate-900 aspect-[16/10] overflow-hidden">
-                                        {analysisResult.ui_ux_review.desktop_screenshot_url ? (
-                                          <img 
-                                            src={analysisResult.ui_ux_review.desktop_screenshot_url}
-                                            alt="Masaüstü görünüm"
-                                            className="w-full h-full object-cover object-top relative z-10"
-                                            loading="lazy"
-                                            onLoad={(e) => {
-                                              const target = e.target as HTMLImageElement;
-                                              target.style.opacity = '1';
-                                              const placeholder = target.nextElementSibling;
-                                              if (placeholder) (placeholder as HTMLElement).style.display = 'none';
-                                            }}
-                                            onError={(e) => {
-                                              const target = e.target as HTMLImageElement;
-                                              target.style.display = 'none';
-                                            }}
-                                            style={{ opacity: 0, transition: 'opacity 0.3s' }}
-                                          />
-                                        ) : null}
-                                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900">
-                                          <Monitor className="w-8 h-8 text-slate-300 dark:text-slate-600 mb-1" />
-                                          <p className="text-[10px] text-slate-400">Yükleniyor...</p>
-                                        </div>
-                                      </div>
-                                    </div>
-                                    {/* Desktop Score */}
-                                    <div className="mt-2 flex items-center justify-center gap-2 p-2 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
-                                      <span className={`text-lg font-bold ${
-                                        (analysisResult.technical_status?.desktop_score || 0) >= 70 ? 'text-emerald-600' :
-                                        (analysisResult.technical_status?.desktop_score || 0) >= 50 ? 'text-amber-600' :
-                                        'text-red-600'
-                                      }`}>{analysisResult.technical_status?.desktop_score || 0}</span>
-                                      <span className="text-[10px] text-slate-500">/100 Performans</span>
-                                    </div>
-                                  </div>
-                                  
-                                  {/* Mobile Screenshot - Smaller */}
-                                  <div className="col-span-1">
-                                    <p className="text-[10px] font-medium text-slate-500 dark:text-slate-400 mb-2 flex items-center gap-1">
-                                      <Smartphone className="w-3 h-3" /> Mobil
-                                    </p>
-                                    <div className="relative rounded-2xl overflow-hidden border-4 border-slate-800 dark:border-slate-700 shadow-lg mx-auto bg-slate-800" style={{ width: '100px' }}>
-                                      {/* Phone Notch */}
-                                      <div className="bg-slate-800 dark:bg-slate-900 px-2 py-1.5 flex items-center justify-center">
-                                        <div className="w-10 h-3 bg-slate-900 rounded-full" />
-                                      </div>
-                                      {/* Screenshot - iPhone aspect ratio 375:812 ≈ 9:19.5 */}
-                                      <div className="relative bg-white dark:bg-slate-900 overflow-hidden" style={{ aspectRatio: '375/812' }}>
-                                        {analysisResult.ui_ux_review.mobile_screenshot_url ? (
-                                          <img 
-                                            src={analysisResult.ui_ux_review.mobile_screenshot_url}
-                                            alt="Mobil görünüm"
-                                            className="w-full h-full object-cover object-top relative z-10"
-                                            loading="lazy"
-                                            onLoad={(e) => {
-                                              const target = e.target as HTMLImageElement;
-                                              target.style.opacity = '1';
-                                              const placeholder = target.nextElementSibling;
-                                              if (placeholder) (placeholder as HTMLElement).style.display = 'none';
-                                            }}
-                                            onError={(e) => {
-                                              const target = e.target as HTMLImageElement;
-                                              target.style.display = 'none';
-                                            }}
-                                            style={{ opacity: 0, transition: 'opacity 0.3s' }}
-                                          />
-                                        ) : null}
-                                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900">
-                                          <Smartphone className="w-6 h-6 text-slate-300 dark:text-slate-600 mb-1" />
-                                          <p className="text-[8px] text-slate-400">Yükleniyor...</p>
-                                        </div>
-                                      </div>
-                                      {/* Home Bar */}
-                                      <div className="bg-slate-800 dark:bg-slate-900 px-2 py-1.5 flex items-center justify-center">
-                                        <div className="w-8 h-1 bg-slate-600 rounded-full" />
-                                      </div>
-                                    </div>
-                                    {/* Mobile Score */}
-                                    <div className="mt-2 flex items-center justify-center gap-1 p-2 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
-                                      <span className={`text-lg font-bold ${
-                                        (analysisResult.technical_status?.mobile_score || 0) >= 70 ? 'text-emerald-600' :
-                                        (analysisResult.technical_status?.mobile_score || 0) >= 50 ? 'text-amber-600' :
-                                        'text-red-600'
-                                      }`}>{analysisResult.technical_status?.mobile_score || 0}</span>
-                                      <span className="text-[10px] text-slate-500">/100</span>
-                                    </div>
-                                  </div>
+                            {/* Individual Scores */}
+                            {[
+                              { label: 'Tasarım', score: analysisResult.ui_ux_review.design_score, icon: '🎨' },
+                              { label: 'Kullanılabilirlik', score: analysisResult.ui_ux_review.usability_score, icon: '👆' },
+                              { label: 'Mobil', score: analysisResult.ui_ux_review.mobile_score, icon: '📱' },
+                              { label: 'Performans', score: analysisResult.ui_ux_review.performance_score, icon: '⚡' }
+                            ].map((item, idx) => (
+                              <div key={idx} className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-3 text-center border border-slate-200 dark:border-slate-700">
+                                <span className="text-lg mb-1 block">{item.icon}</span>
+                                <div className={`text-xl font-bold ${
+                                  item.score >= 70 ? 'text-emerald-600 dark:text-emerald-400' :
+                                  item.score >= 50 ? 'text-amber-600 dark:text-amber-400' : 'text-red-600 dark:text-red-400'
+                                }`}>{item.score}</div>
+                                <p className="text-[9px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">{item.label}</p>
+                                {/* Mini Progress Bar */}
+                                <div className="mt-2 h-1 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                                  <div 
+                                    className={`h-full rounded-full transition-all ${
+                                      item.score >= 70 ? 'bg-emerald-500' :
+                                      item.score >= 50 ? 'bg-amber-500' : 'bg-red-500'
+                                    }`}
+                                    style={{ width: `${item.score}%` }}
+                                  />
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                          
+                          {/* Assessment & Analysis */}
+                          <div className="grid md:grid-cols-2 gap-4">
+                            {/* Overall Assessment */}
+                            <div className="md:col-span-2 p-4 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800/50 dark:to-slate-800/30 rounded-xl border border-slate-200 dark:border-slate-700">
+                              <div className="flex items-start gap-3">
+                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center flex-shrink-0 shadow-lg">
+                                  <Eye className="w-5 h-5 text-white" />
+                                </div>
+                                <div>
+                                  <p className="text-xs font-semibold text-slate-800 dark:text-slate-200 mb-1">Genel Değerlendirme</p>
+                                  <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                                    {analysisResult.ui_ux_review.overall_assessment}
+                                  </p>
                                 </div>
                               </div>
                             </div>
+                            
+                            {/* Strengths */}
+                            {analysisResult.ui_ux_review.strengths && analysisResult.ui_ux_review.strengths.length > 0 && (
+                              <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl border border-emerald-200 dark:border-emerald-800/50">
+                                <p className="text-xs font-semibold text-emerald-800 dark:text-emerald-300 mb-3 flex items-center gap-2">
+                                  <CheckCircle className="w-4 h-4" />
+                                  Güçlü Yönler
+                                </p>
+                                <div className="space-y-2">
+                                  {analysisResult.ui_ux_review.strengths.map((item, idx) => (
+                                    <div key={idx} className="flex items-start gap-2">
+                                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1.5 flex-shrink-0" />
+                                      <p className="text-xs text-emerald-700 dark:text-emerald-300">{item}</p>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                            
+                            {/* Weaknesses */}
+                            {analysisResult.ui_ux_review.weaknesses && analysisResult.ui_ux_review.weaknesses.length > 0 && (
+                              <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-800/50">
+                                <p className="text-xs font-semibold text-red-800 dark:text-red-300 mb-3 flex items-center gap-2">
+                                  <XCircle className="w-4 h-4" />
+                                  İyileştirilmesi Gereken Alanlar
+                                </p>
+                                <div className="space-y-2">
+                                  {analysisResult.ui_ux_review.weaknesses.map((item, idx) => (
+                                    <div key={idx} className="flex items-start gap-2">
+                                      <div className="w-1.5 h-1.5 rounded-full bg-red-500 mt-1.5 flex-shrink-0" />
+                                      <p className="text-xs text-red-700 dark:text-red-300">{item}</p>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
                           </div>
                         </div>
                       )}

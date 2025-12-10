@@ -740,97 +740,103 @@ export function exportAnalysisReportToPDF(
     `;
   }
 
-  // Build UI/UX Review Section - Sadeleştirilmiş
+  // Build UI/UX Review Section - Skor bazlı tasarım
   let uiuxHtml = '';
   if (analysisResult.ui_ux_review) {
     const ux = analysisResult.ui_ux_review;
     
+    const getScoreColor = (score: number) => {
+      if (score >= 70) return '#10b981';
+      if (score >= 50) return '#f59e0b';
+      return '#ef4444';
+    };
+    
     uiuxHtml = `
       <div class="section">
         <div class="section-header">
-          <span class="section-icon">🖼️</span>
-          <h2 class="section-title">UI/UX İnceleme</h2>
+          <span class="section-icon">🎨</span>
+          <h2 class="section-title">UI/UX Değerlendirmesi</h2>
         </div>
         
-        <!-- Two Column Layout -->
-        <div class="uiux-layout">
-          <!-- Left: Analysis -->
-          <div class="uiux-analysis">
-            <!-- Overall Assessment -->
-            <div class="uiux-overall">
-              <div class="uiux-overall-icon">👁️</div>
-              <div class="uiux-overall-content">
-                <div class="uiux-overall-title">Genel Değerlendirme</div>
-                <div class="uiux-overall-text">${escapeHtml(ux.overall_assessment || '')}</div>
-              </div>
+        <!-- Score Cards -->
+        <div class="uiux-scores">
+          <div class="uiux-main-score" style="background: linear-gradient(135deg, #1e293b, #334155);">
+            <div class="uiux-score-circle" style="border-color: ${getScoreColor(ux.overall_score || 0)};">
+              <span class="uiux-score-value" style="color: ${getScoreColor(ux.overall_score || 0)};">${ux.overall_score || 0}</span>
             </div>
-            
-            <!-- Highlights -->
-            ${ux.highlights && ux.highlights.length > 0 ? `
-              <div class="uiux-highlights">
-                <div class="uiux-highlights-title">⚠️ Önemli Bulgular</div>
-                ${ux.highlights.map((h: string, i: number) => `
-                  <div class="uiux-highlight-item">
-                    <span class="uiux-highlight-num">${i + 1}</span>
-                    <span class="uiux-highlight-text">${escapeHtml(h)}</span>
-                  </div>
-                `).join('')}
-              </div>
-            ` : ''}
-            
-            <!-- Suggestions -->
-            ${ux.suggestions && ux.suggestions.length > 0 ? `
-              <div class="uiux-suggestions-inline">
-                <div class="uiux-suggestions-title">💡 İyileştirme Önerileri</div>
-                ${ux.suggestions.map((s: string, i: number) => `
-                  <div class="uiux-suggestion-item-inline">
-                    <span class="uiux-suggestion-num">${i + 1}</span>
-                    <span class="uiux-suggestion-text">${escapeHtml(s)}</span>
-                  </div>
-                `).join('')}
-              </div>
-            ` : ''}
+            <div class="uiux-score-label">GENEL SKOR</div>
           </div>
           
-          <!-- Right: Screenshots -->
-          <div class="uiux-screenshots">
-            <!-- Desktop -->
-            <div class="screenshot-container desktop">
-              <div class="screenshot-label">🖥️ Masaüstü Görünüm</div>
-              <div class="browser-frame">
-                <div class="browser-header">
-                  <div class="browser-dots">
-                    <span class="dot red"></span>
-                    <span class="dot yellow"></span>
-                    <span class="dot green"></span>
-                  </div>
-                  <div class="browser-url">${escapeHtml(websiteUrl)}</div>
-                </div>
-                <div class="browser-content">
-                  ${ux.desktop_screenshot_url ? `<img src="${escapeHtml(ux.desktop_screenshot_url)}" alt="Masaüstü Görünüm" onerror="this.style.display='none'" />` : ''}
-                  <div class="screenshot-placeholder">
-                    <span>🖥️</span>
-                    <p>Masaüstü</p>
-                  </div>
-                </div>
+          <div class="uiux-sub-scores">
+            <div class="uiux-sub-score">
+              <span class="uiux-sub-icon">🎨</span>
+              <span class="uiux-sub-value" style="color: ${getScoreColor(ux.design_score || 0)};">${ux.design_score || 0}</span>
+              <span class="uiux-sub-label">Tasarım</span>
+              <div class="uiux-progress-bar">
+                <div class="uiux-progress-fill" style="width: ${ux.design_score || 0}%; background: ${getScoreColor(ux.design_score || 0)};"></div>
               </div>
             </div>
-            
-            <!-- Mobile -->
-            <div class="screenshot-container mobile">
-              <div class="screenshot-label">📱 Mobil Görünüm</div>
-              <div class="phone-frame">
-                <div class="phone-notch"></div>
-                <div class="phone-content">
-                  ${ux.mobile_screenshot_url ? `<img src="${escapeHtml(ux.mobile_screenshot_url)}" alt="Mobil Görünüm" onerror="this.style.display='none'" />` : ''}
-                  <div class="screenshot-placeholder">
-                    <span>📱</span>
-                    <p>Mobil</p>
-                  </div>
-                </div>
+            <div class="uiux-sub-score">
+              <span class="uiux-sub-icon">👆</span>
+              <span class="uiux-sub-value" style="color: ${getScoreColor(ux.usability_score || 0)};">${ux.usability_score || 0}</span>
+              <span class="uiux-sub-label">Kullanılabilirlik</span>
+              <div class="uiux-progress-bar">
+                <div class="uiux-progress-fill" style="width: ${ux.usability_score || 0}%; background: ${getScoreColor(ux.usability_score || 0)};"></div>
+              </div>
+            </div>
+            <div class="uiux-sub-score">
+              <span class="uiux-sub-icon">📱</span>
+              <span class="uiux-sub-value" style="color: ${getScoreColor(ux.mobile_score || 0)};">${ux.mobile_score || 0}</span>
+              <span class="uiux-sub-label">Mobil</span>
+              <div class="uiux-progress-bar">
+                <div class="uiux-progress-fill" style="width: ${ux.mobile_score || 0}%; background: ${getScoreColor(ux.mobile_score || 0)};"></div>
+              </div>
+            </div>
+            <div class="uiux-sub-score">
+              <span class="uiux-sub-icon">⚡</span>
+              <span class="uiux-sub-value" style="color: ${getScoreColor(ux.performance_score || 0)};">${ux.performance_score || 0}</span>
+              <span class="uiux-sub-label">Performans</span>
+              <div class="uiux-progress-bar">
+                <div class="uiux-progress-fill" style="width: ${ux.performance_score || 0}%; background: ${getScoreColor(ux.performance_score || 0)};"></div>
               </div>
             </div>
           </div>
+        </div>
+        
+        <!-- Overall Assessment -->
+        <div class="uiux-assessment">
+          <div class="uiux-assessment-icon">👁️</div>
+          <div class="uiux-assessment-content">
+            <div class="uiux-assessment-title">Genel Değerlendirme</div>
+            <div class="uiux-assessment-text">${escapeHtml(ux.overall_assessment || '')}</div>
+          </div>
+        </div>
+        
+        <!-- Strengths & Weaknesses -->
+        <div class="uiux-analysis-grid">
+          ${ux.strengths && ux.strengths.length > 0 ? `
+            <div class="uiux-strengths">
+              <div class="uiux-list-title" style="color: #10b981;">✓ Güçlü Yönler</div>
+              ${ux.strengths.map((s: string) => `
+                <div class="uiux-list-item strengths">
+                  <span class="uiux-bullet" style="background: #10b981;"></span>
+                  <span>${escapeHtml(s)}</span>
+                </div>
+              `).join('')}
+            </div>
+          ` : ''}
+          
+          ${ux.weaknesses && ux.weaknesses.length > 0 ? `
+            <div class="uiux-weaknesses">
+              <div class="uiux-list-title" style="color: #ef4444;">✗ İyileştirilmesi Gereken Alanlar</div>
+              ${ux.weaknesses.map((w: string) => `
+                <div class="uiux-list-item weaknesses">
+                  <span class="uiux-bullet" style="background: #ef4444;"></span>
+                  <span>${escapeHtml(w)}</span>
+                </div>
+              `).join('')}
+            </div>
+          ` : ''}
         </div>
       </div>
     `;
@@ -1702,241 +1708,176 @@ export function exportAnalysisReportToPDF(
           color: #5FC8DA;
         }
         
-        /* UI/UX Review Styles */
-        .uiux-layout {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 24px;
+        /* UI/UX Review Styles - Skor Bazlı Tasarım */
+        .uiux-scores {
+          display: flex;
+          gap: 16px;
           margin-bottom: 20px;
         }
         
-        .uiux-analysis {
-          display: flex;
-          flex-direction: column;
-          gap: 16px;
+        .uiux-main-score {
+          flex: 0 0 120px;
+          padding: 20px;
+          border-radius: 16px;
+          text-align: center;
+          color: white;
         }
         
-        .uiux-overall {
-          background: linear-gradient(135deg, #f3e8ff 0%, #e0e7ff 100%);
-          border: 1px solid #c4b5fd;
-          border-radius: 12px;
-          padding: 16px;
-          display: flex;
-          gap: 12px;
-        }
-        
-        .uiux-overall-icon {
-          width: 32px;
-          height: 32px;
-          background: rgba(139, 92, 246, 0.2);
-          border-radius: 8px;
+        .uiux-score-circle {
+          width: 80px;
+          height: 80px;
+          border: 4px solid;
+          border-radius: 50%;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 16px;
-          flex-shrink: 0;
-        }
-        
-        .uiux-overall-title {
-          font-size: 11px;
-          font-weight: 600;
-          color: #6b21a8;
-          margin-bottom: 4px;
-        }
-        
-        .uiux-overall-text {
-          font-size: 11px;
-          color: #7c3aed;
-          line-height: 1.5;
-        }
-        
-        .uiux-scores {
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-        }
-        
-        .uiux-score-card {
-          border: 1px solid #e2e8f0;
-          border-radius: 10px;
-          padding: 12px;
-        }
-        
-        .uiux-score-header {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          margin-bottom: 6px;
-        }
-        
-        .uiux-score-icon {
-          font-size: 14px;
-        }
-        
-        .uiux-score-label {
-          font-size: 11px;
-          font-weight: 500;
-          color: #64748b;
+          margin: 0 auto 10px;
         }
         
         .uiux-score-value {
-          font-size: 22px;
+          font-size: 28px;
           font-weight: 700;
+        }
+        
+        .uiux-score-label {
+          font-size: 9px;
+          color: #94a3b8;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+        
+        .uiux-sub-scores {
+          flex: 1;
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 12px;
+        }
+        
+        .uiux-sub-score {
+          background: #f8fafc;
+          border: 1px solid #e2e8f0;
+          border-radius: 12px;
+          padding: 12px;
+          text-align: center;
+        }
+        
+        .uiux-sub-icon {
+          font-size: 18px;
+          display: block;
           margin-bottom: 6px;
         }
         
-        .uiux-score-value span {
-          font-size: 12px;
-          font-weight: 400;
-          color: #94a3b8;
+        .uiux-sub-value {
+          font-size: 22px;
+          font-weight: 700;
+          display: block;
         }
         
-        .uiux-score-bar {
+        .uiux-sub-label {
+          font-size: 9px;
+          color: #64748b;
+          display: block;
+          margin-top: 2px;
+        }
+        
+        .uiux-progress-bar {
           height: 4px;
           background: #e2e8f0;
           border-radius: 2px;
-          margin-bottom: 8px;
+          margin-top: 8px;
           overflow: hidden;
         }
         
-        .uiux-score-bar-fill {
+        .uiux-progress-fill {
           height: 100%;
           border-radius: 2px;
         }
         
-        .uiux-score-feedback {
-          font-size: 10px;
-          color: #64748b;
-          line-height: 1.4;
-        }
-        
-        .uiux-screenshot {
-          position: relative;
-        }
-        
-        .browser-frame {
-          border: 2px solid #e2e8f0;
-          border-radius: 12px;
-          overflow: hidden;
-          box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-        }
-        
-        .browser-header {
-          background: #f1f5f9;
-          padding: 8px 12px;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          border-bottom: 1px solid #e2e8f0;
-        }
-        
-        .browser-dots {
-          display: flex;
-          gap: 4px;
-        }
-        
-        .browser-dots .dot {
-          width: 10px;
-          height: 10px;
-          border-radius: 50%;
-        }
-        
-        .browser-dots .dot.red { background: #f87171; }
-        .browser-dots .dot.yellow { background: #fbbf24; }
-        .browser-dots .dot.green { background: #4ade80; }
-        
-        .browser-url {
-          flex: 1;
-          background: white;
-          border-radius: 4px;
-          padding: 4px 10px;
-          font-size: 10px;
-          color: #64748b;
-          margin-left: 12px;
-        }
-        
-        .browser-content {
+        .uiux-assessment {
           background: #f8fafc;
-          min-height: 300px;
-          position: relative;
-        }
-        
-        .browser-content img {
-          width: 100%;
-          height: auto;
-          display: block;
-        }
-        
-        .screenshot-placeholder {
-          position: absolute;
-          inset: 0;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          color: #94a3b8;
-        }
-        
-        .screenshot-placeholder span {
-          font-size: 48px;
-          margin-bottom: 12px;
-        }
-        
-        .screenshot-placeholder p {
-          font-size: 14px;
-          font-weight: 500;
-        }
-        
-        .uiux-suggestions {
-          background: linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%);
-          border: 1px solid #93c5fd;
+          border: 1px solid #e2e8f0;
           border-radius: 12px;
           padding: 16px;
-        }
-        
-        .uiux-suggestions-header {
           display: flex;
-          align-items: center;
-          gap: 8px;
-          font-size: 12px;
-          font-weight: 600;
-          color: #1e40af;
-          margin-bottom: 12px;
+          gap: 12px;
+          margin-bottom: 16px;
         }
         
-        .uiux-suggestions-grid {
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 8px;
-        }
-        
-        .uiux-suggestion-item {
-          display: flex;
-          align-items: flex-start;
-          gap: 8px;
-          background: rgba(255, 255, 255, 0.6);
-          padding: 8px 10px;
-          border-radius: 8px;
-        }
-        
-        .uiux-suggestion-num {
-          width: 20px;
-          height: 20px;
-          background: rgba(59, 130, 246, 0.2);
-          color: #2563eb;
-          border-radius: 50%;
+        .uiux-assessment-icon {
+          width: 40px;
+          height: 40px;
+          background: linear-gradient(135deg, #8b5cf6, #6366f1);
+          border-radius: 10px;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 10px;
-          font-weight: 700;
+          font-size: 18px;
           flex-shrink: 0;
         }
         
-        .uiux-suggestion-text {
+        .uiux-assessment-title {
+          font-size: 11px;
+          font-weight: 600;
+          color: #1e293b;
+          margin-bottom: 4px;
+        }
+        
+        .uiux-assessment-text {
+          font-size: 11px;
+          color: #475569;
+          line-height: 1.5;
+        }
+        
+        .uiux-analysis-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 16px;
+        }
+        
+        .uiux-strengths, .uiux-weaknesses {
+          padding: 16px;
+          border-radius: 12px;
+        }
+        
+        .uiux-strengths {
+          background: #ecfdf5;
+          border: 1px solid #a7f3d0;
+        }
+        
+        .uiux-weaknesses {
+          background: #fef2f2;
+          border: 1px solid #fecaca;
+        }
+        
+        .uiux-list-title {
+          font-size: 11px;
+          font-weight: 600;
+          margin-bottom: 12px;
+        }
+        
+        .uiux-list-item {
+          display: flex;
+          align-items: flex-start;
+          gap: 8px;
           font-size: 10px;
-          color: #1e40af;
           line-height: 1.4;
+          margin-bottom: 8px;
+        }
+        
+        .uiux-list-item.strengths {
+          color: #047857;
+        }
+        
+        .uiux-list-item.weaknesses {
+          color: #dc2626;
+        }
+        
+        .uiux-bullet {
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+          flex-shrink: 0;
+          margin-top: 4px;
         }
         
         /* Print Styles */
