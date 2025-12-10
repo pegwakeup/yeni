@@ -827,6 +827,7 @@ DigiBot bu rapora tam erişime sahiptir ve tüm detayları bilmektedir.
 
     try {
       const reportContext = buildReportContext(analysisResult);
+      console.log('[DigiBot] Report context being sent:', reportContext?.substring(0, 500) + '...');
       const reportId = analysisResult?.id || 'demo-report';
 
       // Streaming API çağrısı
@@ -1482,16 +1483,19 @@ DigiBot bu rapora tam erişime sahiptir ve tüm detayları bilmektedir.
                     className="fixed bottom-6 right-6 z-50 bg-white dark:bg-dark-card rounded-2xl border border-slate-200 dark:border-slate-700 shadow-2xl shadow-slate-900/20 dark:shadow-black/40 overflow-hidden w-[420px] sm:w-[500px]"
                   >
                     {/* Chat Header - Clean White Design with Centered Logo */}
-                    <div className="px-4 py-3 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+                    <div className="px-4 py-4 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
                       {/* Empty space for balance */}
-                      <div className="w-9"></div>
+                      <div className="w-10"></div>
                       
-                      {/* Centered Logo */}
-                      <img 
-                        src="https://ctncspdgguclpeijikfp.supabase.co/storage/v1/object/public/Landing%20Page/dijibotkucuk.webp" 
-                        alt="DigiBot" 
-                        className="w-14 h-14 object-contain"
-                      />
+                      {/* Centered Logo with Text */}
+                      <div className="flex items-center gap-2">
+                        <img 
+                          src="https://ctncspdgguclpeijikfp.supabase.co/storage/v1/object/public/Landing%20Page/dijibotkucuk.webp" 
+                          alt="DigiBot" 
+                          className="w-12 h-12 object-contain"
+                        />
+                        <span className="text-lg font-semibold text-slate-700 dark:text-slate-200">digiBot</span>
+                      </div>
                       
                       {/* Close button */}
                       <button 
