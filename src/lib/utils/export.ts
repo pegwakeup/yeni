@@ -740,6 +740,100 @@ export function exportAnalysisReportToPDF(
     `;
   }
 
+  // Build Website Screenshot Preview Section
+  let screenshotHtml = '';
+  if (analysisResult.ui_ux_review && websiteUrl) {
+    const ux = analysisResult.ui_ux_review;
+    const ts = analysisResult.technical_status || {};
+    
+    const getScoreBadgeStyle = (score: number) => {
+      if (score >= 70) return 'background: #ecfdf5; color: #059669; border: 1px solid #10b981;';
+      if (score >= 50) return 'background: #fffbeb; color: #d97706; border: 1px solid #f59e0b;';
+      return 'background: #fef2f2; color: #dc2626; border: 1px solid #ef4444;';
+    };
+    
+    screenshotHtml = `
+      <div class="section">
+        <div class="section-header">
+          <span class="section-icon">🌐</span>
+          <h2 class="section-title">Web Sitesi Görünümü</h2>
+        </div>
+        
+        <div class="screenshot-grid">
+          <!-- Desktop Preview -->
+          <div class="screenshot-preview desktop">
+            <div class="screenshot-header">
+              <div class="screenshot-label">
+                <span class="screenshot-icon">🖥️</span>
+                <span>Masaüstü Görünüm</span>
+              </div>
+              <span class="score-badge" style="${getScoreBadgeStyle(ts.desktop_score || 0)}">${ts.desktop_score || 0}/100</span>
+            </div>
+            <div class="browser-frame">
+              <div class="browser-bar">
+                <div class="browser-dots">
+                  <span class="dot red"></span>
+                  <span class="dot yellow"></span>
+                  <span class="dot green"></span>
+                </div>
+                <div class="browser-url">${escapeHtml(websiteUrl)}</div>
+              </div>
+              <div class="browser-content">
+                ${ux.desktop_screenshot_url ? `
+                  <img src="${escapeHtml(ux.desktop_screenshot_url)}" alt="Masaüstü Görünüm" onerror="this.style.display='none'" />
+                ` : ''}
+                <div class="screenshot-fallback">
+                  <span>🖥️</span>
+                  <p>Masaüstü Önizleme</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Mobile Preview -->
+          <div class="screenshot-preview mobile">
+            <div class="screenshot-header">
+              <div class="screenshot-label">
+                <span class="screenshot-icon">📱</span>
+                <span>Mobil Görünüm</span>
+              </div>
+              <span class="score-badge" style="${getScoreBadgeStyle(ts.mobile_score || 0)}">${ts.mobile_score || 0}/100</span>
+            </div>
+            <div class="phone-frame">
+              <div class="phone-notch"></div>
+              <div class="phone-screen">
+                ${ux.mobile_screenshot_url ? `
+                  <img src="${escapeHtml(ux.mobile_screenshot_url)}" alt="Mobil Görünüm" onerror="this.style.display='none'" />
+                ` : ''}
+                <div class="screenshot-fallback mobile">
+                  <span>📱</span>
+                  <p>Mobil</p>
+                </div>
+              </div>
+              <div class="phone-home-bar"></div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Quick Stats -->
+        <div class="screenshot-stats">
+          <div class="stat-item ${ts.ssl_status ? 'positive' : 'negative'}">
+            <span class="stat-dot"></span>
+            <span>SSL ${ts.ssl_status ? 'Aktif' : 'Yok'}</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-icon">⏱️</span>
+            <span>LCP: ${ts.lcp_mobile?.toFixed(1) || '?'}s</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-icon">📐</span>
+            <span>Tasarım: ${ts.design_score?.toFixed(1) || '?'}/10</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
   // Build UI/UX Review Section - Skor bazlı tasarım
   let uiuxHtml = '';
   if (analysisResult.ui_ux_review) {
@@ -1708,6 +1802,204 @@ export function exportAnalysisReportToPDF(
           color: #5FC8DA;
         }
         
+        /* Screenshot Preview Styles */
+        .screenshot-grid {
+          display: grid;
+          grid-template-columns: 1.5fr 1fr;
+          gap: 24px;
+          margin-bottom: 16px;
+        }
+        
+        .screenshot-preview {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+        }
+        
+        .screenshot-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+        
+        .screenshot-label {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 11px;
+          font-weight: 600;
+          color: #475569;
+        }
+        
+        .screenshot-icon {
+          font-size: 14px;
+        }
+        
+        .score-badge {
+          padding: 2px 8px;
+          border-radius: 12px;
+          font-size: 10px;
+          font-weight: 600;
+        }
+        
+        .browser-frame {
+          background: #1e293b;
+          border-radius: 12px;
+          padding: 8px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        
+        .browser-bar {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          margin-bottom: 8px;
+          padding: 0 4px;
+        }
+        
+        .browser-dots {
+          display: flex;
+          gap: 4px;
+        }
+        
+        .browser-dots .dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+        }
+        
+        .browser-dots .dot.red { background: #ef4444; }
+        .browser-dots .dot.yellow { background: #eab308; }
+        .browser-dots .dot.green { background: #22c55e; }
+        
+        .browser-url {
+          flex: 1;
+          background: #334155;
+          border-radius: 4px;
+          padding: 4px 8px;
+          font-size: 8px;
+          color: #94a3b8;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        
+        .browser-content {
+          background: #334155;
+          border-radius: 8px;
+          aspect-ratio: 16/10;
+          overflow: hidden;
+          position: relative;
+        }
+        
+        .browser-content img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: top;
+        }
+        
+        .screenshot-fallback {
+          position: absolute;
+          inset: 0;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          background: linear-gradient(135deg, #334155, #1e293b);
+          color: #64748b;
+        }
+        
+        .screenshot-fallback span {
+          font-size: 32px;
+          margin-bottom: 8px;
+        }
+        
+        .screenshot-fallback p {
+          font-size: 10px;
+        }
+        
+        .screenshot-fallback.mobile span {
+          font-size: 24px;
+        }
+        
+        .phone-frame {
+          background: #1e293b;
+          border-radius: 28px;
+          padding: 8px;
+          width: 140px;
+          margin: 0 auto;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+          position: relative;
+        }
+        
+        .phone-notch {
+          position: absolute;
+          top: 12px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 50px;
+          height: 16px;
+          background: #1e293b;
+          border-radius: 10px;
+          z-index: 2;
+        }
+        
+        .phone-screen {
+          background: #334155;
+          border-radius: 20px;
+          aspect-ratio: 9/19;
+          overflow: hidden;
+          position: relative;
+        }
+        
+        .phone-screen img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: top;
+        }
+        
+        .phone-home-bar {
+          position: absolute;
+          bottom: 4px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 60px;
+          height: 4px;
+          background: #475569;
+          border-radius: 2px;
+        }
+        
+        .screenshot-stats {
+          display: flex;
+          justify-content: center;
+          gap: 24px;
+          padding-top: 16px;
+          border-top: 1px solid #e2e8f0;
+        }
+        
+        .stat-item {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          font-size: 10px;
+          color: #64748b;
+        }
+        
+        .stat-dot {
+          width: 6px;
+          height: 6px;
+          border-radius: 50%;
+        }
+        
+        .stat-item.positive .stat-dot { background: #22c55e; }
+        .stat-item.negative .stat-dot { background: #ef4444; }
+        
+        .stat-icon {
+          font-size: 12px;
+        }
+        
         /* UI/UX Review Styles - Skor Bazlı Tasarım */
         .uiux-scores {
           display: flex;
@@ -1959,6 +2251,9 @@ export function exportAnalysisReportToPDF(
         
         <!-- Social Media -->
         ${socialMediaHtml}
+        
+        <!-- Website Screenshots -->
+        ${screenshotHtml}
         
         <!-- UI/UX Review -->
         ${uiuxHtml}

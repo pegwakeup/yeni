@@ -124,6 +124,8 @@ interface UiUxReview {
   overall_assessment: string;
   strengths: string[];
   weaknesses: string[];
+  desktop_screenshot_url?: string;
+  mobile_screenshot_url?: string;
 }
 
 interface AnalysisResult {
@@ -306,7 +308,7 @@ const generateMockAnalysis = (companyName: string, websiteUrl: string, email: st
       }
     ],
     
-    // UI/UX İnceleme - Skor bazlı değerlendirme
+    // UI/UX İnceleme - Skor bazlı değerlendirme + Screenshot
     ui_ux_review: {
       overall_score: 42,
       design_score: 45,
@@ -323,7 +325,10 @@ const generateMockAnalysis = (companyName: string, websiteUrl: string, email: st
         "Mobil uyumluluk yetersiz, responsive tasarım eksik",
         "Navigasyon ve kullanıcı yönlendirmesi zayıf",
         "Sayfa yükleme hızı çok düşük"
-      ]
+      ],
+      // Screenshot URL'leri - thum.io API (ücretsiz, API key gerektirmez)
+      desktop_screenshot_url: websiteUrl ? `https://image.thum.io/get/width/1280/crop/800/noanimate/${websiteUrl.startsWith('http') ? websiteUrl : 'https://' + websiteUrl}` : undefined,
+      mobile_screenshot_url: websiteUrl ? `https://image.thum.io/get/width/375/crop/700/viewportWidth/375/noanimate/${websiteUrl.startsWith('http') ? websiteUrl : 'https://' + websiteUrl}` : undefined
     },
     
     scores: {
@@ -1796,6 +1801,145 @@ digiBot bu rapora tam erişime sahiptir ve tüm detayları bilmektedir.
                               </div>
                             </div>
                           )}
+                        </div>
+                      )}
+
+                      {/* Web Sitesi Görünümü - Screenshot Preview */}
+                      {analysisResult.website_url && analysisResult.ui_ux_review && (
+                        <div className="bg-white dark:bg-dark-card rounded-xl border border-slate-200 dark:border-slate-700 p-5">
+                          <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                            <Globe className="w-4 h-4 text-primary" />
+                            Web Sitesi Görünümü
+                          </h3>
+                          
+                          <div className="grid md:grid-cols-2 gap-6">
+                            {/* Desktop Preview */}
+                            <div className="space-y-3">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                  <Monitor className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                                  <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Masaüstü Görünüm</span>
+                                </div>
+                                <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+                                  (analysisResult.technical_status?.desktop_score || 0) >= 70 ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' :
+                                  (analysisResult.technical_status?.desktop_score || 0) >= 50 ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' :
+                                  'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                                }`}>
+                                  {analysisResult.technical_status?.desktop_score || 0}/100
+                                </span>
+                              </div>
+                              
+                              {/* Desktop Device Frame */}
+                              <div className="relative bg-slate-900 dark:bg-slate-800 rounded-xl p-2 shadow-xl">
+                                {/* Browser Chrome */}
+                                <div className="flex items-center gap-1.5 mb-2 px-2">
+                                  <div className="w-2.5 h-2.5 rounded-full bg-red-500" />
+                                  <div className="w-2.5 h-2.5 rounded-full bg-yellow-500" />
+                                  <div className="w-2.5 h-2.5 rounded-full bg-green-500" />
+                                  <div className="flex-1 mx-2 h-5 bg-slate-700 rounded text-[8px] text-slate-400 flex items-center px-2 truncate">
+                                    {analysisResult.website_url}
+                                  </div>
+                                </div>
+                                {/* Screenshot Container */}
+                                <div className="relative aspect-[16/10] bg-slate-800 dark:bg-slate-700 rounded-lg overflow-hidden">
+                                  {analysisResult.ui_ux_review.desktop_screenshot_url ? (
+                                    <img 
+                                      src={analysisResult.ui_ux_review.desktop_screenshot_url}
+                                      alt="Masaüstü görünüm"
+                                      className="w-full h-full object-cover object-top transition-opacity duration-500"
+                                      loading="lazy"
+                                      onLoad={(e) => {
+                                        const target = e.target as HTMLImageElement;
+                                        target.style.opacity = '1';
+                                        const placeholder = target.parentElement?.querySelector('.screenshot-placeholder');
+                                        if (placeholder) (placeholder as HTMLElement).style.display = 'none';
+                                      }}
+                                      onError={(e) => {
+                                        const target = e.target as HTMLImageElement;
+                                        target.style.display = 'none';
+                                      }}
+                                      style={{ opacity: 0 }}
+                                    />
+                                  ) : null}
+                                  <div className="screenshot-placeholder absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-slate-700 to-slate-800">
+                                    <Monitor className="w-8 h-8 text-slate-500 mb-2" />
+                                    <p className="text-xs text-slate-400">Yükleniyor...</p>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            {/* Mobile Preview */}
+                            <div className="space-y-3">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                  <Smartphone className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                                  <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Mobil Görünüm</span>
+                                </div>
+                                <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+                                  (analysisResult.technical_status?.mobile_score || 0) >= 70 ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' :
+                                  (analysisResult.technical_status?.mobile_score || 0) >= 50 ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' :
+                                  'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                                }`}>
+                                  {analysisResult.technical_status?.mobile_score || 0}/100
+                                </span>
+                              </div>
+                              
+                              {/* Mobile Device Frame - iPhone style */}
+                              <div className="flex justify-center">
+                                <div className="relative bg-slate-900 dark:bg-slate-800 rounded-[2.5rem] p-2.5 shadow-xl" style={{ width: '180px' }}>
+                                  {/* Dynamic Island / Notch */}
+                                  <div className="absolute top-4 left-1/2 -translate-x-1/2 w-20 h-5 bg-slate-900 dark:bg-slate-800 rounded-full z-10 flex items-center justify-center">
+                                    <div className="w-2 h-2 rounded-full bg-slate-700 dark:bg-slate-600" />
+                                  </div>
+                                  {/* Screen */}
+                                  <div className="relative bg-slate-800 dark:bg-slate-700 rounded-[2rem] overflow-hidden" style={{ aspectRatio: '9/19.5' }}>
+                                    {analysisResult.ui_ux_review.mobile_screenshot_url ? (
+                                      <img 
+                                        src={analysisResult.ui_ux_review.mobile_screenshot_url}
+                                        alt="Mobil görünüm"
+                                        className="w-full h-full object-cover object-top transition-opacity duration-500"
+                                        loading="lazy"
+                                        onLoad={(e) => {
+                                          const target = e.target as HTMLImageElement;
+                                          target.style.opacity = '1';
+                                          const placeholder = target.parentElement?.querySelector('.screenshot-placeholder-mobile');
+                                          if (placeholder) (placeholder as HTMLElement).style.display = 'none';
+                                        }}
+                                        onError={(e) => {
+                                          const target = e.target as HTMLImageElement;
+                                          target.style.display = 'none';
+                                        }}
+                                        style={{ opacity: 0 }}
+                                      />
+                                    ) : null}
+                                    <div className="screenshot-placeholder-mobile absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-slate-700 to-slate-800">
+                                      <Smartphone className="w-6 h-6 text-slate-500 mb-2" />
+                                      <p className="text-[10px] text-slate-400">Yükleniyor...</p>
+                                    </div>
+                                  </div>
+                                  {/* Home Indicator */}
+                                  <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-20 h-1 bg-slate-600 rounded-full" />
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {/* Quick Info Bar */}
+                          <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700 flex flex-wrap items-center justify-center gap-4 text-xs text-slate-500 dark:text-slate-400">
+                            <div className="flex items-center gap-1.5">
+                              <div className={`w-2 h-2 rounded-full ${analysisResult.technical_status?.ssl_status ? 'bg-emerald-500' : 'bg-red-500'}`} />
+                              <span>SSL {analysisResult.technical_status?.ssl_status ? 'Aktif' : 'Yok'}</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <Clock className="w-3 h-3" />
+                              <span>LCP: {analysisResult.technical_status?.lcp_mobile?.toFixed(1) || '?'}s</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <Gauge className="w-3 h-3" />
+                              <span>Tasarım: {analysisResult.technical_status?.design_score?.toFixed(1) || '?'}/10</span>
+                            </div>
+                          </div>
                         </div>
                       )}
 
