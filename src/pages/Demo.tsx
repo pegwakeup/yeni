@@ -37,13 +37,28 @@ import {
   RefreshCw,
   Copy,
   Check,
-  Clock
+  Clock,
+  Lock,
+  Unlock,
+  Smartphone,
+  Monitor,
+  Gauge,
+  Target,
+  MessageSquare,
+  ChevronDown,
+  ChevronUp,
+  FileSearch,
+  ListChecks,
+  Download,
+  History
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { generateDigiBotResponse } from '../data/unilancerKnowledge';
 import { sendDigiBotMessageStream } from '../lib/api/digibot';
 import { signOut } from '../lib/auth';
 import { useTheme } from '../contexts/ThemeContext';
+import { exportAnalysisReportToPDF } from '../lib/utils/export';
+import { supabase } from '../lib/config/supabase';
 
 // Types
 interface TechnicalStatus {
@@ -141,6 +156,15 @@ interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
+}
+
+interface SavedReport {
+  id: string;
+  company_name: string;
+  website_url: string;
+  digital_score: number;
+  created_at: string;
+  analysis_result: AnalysisResult;
 }
 
 // Mock data generator - İnşaat Sektörü Örneği (Sayılı Beton Benzeri)
@@ -507,6 +531,25 @@ const Demo = () => {
   const [currentStep, setCurrentStep] = useState<'form' | 'analyzing' | 'results'>('form');
   const [analysisProgress, setAnalysisProgress] = useState(0);
   const [activeTab, setActiveTab] = useState<TabType>('overview');
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
+    executive: true,
+    technical: false,
+    content: false,
+    seo: false,
+    social: false,
+    recommendations: false
+  });
+  const [recFilter, setRecFilter] = useState<{ priority: string; category: string }>({ priority: 'all', category: 'all' });
+  
+  // Report history & email states
+  const [savedReports, setSavedReports] = useState<SavedReport[]>([]);
+  const [showHistory, setShowHistory] = useState(false);
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [emailTo, setEmailTo] = useState('');
+  const [emailName, setEmailName] = useState('');
+  const [emailMessage, setEmailMessage] = useState('');
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
+  const [currentReportId, setCurrentReportId] = useState<string | null>(null);
   
   // Chat state
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
@@ -646,7 +689,7 @@ const Demo = () => {
       });
     }, 600);
 
-    setTimeout(() => {
+    setTimeout(async () => {
       clearInterval(progressInterval);
       setAnalysisProgress(100);
       
@@ -655,10 +698,17 @@ const Demo = () => {
       setCurrentStep('results');
       toast.success('Analiz tamamlandı!');
       
+      // Save to database and get report ID
+      const reportId = await saveReportToDatabase(result);
+      if (reportId) {
+        setCurrentReportId(reportId);
+        loadSavedReports(); // Refresh the list
+      }
+      
       setChatMessages([{
         id: '1',
         role: 'assistant',
-        content: `Merhaba! 👋 Ben DigiBot, Unilancer Labs'ın dijital asistanıyım.\n\n${formData.company_name} için hazırlanan dijital analiz raporunuz hazır. Genel dijital skorunuz **${result.digital_score}/100** olarak hesaplandı.\n\nRaporunuz hakkında sorularınızı yanıtlayabilir, Unilancer Labs'ın size nasıl yardımcı olabileceği konusunda bilgi verebilirim.\n\nNasıl yardımcı olabilirim?`,
+        content: `Merhaba! 👋 Ben digiBot, Unilancer Labs'ın dijital asistanıyım.\n\n${formData.company_name} için hazırlanan dijital analiz raporunuz hazır. Genel dijital skorunuz **${result.digital_score}/100** olarak hesaplandı.\n\nRaporunuz hakkında sorularınızı yanıtlayabilir, Unilancer Labs'ın size nasıl yardımcı olabileceği konusunda bilgi verebilirim.\n\nNasıl yardımcı olabilirim?`,
         timestamp: new Date()
       }]);
     }, 5000);
@@ -678,12 +728,114 @@ const Demo = () => {
     setChatMessages([{
       id: '1',
       role: 'assistant',
-      content: `Merhaba! 👋 Ben DigiBot, Unilancer Labs'ın dijital asistanıyım.\n\nBu örnek bir dijital analiz raporudur. Genel dijital skor **${demoResult.digital_score}/100** olarak hesaplandı.\n\nRapor hakkında sorularınızı yanıtlayabilir, Unilancer Labs hizmetleri konusunda bilgi verebilirim.\n\nNasıl yardımcı olabilirim?`,
+      content: `Merhaba! 👋 Ben digiBot, Unilancer Labs'ın dijital asistanıyım.\n\nBu örnek bir dijital analiz raporudur. Genel dijital skor **${demoResult.digital_score}/100** olarak hesaplandı.\n\nRapor hakkında sorularınızı yanıtlayabilir, Unilancer Labs hizmetleri konusunda bilgi verebilirim.\n\nNasıl yardımcı olabilirim?`,
       timestamp: new Date()
     }]);
   };
 
-  // Rapor bağlamı oluştur - DigiBot için kapsamlı rapor bilgisi
+  // Load saved reports from database
+  const loadSavedReports = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('digital_analysis_reports')
+        .select('id, company_name, website_url, digital_score, created_at, analysis_result')
+        .order('created_at', { ascending: false })
+        .limit(10);
+      
+      if (error) throw error;
+      setSavedReports(data || []);
+    } catch (error) {
+      console.error('Error loading reports:', error);
+    }
+  };
+
+  // Save report to database
+  const saveReportToDatabase = async (result: AnalysisResult): Promise<string | null> => {
+    try {
+      const { data, error } = await supabase
+        .from('digital_analysis_reports')
+        .insert({
+          company_name: result.company_name,
+          website_url: result.website_url,
+          requested_by: result.email,
+          digital_score: result.digital_score,
+          status: 'completed',
+          analysis_result: result,
+        })
+        .select('id')
+        .single();
+      
+      if (error) throw error;
+      toast.success('Rapor kaydedildi');
+      return data.id;
+    } catch (error) {
+      console.error('Error saving report:', error);
+      // Don't show error toast - just continue without saving
+      return null;
+    }
+  };
+
+  // Handle PDF Export
+  const handlePDFExport = () => {
+    if (!analysisResult) return;
+    
+    exportAnalysisReportToPDF(
+      analysisResult.company_name,
+      analysisResult.website_url,
+      analysisResult.digital_score,
+      analysisResult
+    );
+    toast.success('PDF raporu hazırlanıyor...');
+  };
+
+  // Send report by email
+  const sendReportByEmail = async () => {
+    if (!emailTo || !currentReportId) {
+      toast.error('E-posta adresi gerekli');
+      return;
+    }
+    
+    setIsSendingEmail(true);
+    try {
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-report-email`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+        },
+        body: JSON.stringify({
+          reportId: currentReportId,
+          recipientEmail: emailTo,
+          recipientName: emailName,
+          customMessage: emailMessage,
+          includeReportLink: true,
+        }),
+      });
+      
+      const data = await response.json();
+      if (data.success) {
+        toast.success('E-posta gönderildi!');
+        setShowEmailModal(false);
+        setEmailTo('');
+        setEmailName('');
+        setEmailMessage('');
+      } else {
+        toast.error(data.error || 'E-posta gönderilemedi');
+      }
+    } catch (error) {
+      console.error('Error sending email:', error);
+      toast.error('E-posta gönderilemedi');
+    } finally {
+      setIsSendingEmail(false);
+    }
+  };
+
+  // Load saved reports on mount
+  useEffect(() => {
+    loadSavedReports();
+  }, []);
+
+  // Rapor bağlamı oluştur - digiBot için kapsamlı rapor bilgisi
   const buildReportContext = (result: AnalysisResult | null): string => {
     if (!result) return '';
     
@@ -795,7 +947,7 @@ ${result.recommendations.map(r => `• [${r.priority.toUpperCase()}] ${r.title}
 
 ═══════════════════════════════════════════════════════════════
 NOT: Bu rapor ${result.company_name} firması için hazırlanmış dijital analiz raporudur.
-DigiBot bu rapora tam erişime sahiptir ve tüm detayları bilmektedir.
+digiBot bu rapora tam erişime sahiptir ve tüm detayları bilmektedir.
 ═══════════════════════════════════════════════════════════════
     `.trim();
   };
@@ -1271,44 +1423,106 @@ DigiBot bu rapora tam erişime sahiptir ve tüm detayları bilmektedir.
                       key="overview"
                       className="space-y-5"
                     >
-                      {/* Score Section */}
-                      <div className="grid lg:grid-cols-3 gap-5">
-                        <div className="bg-white dark:bg-dark-card rounded-xl border border-slate-200 dark:border-slate-700 p-6">
-                          <div className="flex flex-col items-center">
-                            <CircularGauge score={analysisResult.digital_score} />
-                            <div className="mt-3 text-center">
-                              <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5">Dijital Skor</p>
-                              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${getScoreBgLight(analysisResult.digital_score)}`}>
-                                {getScoreLabel(analysisResult.digital_score).emoji} {getScoreLabel(analysisResult.digital_score).text}
-                              </span>
+                      {/* Hero Score Card - Enhanced */}
+                      <div className="bg-gradient-to-br from-white to-slate-50 dark:from-dark-card dark:to-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 shadow-sm">
+                        <div className="flex flex-col lg:flex-row items-center gap-6">
+                          {/* Left - Company Info & Score */}
+                          <div className="flex-1 flex flex-col lg:flex-row items-center gap-6">
+                            {/* Circular Score */}
+                            <div className="relative">
+                              <CircularGauge score={analysisResult.digital_score} />
+                              {/* CRM Badge */}
+                              {analysisResult.crm_readiness_score && (
+                                <div className="absolute -bottom-2 -right-2 bg-white dark:bg-slate-800 rounded-lg px-2 py-1 shadow-md border border-slate-200 dark:border-slate-700">
+                                  <div className="flex items-center gap-1">
+                                    <span className="text-[10px] text-slate-500 dark:text-slate-400">CRM</span>
+                                    <div className="flex gap-0.5">
+                                      {[1, 2, 3, 4, 5].map((star) => (
+                                        <span 
+                                          key={star} 
+                                          className={`text-xs ${star <= (analysisResult.crm_readiness_score || 0) ? 'text-amber-400' : 'text-slate-300 dark:text-slate-600'}`}
+                                        >
+                                          ★
+                                        </span>
+                                      ))}
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                            
+                            {/* Company Details */}
+                            <div className="text-center lg:text-left">
+                              <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-1">
+                                {analysisResult.company_name}
+                              </h2>
+                              <p className="text-sm text-slate-500 dark:text-slate-400 mb-3 flex items-center justify-center lg:justify-start gap-2">
+                                <Building2 className="w-4 h-4" />
+                                {analysisResult.sector}
+                              </p>
+                              
+                              {/* Score Status */}
+                              <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2">
+                                <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${getScoreBgLight(analysisResult.digital_score)}`}>
+                                  {getScoreLabel(analysisResult.digital_score).emoji} {getScoreLabel(analysisResult.digital_score).text}
+                                </span>
+                                
+                                {/* Sector Comparison */}
+                                <div className="flex items-center gap-1 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-xs">
+                                  <span className="text-slate-500 dark:text-slate-400">Sektör Ort:</span>
+                                  <span className="font-semibold text-slate-700 dark:text-slate-300">55</span>
+                                  <span className={`font-medium ${analysisResult.digital_score >= 55 ? 'text-emerald-600' : 'text-red-500'}`}>
+                                    ({analysisResult.digital_score >= 55 ? '+' : ''}{analysisResult.digital_score - 55})
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {/* Right - Quick Actions */}
+                          <div className="flex flex-col gap-2">
+                            <button
+                              onClick={() => setIsChatOpen(true)}
+                              className="flex items-center gap-2 px-4 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-xl text-sm font-medium transition-colors shadow-md shadow-primary/20"
+                            >
+                              <span className="w-6 h-6 bg-white rounded-md flex items-center justify-center"><img src="https://ctncspdgguclpeijikfp.supabase.co/storage/v1/object/public/Landing%20Page/dijibotuyuk.webp" alt="digiBot" className="w-5 h-5 object-contain" /></span>
+                              digiBot'a Sor
+                              <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse" />
+                            </button>
+                            <div className="flex gap-2">
+                              <button
+                                onClick={handlePDFExport}
+                                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-sm font-medium transition-colors"
+                                title="PDF İndir"
+                              >
+                                <Download className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => currentReportId ? setShowEmailModal(true) : toast.error('Önce raporu kaydedin')}
+                                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-sm font-medium transition-colors"
+                                title="E-posta Gönder"
+                              >
+                                <Mail className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => setShowHistory(true)}
+                                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-sm font-medium transition-colors"
+                                title="Geçmiş Raporlar"
+                              >
+                                <History className="w-4 h-4" />
+                              </button>
                             </div>
                           </div>
                         </div>
+                      </div>
 
-                        <div className="lg:col-span-2 grid grid-cols-2 sm:grid-cols-3 gap-3">
-                          <ScoreCard label="Web Varlığı" score={analysisResult.scores.web_presence} icon={Globe} />
-                          <ScoreCard label="Sosyal Medya" score={analysisResult.scores.social_media} icon={Share2} />
-                          <ScoreCard label="Marka Kimliği" score={analysisResult.scores.brand_identity} icon={Palette} />
-                          <ScoreCard label="Dijital Pazarlama" score={analysisResult.scores.digital_marketing} icon={TrendingUp} />
-                          <ScoreCard label="Kullanıcı Deneyimi" score={analysisResult.scores.user_experience} icon={Users} />
-                          
-                          <motion.div 
-                            whileHover={{ y: -2, scale: 1.02 }}
-                            onClick={() => setIsChatOpen(true)}
-                            className="p-4 rounded-xl border border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/20 cursor-pointer transition-all hover:border-primary/50 hover:shadow-md hover:shadow-primary/10"
-                          >
-                            <div className="flex flex-col items-center justify-center h-full text-center">
-                              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary-dark flex items-center justify-center mb-2 shadow-md ring-2 ring-primary/20">
-                                <img src="https://ctncspdgguclpeijikfp.supabase.co/storage/v1/object/public/Landing%20Page/dijibotuyuk.webp" alt="DigiBot" className="w-7 h-7 object-contain drop-shadow-sm" />
-                              </div>
-                              <p className="text-xs font-semibold text-slate-700 dark:text-slate-200">DigiBot'a Sor</p>
-                              <p className="text-[10px] text-primary mt-0.5 flex items-center gap-1">
-                                <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
-                                Çevrimiçi
-                              </p>
-                            </div>
-                          </motion.div>
-                        </div>
+                      {/* Score Cards Grid */}
+                      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                        <ScoreCard label="Web Varlığı" score={analysisResult.scores.web_presence} icon={Globe} />
+                        <ScoreCard label="Sosyal Medya" score={analysisResult.scores.social_media} icon={Share2} />
+                        <ScoreCard label="Marka Kimliği" score={analysisResult.scores.brand_identity} icon={Palette} />
+                        <ScoreCard label="Dijital Pazarlama" score={analysisResult.scores.digital_marketing} icon={TrendingUp} />
+                        <ScoreCard label="Kullanıcı Deneyimi" score={analysisResult.scores.user_experience} icon={Users} />
                       </div>
 
                       {/* Summary */}
@@ -1321,6 +1535,386 @@ DigiBot bu rapora tam erişime sahiptir ve tüm detayları bilmektedir.
                           {analysisResult.summary}
                         </p>
                       </div>
+
+                      {/* Technical Status Section */}
+                      {analysisResult.technical_status && (
+                        <div className="bg-white dark:bg-dark-card rounded-xl border border-slate-200 dark:border-slate-700 p-5">
+                          <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                            <Gauge className="w-4 h-4 text-primary" />
+                            Teknik Durum
+                          </h3>
+                          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                            {/* SSL Status */}
+                            <div className={`p-4 rounded-xl border ${analysisResult.technical_status.ssl_status ? 'bg-emerald-50 border-emerald-200 dark:bg-emerald-900/20 dark:border-emerald-800' : 'bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800'}`}>
+                              <div className="flex items-center gap-2 mb-2">
+                                {analysisResult.technical_status.ssl_status ? (
+                                  <Lock className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                                ) : (
+                                  <Unlock className="w-5 h-5 text-red-600 dark:text-red-400" />
+                                )}
+                                <span className="text-xs font-medium text-slate-600 dark:text-slate-400">SSL Sertifikası</span>
+                              </div>
+                              <p className={`text-lg font-bold ${analysisResult.technical_status.ssl_status ? 'text-emerald-700 dark:text-emerald-300' : 'text-red-700 dark:text-red-300'}`}>
+                                {analysisResult.technical_status.ssl_status ? 'Aktif ✓' : 'Yok ✗'}
+                              </p>
+                              {analysisResult.technical_status.ssl_note && (
+                                <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-2">
+                                  {analysisResult.technical_status.ssl_note}
+                                </p>
+                              )}
+                            </div>
+
+                            {/* Mobile Score */}
+                            <div className="p-4 rounded-xl border bg-slate-50 border-slate-200 dark:bg-slate-800/50 dark:border-slate-700">
+                              <div className="flex items-center gap-2 mb-2">
+                                <Smartphone className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                                <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Mobil Performans</span>
+                              </div>
+                              <div className="flex items-baseline gap-1">
+                                <p className={`text-2xl font-bold ${analysisResult.technical_status.mobile_score >= 70 ? 'text-emerald-600' : analysisResult.technical_status.mobile_score >= 50 ? 'text-amber-600' : 'text-red-600'}`}>
+                                  {analysisResult.technical_status.mobile_score}
+                                </p>
+                                <span className="text-xs text-slate-400">/100</span>
+                              </div>
+                              <div className="mt-2 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                                <div 
+                                  className={`h-full rounded-full transition-all ${analysisResult.technical_status.mobile_score >= 70 ? 'bg-emerald-500' : analysisResult.technical_status.mobile_score >= 50 ? 'bg-amber-500' : 'bg-red-500'}`}
+                                  style={{ width: `${analysisResult.technical_status.mobile_score}%` }}
+                                />
+                              </div>
+                            </div>
+
+                            {/* Desktop Score */}
+                            <div className="p-4 rounded-xl border bg-slate-50 border-slate-200 dark:bg-slate-800/50 dark:border-slate-700">
+                              <div className="flex items-center gap-2 mb-2">
+                                <Monitor className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                                <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Masaüstü Performans</span>
+                              </div>
+                              <div className="flex items-baseline gap-1">
+                                <p className={`text-2xl font-bold ${analysisResult.technical_status.desktop_score >= 70 ? 'text-emerald-600' : analysisResult.technical_status.desktop_score >= 50 ? 'text-amber-600' : 'text-red-600'}`}>
+                                  {analysisResult.technical_status.desktop_score}
+                                </p>
+                                <span className="text-xs text-slate-400">/100</span>
+                              </div>
+                              <div className="mt-2 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                                <div 
+                                  className={`h-full rounded-full transition-all ${analysisResult.technical_status.desktop_score >= 70 ? 'bg-emerald-500' : analysisResult.technical_status.desktop_score >= 50 ? 'bg-amber-500' : 'bg-red-500'}`}
+                                  style={{ width: `${analysisResult.technical_status.desktop_score}%` }}
+                                />
+                              </div>
+                            </div>
+
+                            {/* LCP - Core Web Vital */}
+                            <div className="p-4 rounded-xl border bg-slate-50 border-slate-200 dark:bg-slate-800/50 dark:border-slate-700">
+                              <div className="flex items-center gap-2 mb-2">
+                                <Zap className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                                <span className="text-xs font-medium text-slate-600 dark:text-slate-400">LCP (Yüklenme)</span>
+                              </div>
+                              <div className="flex items-baseline gap-1">
+                                <p className={`text-xl font-bold ${analysisResult.technical_status.lcp_mobile <= 2.5 ? 'text-emerald-600' : analysisResult.technical_status.lcp_mobile <= 4 ? 'text-amber-600' : 'text-red-600'}`}>
+                                  {analysisResult.technical_status.lcp_mobile}s
+                                </p>
+                                <span className="text-[10px] text-slate-400">mobil</span>
+                              </div>
+                              <p className={`text-[10px] mt-1 ${analysisResult.technical_status.lcp_mobile <= 2.5 ? 'text-emerald-600' : analysisResult.technical_status.lcp_mobile <= 4 ? 'text-amber-600' : 'text-red-600'}`}>
+                                {analysisResult.technical_status.lcp_mobile <= 2.5 ? '✓ İyi' : analysisResult.technical_status.lcp_mobile <= 4 ? '⚠ Orta' : '✗ Kritik - İyileştirme Gerekli'}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Legal Compliance Section */}
+                      {analysisResult.compliance && (
+                        <div className="bg-white dark:bg-dark-card rounded-xl border border-slate-200 dark:border-slate-700 p-5">
+                          <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                            <Shield className="w-4 h-4 text-primary" />
+                            Yasal Uyumluluk Durumu
+                          </h3>
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            {/* KVKK */}
+                            <div className={`p-4 rounded-xl border flex items-center gap-3 ${analysisResult.compliance.kvkk ? 'bg-emerald-50 border-emerald-200 dark:bg-emerald-900/20 dark:border-emerald-800' : 'bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800'}`}>
+                              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${analysisResult.compliance.kvkk ? 'bg-emerald-100 dark:bg-emerald-800' : 'bg-red-100 dark:bg-red-800'}`}>
+                                {analysisResult.compliance.kvkk ? (
+                                  <CheckCircle className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                                ) : (
+                                  <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400" />
+                                )}
+                              </div>
+                              <div>
+                                <p className="text-sm font-medium text-slate-700 dark:text-slate-200">KVKK Aydınlatma</p>
+                                <p className={`text-xs ${analysisResult.compliance.kvkk ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
+                                  {analysisResult.compliance.kvkk ? 'Mevcut ✓' : 'Eksik ✗'}
+                                </p>
+                              </div>
+                            </div>
+
+                            {/* Cookie Policy */}
+                            <div className={`p-4 rounded-xl border flex items-center gap-3 ${analysisResult.compliance.cookie_policy ? 'bg-emerald-50 border-emerald-200 dark:bg-emerald-900/20 dark:border-emerald-800' : 'bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800'}`}>
+                              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${analysisResult.compliance.cookie_policy ? 'bg-emerald-100 dark:bg-emerald-800' : 'bg-red-100 dark:bg-red-800'}`}>
+                                {analysisResult.compliance.cookie_policy ? (
+                                  <CheckCircle className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                                ) : (
+                                  <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400" />
+                                )}
+                              </div>
+                              <div>
+                                <p className="text-sm font-medium text-slate-700 dark:text-slate-200">Çerez Politikası</p>
+                                <p className={`text-xs ${analysisResult.compliance.cookie_policy ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
+                                  {analysisResult.compliance.cookie_policy ? 'Mevcut ✓' : 'Eksik ✗'}
+                                </p>
+                              </div>
+                            </div>
+
+                            {/* ETBİS */}
+                            <div className={`p-4 rounded-xl border flex items-center gap-3 ${analysisResult.compliance.etbis ? 'bg-emerald-50 border-emerald-200 dark:bg-emerald-900/20 dark:border-emerald-800' : 'bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800'}`}>
+                              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${analysisResult.compliance.etbis ? 'bg-emerald-100 dark:bg-emerald-800' : 'bg-red-100 dark:bg-red-800'}`}>
+                                {analysisResult.compliance.etbis ? (
+                                  <CheckCircle className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                                ) : (
+                                  <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400" />
+                                )}
+                              </div>
+                              <div>
+                                <p className="text-sm font-medium text-slate-700 dark:text-slate-200">ETBİS Kaydı</p>
+                                <p className={`text-xs ${analysisResult.compliance.etbis ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'}`}>
+                                  {analysisResult.compliance.etbis ? 'Kayıtlı ✓' : 'Kayıtsız ✗'}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {/* Warning if any missing */}
+                          {(!analysisResult.compliance.kvkk || !analysisResult.compliance.cookie_policy || !analysisResult.compliance.etbis) && (
+                            <div className="mt-4 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+                              <p className="text-xs text-amber-700 dark:text-amber-300 flex items-start gap-2">
+                                <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                                <span>
+                                  <strong>Dikkat:</strong> Eksik yasal uyumluluk belgeleri cezai yaptırımlara neden olabilir. 
+                                  KVKK kapsamında 1.966.862 TL'ye kadar idari para cezası uygulanabilir.
+                                </span>
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Social Media Section */}
+                      {analysisResult.social_media && (
+                        <div className="bg-white dark:bg-dark-card rounded-xl border border-slate-200 dark:border-slate-700 p-5">
+                          <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                            <Share2 className="w-4 h-4 text-primary" />
+                            Sosyal Medya Durumu
+                          </h3>
+                          
+                          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+                            {/* Website */}
+                            <div className="p-3 rounded-xl border bg-slate-50 border-slate-200 dark:bg-slate-800/50 dark:border-slate-700">
+                              <div className="flex items-center gap-2 mb-2">
+                                <Globe className="w-4 h-4 text-blue-600" />
+                                <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Website</span>
+                              </div>
+                              <p className="text-xs text-slate-700 dark:text-slate-300 truncate">{analysisResult.social_media.website || '-'}</p>
+                            </div>
+
+                            {/* LinkedIn */}
+                            <div className={`p-3 rounded-xl border ${analysisResult.social_media.linkedin && !analysisResult.social_media.linkedin.includes('bulunamadı') ? 'bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800' : 'bg-slate-50 border-slate-200 dark:bg-slate-800/50 dark:border-slate-700'}`}>
+                              <div className="flex items-center gap-2 mb-2">
+                                <svg className="w-4 h-4 text-blue-700" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                                <span className="text-xs font-medium text-slate-600 dark:text-slate-400">LinkedIn</span>
+                              </div>
+                              <p className="text-[10px] text-slate-600 dark:text-slate-400 line-clamp-2">{analysisResult.social_media.linkedin || 'Bulunamadı'}</p>
+                            </div>
+
+                            {/* Instagram */}
+                            <div className={`p-3 rounded-xl border ${analysisResult.social_media.instagram && !analysisResult.social_media.instagram.includes('Geçersiz') ? 'bg-pink-50 border-pink-200 dark:bg-pink-900/20 dark:border-pink-800' : 'bg-slate-50 border-slate-200 dark:bg-slate-800/50 dark:border-slate-700'}`}>
+                              <div className="flex items-center gap-2 mb-2">
+                                <svg className="w-4 h-4 text-pink-600" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                                <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Instagram</span>
+                              </div>
+                              <p className="text-[10px] text-slate-600 dark:text-slate-400 line-clamp-2">{analysisResult.social_media.instagram || 'Bulunamadı'}</p>
+                            </div>
+
+                            {/* Facebook */}
+                            <div className={`p-3 rounded-xl border ${analysisResult.social_media.facebook && !analysisResult.social_media.facebook.includes('bulunamadı') ? 'bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800' : 'bg-slate-50 border-slate-200 dark:bg-slate-800/50 dark:border-slate-700'}`}>
+                              <div className="flex items-center gap-2 mb-2">
+                                <svg className="w-4 h-4 text-blue-600" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                                <span className="text-xs font-medium text-slate-600 dark:text-slate-400">Facebook</span>
+                              </div>
+                              <p className="text-[10px] text-slate-600 dark:text-slate-400 line-clamp-2">{analysisResult.social_media.facebook || 'Bulunamadı'}</p>
+                            </div>
+                          </div>
+
+                          {/* AI Analysis */}
+                          {analysisResult.social_media.ai_analysis && (
+                            <div className="p-4 bg-gradient-to-r from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/20 rounded-xl border border-primary/20">
+                              <div className="flex items-start gap-3">
+                                <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
+                                  <Sparkles className="w-4 h-4 text-primary" />
+                                </div>
+                                <div>
+                                  <p className="text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">AI Değerlendirmesi</p>
+                                  <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                                    {analysisResult.social_media.ai_analysis}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Pain Points → Solutions */}
+                      {analysisResult.pain_points && analysisResult.pain_points.length > 0 && (
+                        <div className="bg-white dark:bg-dark-card rounded-xl border border-slate-200 dark:border-slate-700 p-5">
+                          <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                            <Target className="w-4 h-4 text-primary" />
+                            Tespit Edilen Sorunlar ve Çözümler
+                          </h3>
+                          <div className="space-y-3">
+                            {analysisResult.pain_points.map((point, idx) => (
+                              <div key={idx} className="border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden">
+                                {/* Problem Header */}
+                                <div className="bg-red-50 dark:bg-red-900/20 px-4 py-3 border-b border-slate-200 dark:border-slate-700">
+                                  <div className="flex items-start gap-3">
+                                    <div className="w-6 h-6 rounded-full bg-red-100 dark:bg-red-900/40 flex items-center justify-center flex-shrink-0">
+                                      <AlertCircle className="w-3.5 h-3.5 text-red-600 dark:text-red-400" />
+                                    </div>
+                                    <div>
+                                      <p className="text-xs font-medium text-red-800 dark:text-red-300">Sorun #{idx + 1}</p>
+                                      <p className="text-sm text-red-700 dark:text-red-400 mt-0.5">{point.issue}</p>
+                                    </div>
+                                  </div>
+                                </div>
+                                {/* Solution */}
+                                <div className="bg-emerald-50 dark:bg-emerald-900/20 px-4 py-3">
+                                  <div className="flex items-start gap-3">
+                                    <div className="w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center flex-shrink-0">
+                                      <CheckCircle className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                                    </div>
+                                    <div className="flex-1">
+                                      <p className="text-xs font-medium text-emerald-800 dark:text-emerald-300">Önerilen Çözüm</p>
+                                      <p className="text-sm text-emerald-700 dark:text-emerald-400 mt-0.5">{point.solution}</p>
+                                      {point.service && (
+                                        <div className="mt-2 flex items-center gap-2">
+                                          <span className="px-2 py-0.5 bg-primary/10 text-primary text-[10px] font-medium rounded-full">
+                                            📦 {point.service}
+                                          </span>
+                                          <button
+                                            onClick={() => {
+                                              setIsChatOpen(true);
+                                              setTimeout(() => {
+                                                const chatInput = document.querySelector('textarea[placeholder*="mesaj"]') as HTMLTextAreaElement;
+                                                if (chatInput) {
+                                                  chatInput.value = `"${point.issue}" sorunu için ${point.service} hizmetiniz hakkında detaylı bilgi verir misiniz?`;
+                                                  chatInput.focus();
+                                                }
+                                              }, 100);
+                                            }}
+                                            className="flex items-center gap-1 px-2 py-0.5 bg-primary/10 hover:bg-primary/20 text-primary text-[10px] font-medium rounded-full transition-colors"
+                                          >
+                                            <MessageSquare className="w-3 h-3" />
+                                            digiBot'a Sor
+                                          </button>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Digital Transformation Roadmap */}
+                      {analysisResult.roadmap && analysisResult.roadmap.length > 0 && (
+                        <div className="bg-white dark:bg-dark-card rounded-xl border border-slate-200 dark:border-slate-700 p-5">
+                          <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                            <TrendingUp className="w-4 h-4 text-primary" />
+                            Dijital Dönüşüm Yol Haritası
+                          </h3>
+                          
+                          {/* Timeline Categories */}
+                          <div className="grid md:grid-cols-4 gap-3">
+                            {/* Immediate Actions */}
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-2 pb-2 border-b border-red-200 dark:border-red-800">
+                                <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                                <span className="text-xs font-semibold text-red-600 dark:text-red-400">Acil</span>
+                              </div>
+                              {analysisResult.roadmap.filter(r => r.category === 'immediate').map((item, idx) => (
+                                <div key={idx} className="p-2.5 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50">
+                                  <p className="text-xs font-medium text-red-800 dark:text-red-300">{item.title}</p>
+                                  <p className="text-[10px] text-red-600 dark:text-red-400 mt-1 line-clamp-2">{item.description}</p>
+                                </div>
+                              ))}
+                              {analysisResult.roadmap.filter(r => r.category === 'immediate').length === 0 && (
+                                <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-dashed border-slate-300 dark:border-slate-700">
+                                  <p className="text-[10px] text-slate-400 text-center">Acil aksiyon yok</p>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Short Term */}
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-2 pb-2 border-b border-amber-200 dark:border-amber-800">
+                                <div className="w-2 h-2 rounded-full bg-amber-500" />
+                                <span className="text-xs font-semibold text-amber-600 dark:text-amber-400">Kısa Vade (1-3 ay)</span>
+                              </div>
+                              {analysisResult.roadmap.filter(r => r.category === 'short_term').map((item, idx) => (
+                                <div key={idx} className="p-2.5 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50">
+                                  <p className="text-xs font-medium text-amber-800 dark:text-amber-300">{item.title}</p>
+                                  <p className="text-[10px] text-amber-600 dark:text-amber-400 mt-1 line-clamp-2">{item.description}</p>
+                                </div>
+                              ))}
+                              {analysisResult.roadmap.filter(r => r.category === 'short_term').length === 0 && (
+                                <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-dashed border-slate-300 dark:border-slate-700">
+                                  <p className="text-[10px] text-slate-400 text-center">Kısa vadeli aksiyon yok</p>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Medium Term */}
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-2 pb-2 border-b border-blue-200 dark:border-blue-800">
+                                <div className="w-2 h-2 rounded-full bg-blue-500" />
+                                <span className="text-xs font-semibold text-blue-600 dark:text-blue-400">Orta Vade (3-6 ay)</span>
+                              </div>
+                              {analysisResult.roadmap.filter(r => r.category === 'medium_term').map((item, idx) => (
+                                <div key={idx} className="p-2.5 rounded-lg bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800/50">
+                                  <p className="text-xs font-medium text-blue-800 dark:text-blue-300">{item.title}</p>
+                                  <p className="text-[10px] text-blue-600 dark:text-blue-400 mt-1 line-clamp-2">{item.description}</p>
+                                </div>
+                              ))}
+                              {analysisResult.roadmap.filter(r => r.category === 'medium_term').length === 0 && (
+                                <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-dashed border-slate-300 dark:border-slate-700">
+                                  <p className="text-[10px] text-slate-400 text-center">Orta vadeli aksiyon yok</p>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Long Term */}
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-2 pb-2 border-b border-emerald-200 dark:border-emerald-800">
+                                <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                                <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">Uzun Vade (6+ ay)</span>
+                              </div>
+                              {analysisResult.roadmap.filter(r => r.category === 'long_term').map((item, idx) => (
+                                <div key={idx} className="p-2.5 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800/50">
+                                  <p className="text-xs font-medium text-emerald-800 dark:text-emerald-300">{item.title}</p>
+                                  <p className="text-[10px] text-emerald-600 dark:text-emerald-400 mt-1 line-clamp-2">{item.description}</p>
+                                </div>
+                              ))}
+                              {analysisResult.roadmap.filter(r => r.category === 'long_term').length === 0 && (
+                                <div className="p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-dashed border-slate-300 dark:border-slate-700">
+                                  <p className="text-[10px] text-slate-400 text-center">Uzun vadeli aksiyon yok</p>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      )}
 
                       {/* Strengths & Weaknesses */}
                       <div className="grid md:grid-cols-2 gap-5">
@@ -1381,12 +1975,261 @@ DigiBot bu rapora tam erişime sahiptir ve tüm detayları bilmektedir.
                   {activeTab === 'details' && (
                     <div
                       key="details"
-                      className="bg-white dark:bg-dark-card rounded-xl border border-slate-200 dark:border-slate-700 p-6"
+                      className="space-y-3"
                     >
-                      <div className="prose dark:prose-invert prose-sm max-w-none">
-                        <div className="whitespace-pre-wrap leading-relaxed text-slate-600 dark:text-slate-400">
-                          {analysisResult.detailed_report}
+                      {/* Quick Navigation */}
+                      <div className="bg-white dark:bg-dark-card rounded-xl border border-slate-200 dark:border-slate-700 p-4">
+                        <div className="flex flex-wrap gap-2">
+                          <span className="text-xs text-slate-500 dark:text-slate-400">Hızlı Erişim:</span>
+                          {[
+                            { key: 'executive', label: 'Yönetici Özeti', icon: FileSearch },
+                            { key: 'technical', label: 'Teknik Analiz', icon: Monitor },
+                            { key: 'content', label: 'İçerik Analizi', icon: FileText },
+                            { key: 'seo', label: 'SEO Durumu', icon: TrendingUp },
+                            { key: 'social', label: 'Sosyal Medya', icon: Share2 },
+                            { key: 'recommendations', label: 'Öneriler', icon: ListChecks }
+                          ].map(({ key, label, icon: Icon }) => (
+                            <button
+                              key={key}
+                              onClick={() => setExpandedSections(prev => ({ ...prev, [key]: !prev[key] }))}
+                              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
+                                expandedSections[key]
+                                  ? 'bg-primary/10 text-primary border border-primary/30'
+                                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                              }`}
+                            >
+                              <Icon className="w-3 h-3" />
+                              {label}
+                            </button>
+                          ))}
                         </div>
+                      </div>
+
+                      {/* Executive Summary Section */}
+                      <div className="bg-white dark:bg-dark-card rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                        <button
+                          onClick={() => setExpandedSections(prev => ({ ...prev, executive: !prev.executive }))}
+                          className="w-full flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                              <FileSearch className="w-4 h-4 text-primary" />
+                            </div>
+                            <div className="text-left">
+                              <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Yönetici Özeti</h3>
+                              <p className="text-xs text-slate-500 dark:text-slate-400">Genel değerlendirme ve kritik bulgular</p>
+                            </div>
+                          </div>
+                          {expandedSections.executive ? (
+                            <ChevronUp className="w-5 h-5 text-slate-400" />
+                          ) : (
+                            <ChevronDown className="w-5 h-5 text-slate-400" />
+                          )}
+                        </button>
+                        {expandedSections.executive && (
+                          <div className="px-4 pb-4 border-t border-slate-100 dark:border-slate-700">
+                            <div className="pt-4 prose dark:prose-invert prose-sm max-w-none">
+                              <div className="whitespace-pre-wrap leading-relaxed text-slate-600 dark:text-slate-400 text-xs">
+                                {analysisResult.executive_summary || analysisResult.detailed_report?.split('\n\n').slice(0, 3).join('\n\n')}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Technical Analysis Section */}
+                      <div className="bg-white dark:bg-dark-card rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                        <button
+                          onClick={() => setExpandedSections(prev => ({ ...prev, technical: !prev.technical }))}
+                          className="w-full flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                              <Monitor className="w-4 h-4 text-blue-500" />
+                            </div>
+                            <div className="text-left">
+                              <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Teknik Analiz</h3>
+                              <p className="text-xs text-slate-500 dark:text-slate-400">Performans, güvenlik ve altyapı değerlendirmesi</p>
+                            </div>
+                          </div>
+                          {expandedSections.technical ? (
+                            <ChevronUp className="w-5 h-5 text-slate-400" />
+                          ) : (
+                            <ChevronDown className="w-5 h-5 text-slate-400" />
+                          )}
+                        </button>
+                        {expandedSections.technical && analysisResult.technical_status && (
+                          <div className="px-4 pb-4 border-t border-slate-100 dark:border-slate-700">
+                            <div className="pt-4 grid grid-cols-2 gap-3">
+                              <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+                                <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider">SSL Sertifikası</p>
+                                <p className={`text-sm font-semibold ${analysisResult.technical_status.ssl_status ? 'text-emerald-600' : 'text-red-600'}`}>
+                                  {analysisResult.technical_status.ssl_status ? 'Aktif' : 'Pasif'}
+                                </p>
+                              </div>
+                              <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+                                <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider">Mobil Skor</p>
+                                <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">{analysisResult.technical_status.mobile_score || 'N/A'}/100</p>
+                              </div>
+                              <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+                                <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider">Masaüstü Skor</p>
+                                <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">{analysisResult.technical_status.desktop_score || 'N/A'}/100</p>
+                              </div>
+                              <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+                                <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-wider">LCP (Mobil)</p>
+                                <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">{analysisResult.technical_status.lcp_mobile || 'N/A'}s</p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Content Analysis Section */}
+                      <div className="bg-white dark:bg-dark-card rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                        <button
+                          onClick={() => setExpandedSections(prev => ({ ...prev, content: !prev.content }))}
+                          className="w-full flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                              <FileText className="w-4 h-4 text-purple-500" />
+                            </div>
+                            <div className="text-left">
+                              <h3 className="text-sm font-semibold text-slate-900 dark:text-white">İçerik Analizi</h3>
+                              <p className="text-xs text-slate-500 dark:text-slate-400">Web sitesi içerik kalitesi ve yapısı</p>
+                            </div>
+                          </div>
+                          {expandedSections.content ? (
+                            <ChevronUp className="w-5 h-5 text-slate-400" />
+                          ) : (
+                            <ChevronDown className="w-5 h-5 text-slate-400" />
+                          )}
+                        </button>
+                        {expandedSections.content && (
+                          <div className="px-4 pb-4 border-t border-slate-100 dark:border-slate-700">
+                            <div className="pt-4 prose dark:prose-invert prose-sm max-w-none">
+                              <div className="whitespace-pre-wrap leading-relaxed text-slate-600 dark:text-slate-400 text-xs">
+                                {analysisResult.detailed_report?.split('\n\n').slice(3, 6).join('\n\n') || 'İçerik analizi bulunamadı.'}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* SEO Section */}
+                      <div className="bg-white dark:bg-dark-card rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                        <button
+                          onClick={() => setExpandedSections(prev => ({ ...prev, seo: !prev.seo }))}
+                          className="w-full flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                              <TrendingUp className="w-4 h-4 text-amber-500" />
+                            </div>
+                            <div className="text-left">
+                              <h3 className="text-sm font-semibold text-slate-900 dark:text-white">SEO Durumu</h3>
+                              <p className="text-xs text-slate-500 dark:text-slate-400">Arama motoru optimizasyon analizi</p>
+                            </div>
+                          </div>
+                          {expandedSections.seo ? (
+                            <ChevronUp className="w-5 h-5 text-slate-400" />
+                          ) : (
+                            <ChevronDown className="w-5 h-5 text-slate-400" />
+                          )}
+                        </button>
+                        {expandedSections.seo && (
+                          <div className="px-4 pb-4 border-t border-slate-100 dark:border-slate-700">
+                            <div className="pt-4 prose dark:prose-invert prose-sm max-w-none">
+                              <div className="whitespace-pre-wrap leading-relaxed text-slate-600 dark:text-slate-400 text-xs">
+                                {analysisResult.detailed_report?.split('\n\n').slice(6, 9).join('\n\n') || 'SEO analizi bulunamadı.'}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Social Media Section */}
+                      <div className="bg-white dark:bg-dark-card rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                        <button
+                          onClick={() => setExpandedSections(prev => ({ ...prev, social: !prev.social }))}
+                          className="w-full flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-lg bg-pink-500/10 flex items-center justify-center">
+                              <Share2 className="w-4 h-4 text-pink-500" />
+                            </div>
+                            <div className="text-left">
+                              <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Sosyal Medya</h3>
+                              <p className="text-xs text-slate-500 dark:text-slate-400">Sosyal medya varlığı ve etkinliği</p>
+                            </div>
+                          </div>
+                          {expandedSections.social ? (
+                            <ChevronUp className="w-5 h-5 text-slate-400" />
+                          ) : (
+                            <ChevronDown className="w-5 h-5 text-slate-400" />
+                          )}
+                        </button>
+                        {expandedSections.social && analysisResult.social_media && (
+                          <div className="px-4 pb-4 border-t border-slate-100 dark:border-slate-700">
+                            <div className="pt-4 space-y-3">
+                              {analysisResult.social_media.linkedin && (
+                                <div className="flex items-center gap-3 p-2 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+                                  <svg className="w-4 h-4 text-blue-700" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                                  <span className="text-xs text-slate-600 dark:text-slate-400">{analysisResult.social_media.linkedin}</span>
+                                </div>
+                              )}
+                              {analysisResult.social_media.instagram && (
+                                <div className="flex items-center gap-3 p-2 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+                                  <svg className="w-4 h-4 text-pink-600" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                                  <span className="text-xs text-slate-600 dark:text-slate-400">{analysisResult.social_media.instagram}</span>
+                                </div>
+                              )}
+                              {analysisResult.social_media.facebook && (
+                                <div className="flex items-center gap-3 p-2 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+                                  <svg className="w-4 h-4 text-blue-600" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                                  <span className="text-xs text-slate-600 dark:text-slate-400">{analysisResult.social_media.facebook}</span>
+                                </div>
+                              )}
+                              {analysisResult.social_media.ai_analysis && (
+                                <div className="p-3 rounded-lg bg-primary/5 border border-primary/20">
+                                  <p className="text-xs text-slate-600 dark:text-slate-400">{analysisResult.social_media.ai_analysis}</p>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Full Report Section */}
+                      <div className="bg-white dark:bg-dark-card rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                        <button
+                          onClick={() => setExpandedSections(prev => ({ ...prev, recommendations: !prev.recommendations }))}
+                          className="w-full flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                              <ListChecks className="w-4 h-4 text-emerald-500" />
+                            </div>
+                            <div className="text-left">
+                              <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Detaylı Öneriler</h3>
+                              <p className="text-xs text-slate-500 dark:text-slate-400">Tüm iyileştirme önerileri</p>
+                            </div>
+                          </div>
+                          {expandedSections.recommendations ? (
+                            <ChevronUp className="w-5 h-5 text-slate-400" />
+                          ) : (
+                            <ChevronDown className="w-5 h-5 text-slate-400" />
+                          )}
+                        </button>
+                        {expandedSections.recommendations && (
+                          <div className="px-4 pb-4 border-t border-slate-100 dark:border-slate-700">
+                            <div className="pt-4 prose dark:prose-invert prose-sm max-w-none">
+                              <div className="whitespace-pre-wrap leading-relaxed text-slate-600 dark:text-slate-400 text-xs">
+                                {analysisResult.detailed_report}
+                              </div>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}
@@ -1394,29 +2237,128 @@ DigiBot bu rapora tam erişime sahiptir ve tüm detayları bilmektedir.
                   {activeTab === 'recommendations' && (
                     <div
                       key="recommendations"
-                      className="space-y-3"
+                      className="space-y-4"
                     >
-                      {analysisResult.recommendations.map((rec, i) => {
-                        const Icon = getCategoryIcon(rec.category);
-                        return (
-                          <div key={i} className="bg-white dark:bg-dark-card rounded-xl border border-slate-200 dark:border-slate-700 p-4">
-                            <div className="flex items-start gap-3">
-                              <div className="p-2 rounded-lg bg-primary/10">
-                                <Icon className="w-4 h-4 text-primary" />
-                              </div>
-                              <div className="flex-1">
-                                <div className="flex items-center gap-2 mb-1">
-                                  <h3 className="text-sm font-semibold text-slate-900 dark:text-white">{rec.title}</h3>
-                                  <span className={`px-1.5 py-0.5 text-[10px] font-medium rounded ${getPriorityColor(rec.priority)}`}>
-                                    {rec.priority === 'high' ? 'Yüksek' : rec.priority === 'medium' ? 'Orta' : 'Düşük'}
-                                  </span>
-                                </div>
-                                <p className="text-xs text-slate-600 dark:text-slate-400">{rec.description}</p>
-                              </div>
+                      {/* Filter Bar */}
+                      <div className="bg-white dark:bg-dark-card rounded-xl border border-slate-200 dark:border-slate-700 p-4">
+                        <div className="flex flex-wrap items-center gap-4">
+                          {/* Priority Filter */}
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-slate-500 dark:text-slate-400">Öncelik:</span>
+                            <div className="flex gap-1">
+                              {[
+                                { value: 'all', label: 'Tümü' },
+                                { value: 'high', label: '🔴 Yüksek' },
+                                { value: 'medium', label: '🟡 Orta' },
+                                { value: 'low', label: '🟢 Düşük' }
+                              ].map(({ value, label }) => (
+                                <button
+                                  key={value}
+                                  onClick={() => setRecFilter(prev => ({ ...prev, priority: value }))}
+                                  className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
+                                    recFilter.priority === value
+                                      ? 'bg-primary text-white'
+                                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                                  }`}
+                                >
+                                  {label}
+                                </button>
+                              ))}
                             </div>
                           </div>
-                        );
-                      })}
+
+                          {/* Category Filter */}
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-slate-500 dark:text-slate-400">Kategori:</span>
+                            <div className="flex flex-wrap gap-1">
+                              {[
+                                { value: 'all', label: 'Tümü', icon: null },
+                                { value: 'technical', label: 'Teknik', icon: Monitor },
+                                { value: 'content', label: 'İçerik', icon: FileText },
+                                { value: 'seo', label: 'SEO', icon: TrendingUp },
+                                { value: 'social', label: 'Sosyal', icon: Share2 },
+                                { value: 'marketing', label: 'Pazarlama', icon: BarChart3 }
+                              ].map(({ value, label, icon: Icon }) => (
+                                <button
+                                  key={value}
+                                  onClick={() => setRecFilter(prev => ({ ...prev, category: value }))}
+                                  className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium transition-colors ${
+                                    recFilter.category === value
+                                      ? 'bg-primary text-white'
+                                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                                  }`}
+                                >
+                                  {Icon && <Icon className="w-3 h-3" />}
+                                  {label}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Results Count */}
+                          <div className="ml-auto text-xs text-slate-500 dark:text-slate-400">
+                            {analysisResult.recommendations.filter(rec => 
+                              (recFilter.priority === 'all' || rec.priority === recFilter.priority) &&
+                              (recFilter.category === 'all' || rec.category === recFilter.category)
+                            ).length} / {analysisResult.recommendations.length} öneri
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Filtered Recommendations */}
+                      <div className="space-y-3">
+                        {analysisResult.recommendations
+                          .filter(rec => 
+                            (recFilter.priority === 'all' || rec.priority === recFilter.priority) &&
+                            (recFilter.category === 'all' || rec.category === recFilter.category)
+                          )
+                          .map((rec, i) => {
+                            const Icon = getCategoryIcon(rec.category);
+                            return (
+                              <div key={i} className="bg-white dark:bg-dark-card rounded-xl border border-slate-200 dark:border-slate-700 p-4">
+                                <div className="flex items-start gap-3">
+                                  <div className="p-2 rounded-lg bg-primary/10">
+                                    <Icon className="w-4 h-4 text-primary" />
+                                  </div>
+                                  <div className="flex-1">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <h3 className="text-sm font-semibold text-slate-900 dark:text-white">{rec.title}</h3>
+                                      <span className={`px-1.5 py-0.5 text-[10px] font-medium rounded ${getPriorityColor(rec.priority)}`}>
+                                        {rec.priority === 'high' ? 'Yüksek' : rec.priority === 'medium' ? 'Orta' : 'Düşük'}
+                                      </span>
+                                      <span className="px-1.5 py-0.5 text-[10px] font-medium rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                                        {rec.category === 'technical' ? 'Teknik' : 
+                                         rec.category === 'content' ? 'İçerik' :
+                                         rec.category === 'seo' ? 'SEO' :
+                                         rec.category === 'social' ? 'Sosyal' :
+                                         rec.category === 'marketing' ? 'Pazarlama' : rec.category}
+                                      </span>
+                                    </div>
+                                    <p className="text-xs text-slate-600 dark:text-slate-400">{rec.description}</p>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                      </div>
+
+                      {/* No Results */}
+                      {analysisResult.recommendations.filter(rec => 
+                        (recFilter.priority === 'all' || rec.priority === recFilter.priority) &&
+                        (recFilter.category === 'all' || rec.category === recFilter.category)
+                      ).length === 0 && (
+                        <div className="bg-white dark:bg-dark-card rounded-xl border border-slate-200 dark:border-slate-700 p-8 text-center">
+                          <p className="text-sm text-slate-500 dark:text-slate-400">
+                            Seçili filtrelere uygun öneri bulunamadı.
+                          </p>
+                          <button
+                            onClick={() => setRecFilter({ priority: 'all', category: 'all' })}
+                            className="mt-2 text-xs text-primary hover:underline"
+                          >
+                            Filtreleri Temizle
+                          </button>
+                        </div>
+                      )}
 
                       <div className="bg-white dark:bg-dark-card rounded-xl border border-primary/30 p-5 text-center">
                         <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">
@@ -1435,7 +2377,181 @@ DigiBot bu rapora tam erişime sahiptir ve tüm detayları bilmektedir.
                 </AnimatePresence>
               </div>
 
-              {/* Floating DigiBot Button */}
+              {/* Email Modal */}
+              <AnimatePresence>
+                {showEmailModal && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+                    onClick={() => setShowEmailModal(false)}
+                  >
+                    <motion.div
+                      initial={{ scale: 0.95, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0.95, opacity: 0 }}
+                      onClick={(e) => e.stopPropagation()}
+                      className="bg-white dark:bg-dark-card rounded-2xl border border-slate-200 dark:border-slate-700 p-6 w-full max-w-md shadow-xl"
+                    >
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                          <Mail className="w-5 h-5 text-primary" />
+                          Raporu E-posta ile Gönder
+                        </h3>
+                        <button onClick={() => setShowEmailModal(false)} className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+                          <X className="w-5 h-5 text-slate-500" />
+                        </button>
+                      </div>
+                      
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                            E-posta Adresi *
+                          </label>
+                          <input
+                            type="email"
+                            value={emailTo}
+                            onChange={(e) => setEmailTo(e.target.value)}
+                            placeholder="ornek@firma.com"
+                            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                          />
+                        </div>
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                            Alıcı Adı
+                          </label>
+                          <input
+                            type="text"
+                            value={emailName}
+                            onChange={(e) => setEmailName(e.target.value)}
+                            placeholder="Ahmet Yılmaz"
+                            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                          />
+                        </div>
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                            Mesaj (Opsiyonel)
+                          </label>
+                          <textarea
+                            value={emailMessage}
+                            onChange={(e) => setEmailMessage(e.target.value)}
+                            placeholder="Dijital analiz raporunuz ekte yer almaktadır..."
+                            rows={3}
+                            className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary resize-none"
+                          />
+                        </div>
+                        
+                        <button
+                          onClick={sendReportByEmail}
+                          disabled={!emailTo || isSendingEmail}
+                          className="w-full py-3 bg-primary hover:bg-primary-dark disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-medium rounded-xl transition-colors flex items-center justify-center gap-2"
+                        >
+                          {isSendingEmail ? (
+                            <>
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                              Gönderiliyor...
+                            </>
+                          ) : (
+                            <>
+                              <Send className="w-4 h-4" />
+                              Raporu Gönder
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    </motion.div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Report History Drawer */}
+              <AnimatePresence>
+                {showHistory && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
+                    onClick={() => setShowHistory(false)}
+                  >
+                    <motion.div
+                      initial={{ x: '100%' }}
+                      animate={{ x: 0 }}
+                      exit={{ x: '100%' }}
+                      transition={{ type: 'spring', damping: 25 }}
+                      onClick={(e) => e.stopPropagation()}
+                      className="absolute right-0 top-0 bottom-0 w-full max-w-md bg-white dark:bg-dark-card border-l border-slate-200 dark:border-slate-700 shadow-xl"
+                    >
+                      <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700">
+                        <h3 className="text-lg font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                          <History className="w-5 h-5 text-primary" />
+                          Geçmiş Raporlar
+                        </h3>
+                        <button onClick={() => setShowHistory(false)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">
+                          <X className="w-5 h-5 text-slate-500" />
+                        </button>
+                      </div>
+                      
+                      <div className="p-4 space-y-3 overflow-y-auto max-h-[calc(100vh-80px)]">
+                        {savedReports.length === 0 ? (
+                          <div className="text-center py-12 text-slate-500">
+                            <FileText className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                            <p className="text-sm">Henüz kaydedilmiş rapor yok</p>
+                            <p className="text-xs mt-1 text-slate-400">Analiz yaptığınızda raporlar burada görünecek</p>
+                          </div>
+                        ) : (
+                          savedReports.map((report) => (
+                            <div
+                              key={report.id}
+                              className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-primary/50 transition-colors cursor-pointer group"
+                              onClick={() => {
+                                setAnalysisResult(report.analysis_result);
+                                setCurrentReportId(report.id);
+                                setCurrentStep('results');
+                                setShowHistory(false);
+                                toast.success(`${report.company_name} raporu yüklendi`);
+                              }}
+                            >
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1 min-w-0">
+                                  <h4 className="font-medium text-slate-900 dark:text-white truncate group-hover:text-primary transition-colors">
+                                    {report.company_name}
+                                  </h4>
+                                  <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
+                                    {report.website_url}
+                                  </p>
+                                  <p className="text-xs text-slate-400 mt-2 flex items-center gap-1">
+                                    <Clock className="w-3 h-3" />
+                                    {new Date(report.created_at).toLocaleDateString('tr-TR', {
+                                      day: 'numeric',
+                                      month: 'short',
+                                      year: 'numeric',
+                                      hour: '2-digit',
+                                      minute: '2-digit'
+                                    })}
+                                  </p>
+                                </div>
+                                <div className={`px-2.5 py-1 rounded-lg text-sm font-bold ${
+                                  report.digital_score >= 70 ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' :
+                                  report.digital_score >= 40 ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' :
+                                  'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                                }`}>
+                                  {report.digital_score}
+                                </div>
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </motion.div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Floating digiBot Button */}
               <AnimatePresence>
                 {!isChatOpen && (
                   <motion.button
@@ -1449,7 +2565,7 @@ DigiBot bu rapora tam erişime sahiptir ve tüm detayları bilmektedir.
                   >
                     <img 
                       src="https://ctncspdgguclpeijikfp.supabase.co/storage/v1/object/public/Landing%20Page/dijibotuyuk.webp" 
-                      alt="DigiBot" 
+                      alt="digiBot" 
                       className="w-10 h-10 object-contain group-hover:scale-110 transition-transform" 
                     />
                     <span className="absolute -top-1 -right-1 w-5 h-5 bg-emerald-500 rounded-full border-2 border-white flex items-center justify-center shadow-md">
@@ -1457,13 +2573,13 @@ DigiBot bu rapora tam erişime sahiptir ve tüm detayları bilmektedir.
                     </span>
                     {/* Tooltip */}
                     <span className="absolute right-full mr-3 px-4 py-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-medium rounded-xl opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-lg">
-                      💬 DigiBot'a Sor
+                      💬 digiBot'a Sor
                     </span>
                   </motion.button>
                 )}
               </AnimatePresence>
 
-              {/* DigiBot Chat Window - Enhanced */}
+              {/* digiBot Chat Window - Enhanced */}
               <AnimatePresence>
                 {isChatOpen && (
                   <motion.div
@@ -1481,7 +2597,7 @@ DigiBot bu rapora tam erişime sahiptir ve tüm detayları bilmektedir.
                       {/* Centered Logo */}
                       <img 
                         src="https://ctncspdgguclpeijikfp.supabase.co/storage/v1/object/public/Landing%20Page/dijibotkucuk.webp" 
-                        alt="DigiBot" 
+                        alt="digiBot" 
                         className="w-24 h-16 object-contain"
                       />
                       
@@ -1514,7 +2630,7 @@ DigiBot bu rapora tam erişime sahiptir ve tüm detayları bilmektedir.
                                 ) : (
                                   <img 
                                     src="https://ctncspdgguclpeijikfp.supabase.co/storage/v1/object/public/Landing%20Page/dijibotuyuk.webp" 
-                                    alt="DigiBot" 
+                                    alt="digiBot" 
                                     className="w-6 h-6 object-contain" 
                                   />
                                 )}
