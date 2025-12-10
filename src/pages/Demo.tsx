@@ -303,9 +303,10 @@ const generateMockAnalysis = (companyName: string, websiteUrl: string, email: st
     ],
     
     // UI/UX İnceleme - Sadeleştirilmiş
+    // Screenshot API: https://image.thum.io - ücretsiz, API key gerektirmez
     ui_ux_review: {
-      desktop_screenshot_url: websiteUrl ? `https://api.microlink.io/?url=${encodeURIComponent(websiteUrl.startsWith('http') ? websiteUrl : 'https://' + websiteUrl)}&screenshot=true&meta=false&embed=screenshot.url&viewport.width=1280&viewport.height=800&viewport.isMobile=false` : '',
-      mobile_screenshot_url: websiteUrl ? `https://api.microlink.io/?url=${encodeURIComponent(websiteUrl.startsWith('http') ? websiteUrl : 'https://' + websiteUrl)}&screenshot=true&meta=false&embed=screenshot.url&viewport.width=375&viewport.height=667&viewport.deviceScaleFactor=2&viewport.isMobile=true` : '',
+      desktop_screenshot_url: websiteUrl ? `https://image.thum.io/get/width/1280/crop/800/noanimate/${websiteUrl.startsWith('http') ? websiteUrl : 'https://' + websiteUrl}` : '',
+      mobile_screenshot_url: websiteUrl ? `https://image.thum.io/get/width/375/crop/667/viewportWidth/375/noanimate/${websiteUrl.startsWith('http') ? websiteUrl : 'https://' + websiteUrl}` : '',
       overall_assessment: "Web sitesi tasarımı eski teknolojileri yansıtmaktadır. Modern web standartlarının gerisinde kalan tasarım, kullanıcı deneyimini olumsuz etkilemektedir.",
       highlights: [
         "Görsel tasarım güncel değil, kurumsal kimlik zayıf",
@@ -1882,18 +1883,25 @@ digiBot bu rapora tam erişime sahiptir ve tüm detayları bilmektedir.
                                       </div>
                                       {/* Screenshot */}
                                       <div className="relative bg-slate-100 dark:bg-slate-900 aspect-[16/10] overflow-hidden">
-                                        {analysisResult.ui_ux_review.desktop_screenshot_url && (
+                                        {analysisResult.ui_ux_review.desktop_screenshot_url ? (
                                           <img 
                                             src={analysisResult.ui_ux_review.desktop_screenshot_url}
                                             alt="Masaüstü görünüm"
-                                            className="w-full h-full object-cover object-top"
+                                            className="w-full h-full object-cover object-top relative z-10"
                                             loading="lazy"
+                                            onLoad={(e) => {
+                                              const target = e.target as HTMLImageElement;
+                                              target.style.opacity = '1';
+                                              const placeholder = target.nextElementSibling;
+                                              if (placeholder) (placeholder as HTMLElement).style.display = 'none';
+                                            }}
                                             onError={(e) => {
                                               const target = e.target as HTMLImageElement;
                                               target.style.display = 'none';
                                             }}
+                                            style={{ opacity: 0, transition: 'opacity 0.3s' }}
                                           />
-                                        )}
+                                        ) : null}
                                         <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900">
                                           <Monitor className="w-8 h-8 text-slate-300 dark:text-slate-600 mb-1" />
                                           <p className="text-[10px] text-slate-400">Yükleniyor...</p>
@@ -1923,18 +1931,25 @@ digiBot bu rapora tam erişime sahiptir ve tüm detayları bilmektedir.
                                       </div>
                                       {/* Screenshot */}
                                       <div className="relative bg-slate-100 dark:bg-slate-900 aspect-[9/16] overflow-hidden">
-                                        {analysisResult.ui_ux_review.mobile_screenshot_url && (
+                                        {analysisResult.ui_ux_review.mobile_screenshot_url ? (
                                           <img 
                                             src={analysisResult.ui_ux_review.mobile_screenshot_url}
                                             alt="Mobil görünüm"
-                                            className="w-full h-full object-cover object-top"
+                                            className="w-full h-full object-cover object-top relative z-10"
                                             loading="lazy"
+                                            onLoad={(e) => {
+                                              const target = e.target as HTMLImageElement;
+                                              target.style.opacity = '1';
+                                              const placeholder = target.nextElementSibling;
+                                              if (placeholder) (placeholder as HTMLElement).style.display = 'none';
+                                            }}
                                             onError={(e) => {
                                               const target = e.target as HTMLImageElement;
                                               target.style.display = 'none';
                                             }}
+                                            style={{ opacity: 0, transition: 'opacity 0.3s' }}
                                           />
-                                        )}
+                                        ) : null}
                                         <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-900">
                                           <Smartphone className="w-6 h-6 text-slate-300 dark:text-slate-600 mb-1" />
                                           <p className="text-[8px] text-slate-400">Yükleniyor...</p>
