@@ -326,9 +326,11 @@ const generateMockAnalysis = (companyName: string, websiteUrl: string, email: st
         "Navigasyon ve kullanıcı yönlendirmesi zayıf",
         "Sayfa yükleme hızı çok düşük"
       ],
-      // Screenshot URL'leri - thum.io API (ücretsiz, API key gerektirmez)
-      desktop_screenshot_url: websiteUrl ? `https://image.thum.io/get/width/1280/crop/800/noanimate/${websiteUrl.startsWith('http') ? websiteUrl : 'https://' + websiteUrl}` : undefined,
-      mobile_screenshot_url: websiteUrl ? `https://image.thum.io/get/width/375/crop/700/viewportWidth/375/noanimate/${websiteUrl.startsWith('http') ? websiteUrl : 'https://' + websiteUrl}` : undefined
+      // Screenshot URL'leri - Microlink API (delay ile sayfa tam yüklensin)
+      // Masaüstü: 1280x800 (16:10 aspect ratio)
+      desktop_screenshot_url: websiteUrl ? `https://api.microlink.io/?url=${encodeURIComponent(websiteUrl.startsWith('http') ? websiteUrl : 'https://' + websiteUrl)}&screenshot=true&meta=false&embed=screenshot.url&viewport.width=1280&viewport.height=800&viewport.deviceScaleFactor=1&waitUntil=networkidle2` : undefined,
+      // Mobil: 390x844 (iPhone 14 Pro - 9:19.5 aspect ratio)
+      mobile_screenshot_url: websiteUrl ? `https://api.microlink.io/?url=${encodeURIComponent(websiteUrl.startsWith('http') ? websiteUrl : 'https://' + websiteUrl)}&screenshot=true&meta=false&embed=screenshot.url&viewport.width=390&viewport.height=844&viewport.deviceScaleFactor=2&viewport.isMobile=true&waitUntil=networkidle2` : undefined
     },
     
     scores: {
@@ -1840,8 +1842,8 @@ digiBot bu rapora tam erişime sahiptir ve tüm detayları bilmektedir.
                                     {analysisResult.website_url}
                                   </div>
                                 </div>
-                                {/* Screenshot Container */}
-                                <div className="relative aspect-[16/10] bg-slate-800 dark:bg-slate-700 rounded-lg overflow-hidden">
+                                {/* Screenshot Container - 16:10 aspect ratio */}
+                                <div className="relative bg-slate-800 dark:bg-slate-700 rounded-lg overflow-hidden" style={{ aspectRatio: '16/10' }}>
                                   {analysisResult.ui_ux_review.desktop_screenshot_url ? (
                                     <img 
                                       src={analysisResult.ui_ux_review.desktop_screenshot_url}
@@ -1892,8 +1894,8 @@ digiBot bu rapora tam erişime sahiptir ve tüm detayları bilmektedir.
                                   <div className="absolute top-4 left-1/2 -translate-x-1/2 w-20 h-5 bg-slate-900 dark:bg-slate-800 rounded-full z-10 flex items-center justify-center">
                                     <div className="w-2 h-2 rounded-full bg-slate-700 dark:bg-slate-600" />
                                   </div>
-                                  {/* Screen */}
-                                  <div className="relative bg-slate-800 dark:bg-slate-700 rounded-[2rem] overflow-hidden" style={{ aspectRatio: '9/19.5' }}>
+                                  {/* Screen - iPhone 14 Pro aspect ratio 390:844 */}
+                                  <div className="relative bg-slate-800 dark:bg-slate-700 rounded-[2rem] overflow-hidden" style={{ aspectRatio: '390/844' }}>
                                     {analysisResult.ui_ux_review.mobile_screenshot_url ? (
                                       <img 
                                         src={analysisResult.ui_ux_review.mobile_screenshot_url}
