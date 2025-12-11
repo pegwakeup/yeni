@@ -7,6 +7,7 @@ import AuroraBackground from '@/components/ui/effects/aurora-background';
 // Define the props interface for type safety and reusability
 interface DigibotHeroProps {
   logoText?: string;
+  logoSrc?: string;
   navLinks?: { label: string; href: string }[];
   mainText: string;
   readMoreLink?: string;
@@ -45,6 +46,7 @@ const SocialIcon = ({ href, icon: Icon }: { href: string; icon: LucideIcon }) =>
 // The main reusable Hero Section component styled for Unilancer
 export const DigibotHero = ({
   logoText,
+  logoSrc,
   navLinks = [],
   mainText,
   readMoreLink,
@@ -114,6 +116,21 @@ export const DigibotHero = ({
           transition={{ duration: 0.6, delay: 0.8 }}
           className="z-30 order-2 mt-8 text-center lg:order-1 lg:mt-0 lg:text-left"
         >
+          {/* Logo above text */}
+          {logoSrc && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, delay: 0.6 }}
+              className="mb-6 flex justify-center lg:justify-start"
+            >
+              <img 
+                src={logoSrc} 
+                alt="digiBot" 
+                className="h-16 w-16 object-contain drop-shadow-lg"
+              />
+            </motion.div>
+          )}
           <p className="mx-auto max-w-sm text-base leading-relaxed text-slate-600 dark:text-gray-400 lg:mx-0">
             {mainText}
           </p>

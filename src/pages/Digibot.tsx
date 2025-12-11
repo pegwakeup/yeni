@@ -41,9 +41,10 @@ const Digibot = () => {
       <DigibotHero
         imageSrc="https://ctncspdgguclpeijikfp.supabase.co/storage/v1/object/public/Landing%20Page/digibotefendi.webp"
         imageAlt="digiBot - AI Dijital Asistan"
+        logoSrc="https://ctncspdgguclpeijikfp.supabase.co/storage/v1/object/public/Landing%20Page/dijibotkucuk.webp"
         overlayText={{
           part1: 'digiBot',
-          part2: 'AI Asistan',
+          part2: 'Yakında',
         }}
         mainText="Sektörünüzü analiz eder, kritik ihtiyaçları belirler ve uygun hizmet akışını otomatik olarak kurar. İşletmeniz için akıllı dijital asistan."
         showFooter
