@@ -39,7 +39,7 @@ const Digibot = () => {
       </Helmet>
       
       <DigibotHero
-        imageSrc="https://ctncspdgguclpeijikfp.supabase.co/storage/v1/object/public/Landing%20Page/dijibotuyuk.webp"
+        imageSrc="https://ctncspdgguclpeijikfp.supabase.co/storage/v1/object/public/Landing%20Page/digibotefendi.webp"
         imageAlt="digiBot - AI Dijital Asistan"
         overlayText={{
           part1: 'digiBot',
