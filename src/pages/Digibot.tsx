@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 import { DigibotHero } from '../components/ui/digibot-hero';
-import { CheckCircle2, Users, ArrowUpRight, BarChart3, FileSearch, Linkedin, Twitter, Instagram } from 'lucide-react';
+import { CheckCircle2, Users, ArrowUpRight, Linkedin, Twitter, Instagram } from 'lucide-react';
 
 const Digibot = () => {
   const [email, setEmail] = useState('');
@@ -97,32 +97,6 @@ const Digibot = () => {
             <Users className="w-4 h-4" />
             <span className="font-medium text-slate-700 dark:text-white">2,000+</span> kişi bekleme listesinde
           </p>
-
-          {/* Feature Cards */}
-          <div className="grid sm:grid-cols-2 gap-4 mt-8 max-w-lg">
-            <div className="p-4 rounded-2xl bg-white/60 dark:bg-white/5 border border-slate-200/50 dark:border-white/10 backdrop-blur-sm">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <BarChart3 className="w-4 h-4 text-primary" />
-                </div>
-                <span className="font-semibold text-slate-900 dark:text-white text-sm">İşletmeler için</span>
-              </div>
-              <p className="text-sm text-slate-600 dark:text-gray-400 leading-relaxed">
-                Sektörünüzü analiz eder, kritik ihtiyaçları belirler.
-              </p>
-            </div>
-            <div className="p-4 rounded-2xl bg-white/60 dark:bg-white/5 border border-slate-200/50 dark:border-white/10 backdrop-blur-sm">
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <FileSearch className="w-4 h-4 text-primary" />
-                </div>
-                <span className="font-semibold text-slate-900 dark:text-white text-sm">Freelancerlar için</span>
-              </div>
-              <p className="text-sm text-slate-600 dark:text-gray-400 leading-relaxed">
-                Net brief oluşturur, otomatik görev akışları sağlar.
-              </p>
-            </div>
-          </div>
         </div>
       </DigibotHero>
     </>

@@ -127,7 +127,7 @@ export const DigibotHero = ({
               <img 
                 src={logoSrc} 
                 alt="digiBot" 
-                className="h-16 w-16 object-contain drop-shadow-lg"
+                className="h-24 w-24 object-contain drop-shadow-lg"
               />
             </motion.div>
           )}
@@ -156,25 +156,25 @@ export const DigibotHero = ({
 
         {/* Center Image with Gradient Circle */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none lg:relative lg:order-2">
-          {/* Main Circle - Solid like original */}
+          {/* Main Circle - Solid like original - reduced by 20% */}
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
-            className="absolute z-0 h-[400px] w-[400px] rounded-full bg-gradient-to-br from-primary/90 to-primary-light/80 md:h-[500px] md:w-[500px] lg:h-[600px] lg:w-[600px]"
+            className="absolute z-0 h-[320px] w-[320px] rounded-full bg-gradient-to-br from-primary/90 to-primary-light/80 md:h-[400px] md:w-[400px] lg:h-[480px] lg:w-[480px]"
           />
-          {/* Decorative Ring */}
+          {/* Decorative Ring - reduced by 20% */}
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 0.4 }}
             transition={{ duration: 1, ease: [0.22, 1, 0.36, 1], delay: 0.4 }}
-            className="absolute z-0 h-[440px] w-[440px] rounded-full border-2 border-primary/40 md:h-[540px] md:w-[540px] lg:h-[660px] lg:w-[660px]"
+            className="absolute z-0 h-[352px] w-[352px] rounded-full border-2 border-primary/40 md:h-[432px] md:w-[432px] lg:h-[528px] lg:w-[528px]"
           />
           
           <motion.img
             src={imageSrc}
             alt={imageAlt}
-            className="relative z-10 h-auto w-[350px] object-contain drop-shadow-2xl md:w-[450px] lg:w-[550px]"
+            className="relative z-10 h-auto w-[385px] object-contain drop-shadow-2xl md:w-[495px] lg:w-[605px]"
             style={{ transform: 'translateY(10%)' }}
             initial={{ opacity: 0, y: 80 }}
             animate={{ opacity: 1, y: 0 }}
