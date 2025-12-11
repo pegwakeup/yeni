@@ -106,13 +106,13 @@ export const DigibotHero = ({
       )}
 
       {/* Main Content Area */}
-      <div className="relative z-10 grid w-full max-w-[1340px] flex-grow grid-cols-1 items-center px-4 pt-24 pb-12 sm:px-6 lg:grid-cols-3 lg:px-8">
+      <div className="relative z-10 grid w-full max-w-[1600px] flex-grow grid-cols-1 items-center px-4 pt-24 pb-12 sm:px-6 lg:grid-cols-3 lg:px-12">
         {/* Left Text Content */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.8 }}
-          className="z-20 order-2 mt-8 text-center lg:order-1 lg:mt-0 lg:text-left"
+          className="z-30 order-2 mt-8 text-center lg:order-1 lg:mt-0 lg:text-left"
         >
           <p className="mx-auto max-w-sm text-base leading-relaxed text-slate-600 dark:text-gray-400 lg:mx-0">
             {mainText}
@@ -138,34 +138,28 @@ export const DigibotHero = ({
         </motion.div>
 
         {/* Center Image with Gradient Circle */}
-        <div className="relative order-1 flex h-full items-center justify-center lg:order-2 min-h-[400px] md:min-h-[500px]">
-          {/* Glow Effect */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none lg:relative lg:order-2">
+          {/* Main Circle - Solid like original */}
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
-            className="absolute z-0 h-[300px] w-[300px] rounded-full bg-gradient-to-br from-primary/80 to-primary-dark/60 blur-sm md:h-[400px] md:w-[400px] lg:h-[500px] lg:w-[500px]"
-          />
-          {/* Inner Circle */}
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1], delay: 0.3 }}
-            className="absolute z-0 h-[280px] w-[280px] rounded-full bg-gradient-to-br from-primary to-primary-light md:h-[380px] md:w-[380px] lg:h-[480px] lg:w-[480px]"
+            className="absolute z-0 h-[400px] w-[400px] rounded-full bg-gradient-to-br from-primary/90 to-primary-light/80 md:h-[500px] md:w-[500px] lg:h-[600px] lg:w-[600px]"
           />
           {/* Decorative Ring */}
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 0.3 }}
+            animate={{ scale: 1, opacity: 0.4 }}
             transition={{ duration: 1, ease: [0.22, 1, 0.36, 1], delay: 0.4 }}
-            className="absolute z-0 h-[340px] w-[340px] rounded-full border-2 border-primary/30 md:h-[440px] md:w-[440px] lg:h-[540px] lg:w-[540px]"
+            className="absolute z-0 h-[440px] w-[440px] rounded-full border-2 border-primary/40 md:h-[540px] md:w-[540px] lg:h-[660px] lg:w-[660px]"
           />
           
           <motion.img
             src={imageSrc}
             alt={imageAlt}
-            className="relative z-10 h-auto w-56 scale-150 object-contain drop-shadow-2xl md:w-64 lg:w-72"
-            initial={{ opacity: 0, y: 50 }}
+            className="relative z-10 h-auto w-[350px] object-contain drop-shadow-2xl md:w-[450px] lg:w-[550px]"
+            style={{ transform: 'translateY(10%)' }}
+            initial={{ opacity: 0, y: 80 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, ease: [0.22, 1, 0.36, 1], delay: 0.5 }}
             onError={(e) => {
@@ -176,18 +170,16 @@ export const DigibotHero = ({
           />
         </div>
 
-        {/* Right Text - Big Typography */}
+        {/* Right Text - Big Typography - ON TOP of image */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 1 }}
-          className="z-20 order-3 mt-8 flex items-center justify-center text-center lg:mt-0 lg:justify-start lg:text-left"
+          className="z-30 order-3 mt-8 flex items-center justify-center text-center lg:mt-0 lg:justify-start lg:text-left"
         >
-          <h1 className="text-5xl font-extrabold leading-[0.9] tracking-tight text-slate-900 dark:text-white sm:text-6xl md:text-7xl lg:text-8xl">
-            <span className="block">{overlayText.part1}</span>
-            <span className="block bg-gradient-to-r from-primary to-primary-dark bg-clip-text text-transparent">
-              {overlayText.part2}
-            </span>
+          <h1 className="text-6xl font-extrabold leading-[0.85] tracking-tight sm:text-7xl md:text-8xl lg:text-9xl">
+            <span className="block text-slate-900 dark:text-white">{overlayText.part1}</span>
+            <span className="block text-slate-900 dark:text-white">{overlayText.part2}</span>
           </h1>
         </motion.div>
       </div>
