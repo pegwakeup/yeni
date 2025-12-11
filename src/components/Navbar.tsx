@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Menu, X, Rocket, Users, ChevronDown, Code2, Palette,
   Globe, BrainCircuit, PaintBucket,
@@ -23,15 +23,15 @@ const getDigitAllServices = (t: (key: string) => string, lang: string) => [
   { icon: Palette, label: t('service.graphics'), path: getRouteForLanguage('/hizmetler/grafik-tasarim', lang as 'tr' | 'en') }
 ];
 
-const NavLink = ({ to, active, children, onClick, isDarkHero }: {
+const NavLink = ({ to, active, children, onNavigate, isDarkHero }: {
   to: string;
   active: boolean;
   children: React.ReactNode;
-  onClick?: () => void;
+  onNavigate: (path: string) => void;
   isDarkHero?: boolean;
 }) => (
-  <Link
-    to={to}
+  <button
+    onClick={() => onNavigate(to)}
     className={`
       px-4 py-2 rounded-lg transition-all duration-300 relative group text-base font-medium
       ${active
@@ -41,7 +41,6 @@ const NavLink = ({ to, active, children, onClick, isDarkHero }: {
         : 'text-slate-700 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white'}
       ${isDarkHero ? 'hover:bg-white/5' : 'hover:bg-slate-100/70 dark:hover:bg-white/5'} focus:outline-none focus-visible:ring-2 focus-visible:ring-primary
     `}
-    onClick={onClick}
   >
     {children}
     {active && (
@@ -51,16 +50,15 @@ const NavLink = ({ to, active, children, onClick, isDarkHero }: {
         transition={{ type: "spring", stiffness: 380, damping: 30 }}
       />
     )}
-  </Link>
+  </button>
 );
 
-const ActionButton = ({ href, icon: Icon, primary, children, onClick, isLink = false }: { 
+const ActionButton = ({ href, icon: Icon, primary, children, onNavigate }: { 
   href: string; 
   icon: React.ElementType; 
   primary?: boolean; 
   children: React.ReactNode;
-  onClick?: () => void;
-  isLink?: boolean;
+  onNavigate: (path: string) => void;
 }) => {
   const className = `
     flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 text-base font-medium
@@ -83,13 +81,12 @@ const ActionButton = ({ href, icon: Icon, primary, children, onClick, isLink = f
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
     >
-      <Link
-        to={href}
+      <button
+        onClick={() => onNavigate(href)}
         className={className}
-        onClick={onClick}
       >
         {content}
-      </Link>
+      </button>
     </motion.div>
   );
 };
@@ -103,6 +100,7 @@ const Navbar = () => {
   const [mobileCorporateOpen, setMobileCorporateOpen] = useState(false);
   const [isCalendlyOpen, setIsCalendlyOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
   const { language, toggleLanguage, t } = useTranslation();
 
@@ -116,6 +114,23 @@ const Navbar = () => {
     setMobileServicesOpen(false);
     setMobileCorporateOpen(false);
   }, []);
+
+  const scrollToTop = useCallback(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  }, []);
+
+  // Navigate and close menus - ensures menu closes before navigation
+  const handleNavigation = useCallback((path: string) => {
+    closeAllMenus();
+    scrollToTop();
+    // Small delay to ensure menu animation completes
+    setTimeout(() => {
+      navigate(path);
+    }, 10);
+  }, [closeAllMenus, navigate, scrollToTop]);
 
   const handleScroll = useCallback(() => {
     const scrolled = window.scrollY > 50;
@@ -162,13 +177,6 @@ const Navbar = () => {
     }
   }, [isServicesOpen]);
 
-  const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth'
-    });
-  };
-
   const isUniversitiesPage = location.pathname.includes('/universities') || location.pathname.includes('/universiteliler');
   // Blog detay sayfasında navbar her zaman solid olsun
   const isBlogDetailPage = /\/blog\/[^/]+$/.test(location.pathname);
@@ -203,10 +211,9 @@ const Navbar = () => {
       <div className="max-w-[1600px] mx-auto px-8 sm:px-12 lg:px-24">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link
-            to="/"
+          <button
+            onClick={() => handleNavigation('/')}
             className="flex items-center space-x-3 group focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-lg"
-            onClick={scrollToTop}
           >
             <motion.div
               whileHover={{ scale: 1.05 }}
@@ -225,7 +232,7 @@ const Navbar = () => {
                 }}
               />
             </motion.div>
-          </Link>
+          </button>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center justify-center">
@@ -269,10 +276,10 @@ const Navbar = () => {
                 </button>
               </div>
 
-              <NavLink to={getRouteForLanguage('/universities', language)} active={location.pathname.includes('/universities') || location.pathname.includes('/universiteliler')} onClick={scrollToTop} isDarkHero={isDarkHero}>
+              <NavLink to={getRouteForLanguage('/universities', language)} active={location.pathname.includes('/universities') || location.pathname.includes('/universiteliler')} onNavigate={handleNavigation} isDarkHero={isDarkHero}>
                 {t('nav.universities', 'Üniversiteliler')}
               </NavLink>
-              <NavLink to={getRouteForLanguage('/digibot', language)} active={location.pathname.includes('/digibot')} onClick={scrollToTop} isDarkHero={isDarkHero}>
+              <NavLink to={getRouteForLanguage('/digibot', language)} active={location.pathname.includes('/digibot')} onNavigate={handleNavigation} isDarkHero={isDarkHero}>
                 digiBot
               </NavLink>
 
@@ -314,27 +321,24 @@ const Navbar = () => {
                       className="absolute top-full left-0 w-48 pt-2"
                     >
                       <div className="bg-white dark:bg-[#1a1a1a] rounded-xl shadow-xl border border-slate-200/80 dark:border-slate-700/40 overflow-hidden p-2">
-                        <Link
-                          to={getRouteForLanguage('/about', language)}
-                          className="block px-4 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/5 text-slate-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors"
-                          onClick={() => { closeAllMenus(); scrollToTop(); }}
+                        <button
+                          onClick={() => handleNavigation(getRouteForLanguage('/about', language))}
+                          className="block w-full text-left px-4 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/5 text-slate-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors"
                         >
                           {t('nav.about')}
-                        </Link>
-                        <Link
-                          to={getRouteForLanguage('/team', language)}
-                          className="block px-4 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/5 text-slate-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors"
-                          onClick={() => { closeAllMenus(); scrollToTop(); }}
+                        </button>
+                        <button
+                          onClick={() => handleNavigation(getRouteForLanguage('/team', language))}
+                          className="block w-full text-left px-4 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/5 text-slate-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors"
                         >
                           {t('nav.team', 'Ekibimiz')}
-                        </Link>
-                        <Link
-                          to={getRouteForLanguage('/contact', language)}
-                          className="block px-4 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/5 text-slate-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors"
-                          onClick={() => { closeAllMenus(); scrollToTop(); }}
+                        </button>
+                        <button
+                          onClick={() => handleNavigation(getRouteForLanguage('/contact', language))}
+                          className="block w-full text-left px-4 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/5 text-slate-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary transition-colors"
                         >
                           {t('nav.contact')}
-                        </Link>
+                        </button>
                       </div>
                     </motion.div>
                   )}
@@ -342,7 +346,7 @@ const Navbar = () => {
               </div>
 
               {language !== 'en' && (
-                <NavLink to={getRouteForLanguage('/blog', language)} active={location.pathname.includes('/blog')} onClick={scrollToTop} isDarkHero={isDarkHero}>
+                <NavLink to={getRouteForLanguage('/blog', language)} active={location.pathname.includes('/blog')} onNavigate={handleNavigation} isDarkHero={isDarkHero}>
                   {t('nav.blog')}
                 </NavLink>
               )}
@@ -385,26 +389,21 @@ const Navbar = () => {
                               {t('nav.solutionsDesc', 'İşletmenizi geleceğe taşıyacak profesyonel hizmetler')}
                             </p>
                           </div>
-                          <Link 
-                            to="/services" 
+                          <button 
+                            onClick={() => handleNavigation('/services')}
                             className="text-sm font-medium text-primary hover:text-primary-dark flex items-center gap-1 group transition-colors"
-                            onClick={() => { closeAllMenus(); scrollToTop(); }}
                           >
                             {t('nav.viewAll', 'Tümünü Gör')}
                             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                          </Link>
+                          </button>
                         </div>
 
                         <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
                           {digitAllServices.map((service, index) => (
-                            <Link
+                            <button
                               key={index}
-                              to={service.path}
-                              className="group flex items-start gap-4 p-4 rounded-2xl hover:bg-slate-50 dark:hover:bg-white/5 transition-all duration-200 border border-transparent hover:border-slate-200 dark:hover:border-white/5"
-                              onClick={() => {
-                                closeAllMenus();
-                                scrollToTop();
-                              }}
+                              onClick={() => handleNavigation(service.path)}
+                              className="group flex items-start gap-4 p-4 rounded-2xl hover:bg-slate-50 dark:hover:bg-white/5 transition-all duration-200 border border-transparent hover:border-slate-200 dark:hover:border-white/5 text-left"
                             >
                               <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-slate-100 dark:bg-zinc-800 flex items-center justify-center group-hover:bg-white dark:group-hover:bg-zinc-700 group-hover:shadow-sm transition-all duration-200">
                                 <service.icon className="w-5 h-5 text-slate-600 dark:text-slate-400 group-hover:text-primary transition-colors" />
@@ -417,7 +416,7 @@ const Navbar = () => {
                                   {t('nav.clickForDetails', 'Detaylı bilgi için tıklayın')}
                                 </p>
                               </div>
-                            </Link>
+                            </button>
                           ))}
                         </div>
                       </div>
@@ -545,10 +544,10 @@ const Navbar = () => {
               >
                 NEXTGEN
               </motion.a>
-              <ActionButton href={getRouteForLanguage('/basvuru', language as 'tr' | 'en')} icon={Users} isLink>
+              <ActionButton href={getRouteForLanguage('/basvuru', language as 'tr' | 'en')} icon={Users} onNavigate={handleNavigation}>
                 {t('nav.joinUs')}
               </ActionButton>
-              <ActionButton href={getRouteForLanguage('/proje-talebi', language as 'tr' | 'en')} icon={Rocket} primary isLink>
+              <ActionButton href={getRouteForLanguage('/proje-talebi', language as 'tr' | 'en')} icon={Rocket} primary onNavigate={handleNavigation}>
                 {t('nav.getQuote')}
               </ActionButton>
             </div>
@@ -631,22 +630,20 @@ const Navbar = () => {
 
               {/* Join Us and Get Quote Buttons - Mobile */}
               <div className="grid grid-cols-2 gap-3">
-                <Link
-                  to={getRouteForLanguage('/basvuru', language as 'tr' | 'en')}
+                <button
+                  onClick={() => handleNavigation(getRouteForLanguage('/basvuru', language as 'tr' | 'en'))}
                   className="flex items-center justify-center gap-2 px-4 py-3.5 min-h-[52px] bg-slate-100 dark:bg-white/10 text-slate-900 dark:text-white rounded-xl active:scale-[0.98] transition-all font-semibold"
-                  onClick={closeAllMenus}
                 >
                   <Users className="w-5 h-5" />
                   <span>{t('nav.joinUs')}</span>
-                </Link>
-                <Link
-                  to={getRouteForLanguage('/proje-talebi', language as 'tr' | 'en')}
+                </button>
+                <button
+                  onClick={() => handleNavigation(getRouteForLanguage('/proje-talebi', language as 'tr' | 'en'))}
                   className="flex items-center justify-center gap-2 px-4 py-3.5 min-h-[52px] bg-primary text-white rounded-xl active:scale-[0.98] transition-all font-semibold shadow-lg shadow-primary/25"
-                  onClick={closeAllMenus}
                 >
                   <Rocket className="w-5 h-5" />
                   <span>{t('nav.getQuote')}</span>
-                </Link>
+                </button>
               </div>
 
               {/* Divider */}
@@ -672,25 +669,23 @@ const Navbar = () => {
                 {mobileServicesOpen && (
                   <div className="px-3 pb-3 grid grid-cols-2 gap-2">
                     {digitAllServices.map((service, index) => (
-                      <Link
+                      <button
                         key={index}
-                        to={service.path}
-                        className="flex items-center gap-2.5 p-3 min-h-[48px] bg-white dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/5"
-                        onClick={closeAllMenus}
+                        onClick={() => handleNavigation(service.path)}
+                        className="flex items-center gap-2.5 p-3 min-h-[48px] bg-white dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/5 text-left w-full"
                       >
                         <service.icon className="w-4 h-4 text-primary flex-shrink-0" />
                         <span className="text-sm font-medium text-slate-700 dark:text-slate-200 truncate">{service.label}</span>
-                      </Link>
+                      </button>
                     ))}
                   </div>
                 )}
               </div>
 
               {/* Universities Link */}
-              <Link
-                to={getRouteForLanguage('/universities', language)}
-                className="flex items-center justify-between px-4 py-4 min-h-[56px] rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200/50 dark:border-white/5"
-                onClick={closeAllMenus}
+              <button
+                onClick={() => handleNavigation(getRouteForLanguage('/universities', language))}
+                className="flex items-center justify-between px-4 py-4 min-h-[56px] rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200/50 dark:border-white/5 w-full text-left"
               >
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-purple-500/10 rounded-xl flex items-center justify-center">
@@ -699,13 +694,12 @@ const Navbar = () => {
                   <span className="font-semibold text-slate-900 dark:text-white">{t('nav.universities', 'Üniversiteliler')}</span>
                 </div>
                 <ArrowRight className="w-5 h-5 text-slate-400" />
-              </Link>
+              </button>
 
               {/* digiBot Link */}
-              <Link
-                to={getRouteForLanguage('/digibot', language)}
-                className="flex items-center justify-between px-4 py-4 min-h-[56px] rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200/50 dark:border-white/5"
-                onClick={closeAllMenus}
+              <button
+                onClick={() => handleNavigation(getRouteForLanguage('/digibot', language))}
+                className="flex items-center justify-between px-4 py-4 min-h-[56px] rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200/50 dark:border-white/5 w-full text-left"
               >
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-orange-500/10 rounded-xl flex items-center justify-center">
@@ -714,7 +708,7 @@ const Navbar = () => {
                   <span className="font-semibold text-slate-900 dark:text-white">digiBot</span>
                 </div>
                 <ArrowRight className="w-5 h-5 text-slate-400" />
-              </Link>
+              </button>
 
               {/* Kurumsal Accordion */}
               <div className="rounded-2xl overflow-hidden bg-slate-50 dark:bg-white/5 border border-slate-200/50 dark:border-white/5">
@@ -732,47 +726,42 @@ const Navbar = () => {
                 </button>
                 {mobileCorporateOpen && (
                   <div className="px-3 pb-3 space-y-2">
-                    <Link
-                      to={getRouteForLanguage('/about', language)}
-                      className="flex items-center gap-3 p-3 min-h-[48px] bg-white dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/5"
-                      onClick={closeAllMenus}
+                    <button
+                      onClick={() => handleNavigation(getRouteForLanguage('/about', language))}
+                      className="flex items-center gap-3 p-3 min-h-[48px] bg-white dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/5 w-full text-left"
                     >
                       <FileText className="w-4 h-4 text-primary" />
                       <span className="text-sm font-medium text-slate-700 dark:text-slate-200">{t('nav.about')}</span>
-                    </Link>
-                    <Link
-                      to={getRouteForLanguage('/team', language)}
-                      className="flex items-center gap-3 p-3 min-h-[48px] bg-white dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/5"
-                      onClick={closeAllMenus}
+                    </button>
+                    <button
+                      onClick={() => handleNavigation(getRouteForLanguage('/team', language))}
+                      className="flex items-center gap-3 p-3 min-h-[48px] bg-white dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/5 w-full text-left"
                     >
                       <Users className="w-4 h-4 text-primary" />
                       <span className="text-sm font-medium text-slate-700 dark:text-slate-200">{t('nav.team')}</span>
-                    </Link>
-                    <Link
-                      to={getRouteForLanguage('/portfolio', language)}
-                      className="flex items-center gap-3 p-3 min-h-[48px] bg-white dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/5"
-                      onClick={closeAllMenus}
+                    </button>
+                    <button
+                      onClick={() => handleNavigation(getRouteForLanguage('/portfolio', language))}
+                      className="flex items-center gap-3 p-3 min-h-[48px] bg-white dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/5 w-full text-left"
                     >
                       <Palette className="w-4 h-4 text-primary" />
                       <span className="text-sm font-medium text-slate-700 dark:text-slate-200">{t('nav.portfolio')}</span>
-                    </Link>
-                    <Link
-                      to={getRouteForLanguage('/contact', language)}
-                      className="flex items-center gap-3 p-3 min-h-[48px] bg-white dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/5"
-                      onClick={closeAllMenus}
+                    </button>
+                    <button
+                      onClick={() => handleNavigation(getRouteForLanguage('/contact', language))}
+                      className="flex items-center gap-3 p-3 min-h-[48px] bg-white dark:bg-white/5 rounded-xl border border-slate-100 dark:border-white/5 w-full text-left"
                     >
                       <MessageSquare className="w-4 h-4 text-primary" />
                       <span className="text-sm font-medium text-slate-700 dark:text-slate-200">{t('nav.contact')}</span>
-                    </Link>
+                    </button>
                   </div>
                 )}
               </div>
 
               {/* Blog Link */}
-              <Link
-                to={getRouteForLanguage('/blog', language)}
-                className="flex items-center justify-between px-4 py-4 min-h-[56px] rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200/50 dark:border-white/5"
-                onClick={closeAllMenus}
+              <button
+                onClick={() => handleNavigation(getRouteForLanguage('/blog', language))}
+                className="flex items-center justify-between px-4 py-4 min-h-[56px] rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200/50 dark:border-white/5 w-full text-left"
               >
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-green-500/10 rounded-xl flex items-center justify-center">
@@ -781,7 +770,7 @@ const Navbar = () => {
                   <span className="font-semibold text-slate-900 dark:text-white">Blog</span>
                 </div>
                 <ArrowRight className="w-5 h-5 text-slate-400" />
-              </Link>
+              </button>
 
               {/* Divider */}
               <div className="h-px bg-slate-200 dark:bg-white/10" />
