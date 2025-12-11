@@ -2523,68 +2523,6 @@ export const staticTranslations: Record<string, Record<Language, string>> = {
     en: 'Open in Map'
   },
 
-  // About Page - Additional Translations
-  'about.hero.title_prefix': {
-    tr: 'Unilancer ile',
-    en: 'With Unilancer'
-  },
-  'about.hero.title_suffix': {
-    tr: 'Geleceği İnşa Edin',
-    en: 'Build the Future'
-  },
-  'about.hero.description': {
-    tr: 'Türkiye\'nin en yetenekli üniversite öğrencileri ve mezunları ile işletmeleri buluşturan yeni nesil iş platformu.',
-    en: 'A new generation business platform that connects Turkey\'s most talented university students and graduates with businesses.'
-  },
-  'about.hero.contact_button': {
-    tr: 'İletişime Geç',
-    en: 'Get in Touch'
-  },
-  'about.hero.portfolio_button': {
-    tr: 'Projelerimizi İncele',
-    en: 'View Our Projects'
-  },
-  'about.story.badge': {
-    tr: 'Hikayemiz',
-    en: 'Our Story'
-  },
-  'about.story.p1_part1': {
-    tr: 'Unilancer, Türkiye\'nin en parlak genç yeteneklerini, vizyoner işletmelerle buluşturan',
-    en: 'Unilancer brings together Turkey\'s brightest young talents with visionary businesses as'
-  },
-  'about.story.p1_highlight': {
-    tr: 'dinamik bir ekosistemdir',
-    en: 'a dynamic ecosystem'
-  },
-  'about.story.p1_part2': {
-    tr: 'Geleneksel freelance platformlarının ötesine geçerek, sürdürülebilir iş birlikleri ve kaliteli projeler üretmeyi hedefliyoruz.',
-    en: 'Going beyond traditional freelance platforms, we aim to produce sustainable collaborations and quality projects.'
-  },
-  'about.story.p2_part1': {
-    tr: 'Teknolojiye, inovasyona ve gençlerin potansiyeline inanıyoruz. Her projenin arkasında, tutkuyla çalışan ve sürekli kendini geliştiren bir ekip var. Biz sadece iş yapmıyoruz,',
-    en: 'We believe in technology, innovation and the potential of young people. Behind every project is a team that works with passion and constantly improves itself. We don\'t just do business,'
-  },
-  'about.story.p2_highlight': {
-    tr: 'geleceği birlikte tasarlıyoruz',
-    en: 'we design the future together'
-  },
-  'about.team_image_alt': {
-    tr: 'Unilancer Ekibi',
-    en: 'Unilancer Team'
-  },
-  'about.image_caption.family': {
-    tr: 'Unilancer Ailesi',
-    en: 'Unilancer Family'
-  },
-  'about.image_caption.stronger': {
-    tr: 'Birlikte Daha Güçlüyüz',
-    en: 'Stronger Together'
-  },
-  'about.view_all_team': {
-    tr: 'Tüm Ekibi Gör',
-    en: 'View All Team'
-  },
-
   // Team Section Translations
   'team.badge': {
     tr: 'Ekibimiz',
