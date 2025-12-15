@@ -62,6 +62,7 @@ import { signOut } from '../lib/auth';
 import { useTheme } from '../contexts/ThemeContext';
 import { exportAnalysisReportToPDF } from '../lib/utils/export';
 import { supabase } from '../lib/config/supabase';
+import { createDigitalAnalysisReport, triggerAnalysisWebhook, getDigitalAnalysisReportById } from '../lib/api/digitalAnalysis';
 
 // Types
 interface TechnicalStatus {
@@ -704,7 +705,7 @@ const Demo = () => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatMessages]);
 
-  // Handle form submission
+  // Handle form submission - triggers real n8n analysis
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -721,31 +722,123 @@ const Demo = () => {
     setCurrentStep('analyzing');
     setAnalysisProgress(0);
 
-    const progressInterval = setInterval(() => {
-      setAnalysisProgress(prev => {
-        if (prev >= 95) {
-          clearInterval(progressInterval);
-          return prev;
-        }
-        return prev + Math.random() * 12;
+    try {
+      // Step 1: Create report in database
+      const report = await createDigitalAnalysisReport({
+        company_name: formData.company_name,
+        website_url: cleanUrl,
+        requested_by: formData.email,
+        priority: 'medium'
       });
-    }, 600);
 
-    setTimeout(async () => {
-      clearInterval(progressInterval);
-      setAnalysisProgress(100);
+      if (!report || !report.id) {
+        throw new Error('Rapor oluşturulamadı');
+      }
+
+      setCurrentReportId(report.id);
+      toast.success('Analiz başlatıldı!');
+
+      // Step 2: Trigger n8n webhook
+      await triggerAnalysisWebhook(report.id);
+
+      // Step 3: Poll for results
+      let attempts = 0;
+      const maxAttempts = 60; // 5 minutes max (5s intervals)
       
+      const pollInterval = setInterval(async () => {
+        attempts++;
+        
+        // Update progress bar
+        setAnalysisProgress(Math.min(95, (attempts / maxAttempts) * 100));
+        
+        try {
+          const updatedReport = await getDigitalAnalysisReportById(report.id);
+          
+          if (updatedReport.status === 'completed' && updatedReport.analysis_result) {
+            clearInterval(pollInterval);
+            setAnalysisProgress(100);
+            
+            // Transform analysis_result to match AnalysisResult type
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const analysisData: any = updatedReport.analysis_result || {};
+            const scores = analysisData.scores || {};
+            const socialMedia = analysisData.social_media || {};
+            
+            const result: AnalysisResult = {
+              id: updatedReport.id,
+              company_name: updatedReport.company_name,
+              website_url: updatedReport.website_url,
+              email: formData.email,
+              digital_score: updatedReport.digital_score || 0,
+              sector: analysisData.sector || 'Genel',
+              location: analysisData.location || 'Türkiye',
+              scores: {
+                web_presence: scores.web_presence ?? scores.website ?? 0,
+                social_media: scores.social_media ?? 0,
+                brand_identity: scores.brand_identity ?? 0,
+                digital_marketing: scores.digital_marketing ?? scores.seo ?? 0,
+                user_experience: scores.user_experience ?? 0
+              },
+              strengths: analysisData.strengths || [],
+              weaknesses: analysisData.weaknesses || [],
+              recommendations: analysisData.recommendations || [],
+              summary: analysisData.executive_summary || analysisData.summary || '',
+              detailed_report: analysisData.detailed_report || '',
+              executive_summary: analysisData.executive_summary,
+              technical_status: analysisData.technical_status,
+              compliance: analysisData.compliance,
+              social_media: Object.keys(socialMedia).length > 0 ? {
+                website: socialMedia.website || updatedReport.website_url,
+                linkedin: socialMedia.linkedin || '',
+                instagram: socialMedia.instagram || '',
+                facebook: socialMedia.facebook || '',
+                ai_analysis: socialMedia.ai_analysis || ''
+              } : undefined,
+              social_media_profiles: analysisData.social_media_profiles,
+              opportunities: analysisData.opportunities,
+              pain_points: analysisData.pain_points,
+              roadmap: analysisData.roadmap,
+              ui_ux_review: analysisData.ui_ux_review
+            };
+            
+            setAnalysisResult(result);
+            setCurrentStep('results');
+            toast.success('Analiz tamamlandı!');
+            loadSavedReports();
+            
+            setChatMessages([{
+              id: '1',
+              role: 'assistant',
+              content: `Merhaba! 👋 Ben digiBot, Unilancer Labs'ın dijital asistanıyım.\n\n${formData.company_name} için hazırlanan dijital analiz raporunuz hazır. Genel dijital skorunuz **${result.digital_score}/100** olarak hesaplandı.\n\nRaporunuz hakkında sorularınızı yanıtlayabilir, Unilancer Labs'ın size nasıl yardımcı olabileceği konusunda bilgi verebilirim.\n\nNasıl yardımcı olabilirim?`,
+              timestamp: new Date()
+            }]);
+            
+          } else if (updatedReport.status === 'failed') {
+            clearInterval(pollInterval);
+            throw new Error(updatedReport.error_message || 'Analiz başarısız oldu');
+            
+          } else if (attempts >= maxAttempts) {
+            clearInterval(pollInterval);
+            // Timeout - show mock data with warning
+            toast.warning('Analiz uzun sürüyor. Demo verisi gösteriliyor.');
+            const result = generateMockAnalysis(formData.company_name, cleanUrl, formData.email);
+            setAnalysisResult(result);
+            setCurrentStep('results');
+          }
+        } catch (pollError) {
+          console.error('Polling error:', pollError);
+        }
+      }, 5000); // Poll every 5 seconds
+
+    } catch (error: any) {
+      console.error('Analysis error:', error);
+      toast.error(error.message || 'Analiz başlatılamadı');
+      
+      // Fallback to mock analysis
+      toast.info('Demo modu aktif edildi');
       const result = generateMockAnalysis(formData.company_name, cleanUrl, formData.email);
       setAnalysisResult(result);
       setCurrentStep('results');
-      toast.success('Analiz tamamlandı!');
-      
-      // Save to database and get report ID
-      const reportId = await saveReportToDatabase(result);
-      if (reportId) {
-        setCurrentReportId(reportId);
-        loadSavedReports(); // Refresh the list
-      }
       
       setChatMessages([{
         id: '1',
@@ -753,7 +846,7 @@ const Demo = () => {
         content: `Merhaba! 👋 Ben digiBot, Unilancer Labs'ın dijital asistanıyım.\n\n${formData.company_name} için hazırlanan dijital analiz raporunuz hazır. Genel dijital skorunuz **${result.digital_score}/100** olarak hesaplandı.\n\nRaporunuz hakkında sorularınızı yanıtlayabilir, Unilancer Labs'ın size nasıl yardımcı olabileceği konusunda bilgi verebilirim.\n\nNasıl yardımcı olabilirim?`,
         timestamp: new Date()
       }]);
-    }, 5000);
+    }
   };
 
   // Skip to demo
