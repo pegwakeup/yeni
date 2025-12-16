@@ -144,6 +144,13 @@ interface AnalysisResult {
     brand_identity: number;
     digital_marketing: number;
     user_experience: number;
+    // n8n ek alanları
+    website?: number;
+    seo?: number;
+    mobile_optimization?: number;
+    performance?: number;
+    security?: number;
+    overall?: number;
   };
   executive_summary?: string;
   sector_summary?: string;
@@ -167,6 +174,55 @@ interface AnalysisResult {
   // Legacy fields for compatibility
   summary: string;
   detailed_report: string;
+  
+  // n8n Turkish fields
+  firma_adi?: string;
+  sektor?: string;
+  ulke?: string;
+  musteri_kitlesi?: string;
+  firma_tanitimi?: string;
+  ui_ux_degerlendirmesi?: string;
+  guclu_yonler?: Array<{ baslik: string; aciklama: string; oneri?: string }>;
+  gelistirilmesi_gereken_alanlar?: Array<{
+    baslik: string;
+    mevcut_durum: string;
+    neden_onemli?: string;
+    cozum_onerisi: string;
+    oncelik: string;
+    tahmini_sure: string;
+    beklenen_etki?: string;
+  }>;
+  hizmet_paketleri?: Array<{
+    paket_adi: string;
+    aciklama?: string;
+    kapsam: string[];
+    tahmini_sure?: string;
+    beklenen_sonuc?: string;
+  }>;
+  stratejik_yol_haritasi?: {
+    vizyon?: string;
+    ilk_30_gun?: Array<{ aksiyon: string; neden: string }>;
+    '30_90_gun'?: Array<{ aksiyon: string; neden: string }>;
+    '90_365_gun'?: Array<{ aksiyon: string; neden: string }>;
+  };
+  sektor_ozel_oneriler?: Array<{ baslik: string; aciklama: string; ornek?: string }>;
+  rekabet_analizi?: {
+    genel_degerlendirme?: string;
+    avantajlar?: string[];
+    dezavantajlar?: string[];
+    firsat_alanlari?: string;
+  };
+  onemli_tespitler?: Array<{ tip: string; tespit: string; detay: string }>;
+  legal_compliance?: {
+    kvkk?: { status: string; aciklama: string };
+    cookie_policy?: { status: string; aciklama: string };
+    etbis?: { status: string; aciklama: string };
+  };
+  sonraki_adim?: {
+    cta_mesaji: string;
+    iletisim_onerisi?: string;
+    iletisim_bilgisi?: string;
+  };
 }
 
 interface ChatMessage {
@@ -593,6 +649,8 @@ const Demo = () => {
   const [emailMessage, setEmailMessage] = useState('');
   const [isSendingEmail, setIsSendingEmail] = useState(false);
   const [currentReportId, setCurrentReportId] = useState<string | null>(null);
+  const [analysisStatus, setAnalysisStatus] = useState<string>('');
+  const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   
   // Chat state
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
@@ -619,6 +677,16 @@ const Demo = () => {
     } catch (error) {
       console.error('Failed to load chat history:', error);
     }
+  }, []);
+
+  // Cleanup polling interval on unmount
+  useEffect(() => {
+    return () => {
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current);
+        pollIntervalRef.current = null;
+      }
+    };
   }, []);
 
   // Save chat history to localStorage
@@ -743,20 +811,76 @@ const Demo = () => {
 
       // Step 3: Poll for results
       let attempts = 0;
-      const maxAttempts = 60; // 5 minutes max (5s intervals)
+      let errorCount = 0;
+      const maxAttempts = 180; // 15 minutes max (5s intervals)
+      const maxErrors = 5; // Max consecutive errors before giving up
+      
+      setAnalysisStatus('Analiz başlatılıyor...');
+      
+      // Clear any existing poll interval
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current);
+      }
       
       const pollInterval = setInterval(async () => {
         attempts++;
         
-        // Update progress bar
-        setAnalysisProgress(Math.min(95, (attempts / maxAttempts) * 100));
+        // Update progress bar (slower progress for longer timeout)
+        const progressPercent = Math.min(95, (attempts / maxAttempts) * 100);
+        setAnalysisProgress(progressPercent);
+        
+        // Update status message based on progress
+        if (attempts < 12) {
+          setAnalysisStatus('Web sitesi taranıyor...');
+        } else if (attempts < 30) {
+          setAnalysisStatus('Sosyal medya analiz ediliyor...');
+        } else if (attempts < 60) {
+          setAnalysisStatus('AI analizi yapılıyor...');
+        } else if (attempts < 90) {
+          setAnalysisStatus('Rapor hazırlanıyor...');
+        } else {
+          setAnalysisStatus('Analiz devam ediyor, lütfen bekleyin...');
+        }
         
         try {
           const updatedReport = await getDigitalAnalysisReportById(report.id);
+          errorCount = 0; // Reset error count on successful fetch
           
-          if (updatedReport.status === 'completed' && updatedReport.analysis_result) {
+          // Debug logging - kritik bilgileri logla
+          console.log(`[Poll #${attempts}] Status: ${updatedReport.status}, Has analysis_result: ${!!updatedReport.analysis_result}, Type: ${typeof updatedReport.analysis_result}`);
+          if (updatedReport.analysis_result) {
+            console.log('[Poll] analysis_result keys:', Object.keys(updatedReport.analysis_result));
+            console.log('[Poll] FULL analysis_result:', JSON.stringify(updatedReport.analysis_result, null, 2));
+          }
+          
+          // Show actual database status
+          if (updatedReport.status === 'processing') {
+            setAnalysisStatus('n8n analizi devam ediyor...');
+          }
+          
+          // Normalize status check - handle various completed-like statuses
+          const statusStr = String(updatedReport.status || '').toLowerCase();
+          const isCompleted = statusStr === 'completed' || 
+                              statusStr === 'done' || 
+                              statusStr === 'success';
+          
+          // Validate analysis_result is a non-empty object
+          const hasValidResult = updatedReport.analysis_result && 
+                                 typeof updatedReport.analysis_result === 'object' &&
+                                 Object.keys(updatedReport.analysis_result).length > 0;
+          
+          // Also check if we have analysis_result even if status is weird
+          const hasResultWithUnknownStatus = hasValidResult && 
+                                             !['pending', 'processing', 'failed'].includes(updatedReport.status);
+          
+          if ((isCompleted && hasValidResult) || hasResultWithUnknownStatus) {
+            if (hasResultWithUnknownStatus && !isCompleted) {
+              console.warn('[Poll] Unexpected status with valid analysis_result:', updatedReport.status);
+            }
             clearInterval(pollInterval);
+            pollIntervalRef.current = null;
             setAnalysisProgress(100);
+            setAnalysisStatus('Tamamlandı!');
             
             // Transform analysis_result to match AnalysisResult type
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -764,41 +888,75 @@ const Demo = () => {
             const scores = analysisData.scores || {};
             const socialMedia = analysisData.social_media || {};
             
+            // n8n sosyal medya yapısını düzelt (nested object -> string)
+            const extractSocialUrl = (platform: any): string => {
+              if (typeof platform === 'string') return platform;
+              if (platform && typeof platform === 'object') return platform.url || '';
+              return '';
+            };
+
             const result: AnalysisResult = {
               id: updatedReport.id,
               company_name: updatedReport.company_name,
               website_url: updatedReport.website_url,
               email: formData.email,
-              digital_score: updatedReport.digital_score || 0,
-              sector: analysisData.sector || 'Genel',
+              digital_score: updatedReport.digital_score || scores.overall || 0,
+              sector: analysisData.sektor || analysisData.sector || 'Genel',
               location: analysisData.location || 'Türkiye',
+              crm_readiness_score: analysisData.crm_readiness?.score,
               scores: {
+                // Legacy mapping
                 web_presence: scores.web_presence ?? scores.website ?? 0,
                 social_media: scores.social_media ?? 0,
-                brand_identity: scores.brand_identity ?? 0,
+                brand_identity: scores.brand_identity ?? scores.security ?? 0,
                 digital_marketing: scores.digital_marketing ?? scores.seo ?? 0,
-                user_experience: scores.user_experience ?? 0
+                user_experience: scores.user_experience ?? scores.mobile_optimization ?? 0,
+                // n8n native fields
+                website: scores.website ?? scores.web_presence ?? 0,
+                seo: scores.seo ?? scores.digital_marketing ?? 0,
+                mobile_optimization: scores.mobile_optimization ?? 0,
+                performance: scores.performance ?? 0,
+                security: scores.security ?? 0,
+                overall: scores.overall ?? updatedReport.digital_score ?? 0
               },
-              strengths: analysisData.strengths || [],
-              weaknesses: analysisData.weaknesses || [],
-              recommendations: analysisData.recommendations || [],
+              strengths: analysisData.competitive_analysis?.strengths || analysisData.strengths || [],
+              weaknesses: analysisData.competitive_analysis?.weaknesses || analysisData.weaknesses || [],
+              recommendations: (analysisData.recommendations || []).map((rec: any) => ({
+                title: rec.title || '',
+                description: rec.description || '',
+                priority: rec.priority || 'medium',
+                category: rec.category || rec.service || 'Genel',
+                impact: rec.impact,
+                effort: rec.effort
+              })),
               summary: analysisData.executive_summary || analysisData.summary || '',
-              detailed_report: analysisData.detailed_report || '',
+              detailed_report: analysisData.detailed_report || analysisData.plain_text_report || '',
               executive_summary: analysisData.executive_summary,
-              technical_status: analysisData.technical_status,
+              technical_status: analysisData.website_analysis ? {
+                design_age: analysisData.design_analysis?.design_age,
+                mobile_score: analysisData.website_analysis?.page_speed_score_mobile,
+                desktop_score: analysisData.website_analysis?.page_speed_score_desktop,
+                ssl_enabled: analysisData.website_analysis?.ssl_enabled,
+                ssl_grade: analysisData.website_analysis?.ssl_grade
+              } : analysisData.technical_status,
               compliance: analysisData.compliance,
               social_media: Object.keys(socialMedia).length > 0 ? {
                 website: socialMedia.website || updatedReport.website_url,
-                linkedin: socialMedia.linkedin || '',
-                instagram: socialMedia.instagram || '',
-                facebook: socialMedia.facebook || '',
-                ai_analysis: socialMedia.ai_analysis || ''
+                linkedin: extractSocialUrl(socialMedia.linkedin),
+                instagram: extractSocialUrl(socialMedia.instagram),
+                facebook: extractSocialUrl(socialMedia.facebook),
+                ai_analysis: socialMedia.overall_assessment || socialMedia.ai_analysis || 
+                  (typeof socialMedia.linkedin === 'object' ? socialMedia.linkedin.analysis : '') || ''
               } : undefined,
               social_media_profiles: analysisData.social_media_profiles,
               opportunities: analysisData.opportunities,
               pain_points: analysisData.pain_points,
               roadmap: analysisData.roadmap,
-              ui_ux_review: analysisData.ui_ux_review
+              ui_ux_review: analysisData.design_analysis ? {
+                design_age: analysisData.design_analysis.design_age,
+                ux_assessment: analysisData.design_analysis.ux_assessment,
+                ai_vision_comment: analysisData.design_analysis.ai_vision_comment
+              } : analysisData.ui_ux_review
             };
             
             setAnalysisResult(result);
@@ -815,20 +973,38 @@ const Demo = () => {
             
           } else if (updatedReport.status === 'failed') {
             clearInterval(pollInterval);
+            pollIntervalRef.current = null;
+            setAnalysisStatus('Analiz başarısız oldu');
             throw new Error(updatedReport.error_message || 'Analiz başarısız oldu');
             
           } else if (attempts >= maxAttempts) {
             clearInterval(pollInterval);
+            pollIntervalRef.current = null;
             // Timeout - show mock data with warning
-            toast.warning('Analiz uzun sürüyor. Demo verisi gösteriliyor.');
+            setAnalysisStatus('');
+            toast.warning('Analiz 15 dakikayı aştı. Demo verisi gösteriliyor.');
             const result = generateMockAnalysis(formData.company_name, cleanUrl, formData.email);
             setAnalysisResult(result);
             setCurrentStep('results');
           }
         } catch (pollError) {
           console.error('Polling error:', pollError);
+          errorCount++;
+          
+          if (errorCount >= maxErrors) {
+            clearInterval(pollInterval);
+            pollIntervalRef.current = null;
+            setAnalysisStatus('');
+            toast.error('Bağlantı hatası. Demo verisi gösteriliyor.');
+            const result = generateMockAnalysis(formData.company_name, cleanUrl, formData.email);
+            setAnalysisResult(result);
+            setCurrentStep('results');
+          }
         }
       }, 5000); // Poll every 5 seconds
+      
+      // Store interval reference for cleanup
+      pollIntervalRef.current = pollInterval;
 
     } catch (error: any) {
       console.error('Analysis error:', error);
@@ -1457,9 +1633,21 @@ digiBot bu rapora tam erişime sahiptir ve tüm detayları bilmektedir.
                 <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-1">
                   Analiz Ediliyor
                 </h2>
-                <p className="text-sm text-slate-500 dark:text-slate-400 mb-5">
+                <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">
                   {formData.website_url}
                 </p>
+                
+                {/* Real-time status message */}
+                {analysisStatus && (
+                  <motion.p 
+                    key={analysisStatus}
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="text-xs font-medium text-primary mb-3"
+                  >
+                    {analysisStatus}
+                  </motion.p>
+                )}
 
                 <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-1.5 mb-5 overflow-hidden">
                   <motion.div 

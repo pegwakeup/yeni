@@ -6,6 +6,7 @@ interface OverallScoreProps {
   maxScore?: number;
   companyName: string;
   reportDate?: string;
+  sektor?: string;
 }
 
 const OverallScore: React.FC<OverallScoreProps> = ({
@@ -13,6 +14,7 @@ const OverallScore: React.FC<OverallScoreProps> = ({
   maxScore = 100,
   companyName,
   reportDate,
+  sektor,
 }) => {
   const percentage = (score / maxScore) * 100;
   
@@ -47,8 +49,13 @@ const OverallScore: React.FC<OverallScoreProps> = ({
         <div className="text-center mb-8">
           <h2 className="text-2xl font-bold mb-2">{companyName}</h2>
           <p className="text-gray-400 text-sm">Dijital Varlık Analiz Raporu</p>
+          {sektor && (
+            <span className="inline-block mt-2 px-3 py-1 bg-emerald-500/20 text-emerald-400 text-xs rounded-full">
+              {sektor}
+            </span>
+          )}
           {reportDate && (
-            <p className="text-gray-500 text-xs mt-1">{reportDate}</p>
+            <p className="text-gray-500 text-xs mt-2">{reportDate}</p>
           )}
         </div>
 
