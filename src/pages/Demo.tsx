@@ -956,8 +956,27 @@ const Demo = () => {
                 design_age: analysisData.design_analysis.design_age,
                 ux_assessment: analysisData.design_analysis.ux_assessment,
                 ai_vision_comment: analysisData.design_analysis.ai_vision_comment
-              } : analysisData.ui_ux_review
+              } : analysisData.ui_ux_review,
+              
+              // n8n Turkish fields
+              firma_adi: analysisData.firma_adi,
+              sektor: analysisData.sektor,
+              ulke: analysisData.ulke,
+              musteri_kitlesi: analysisData.musteri_kitlesi,
+              firma_tanitimi: analysisData.firma_tanitimi,
+              ui_ux_degerlendirmesi: analysisData.ui_ux_degerlendirmesi,
+              guclu_yonler: analysisData.guclu_yonler || [],
+              gelistirilmesi_gereken_alanlar: analysisData.gelistirilmesi_gereken_alanlar || [],
+              hizmet_paketleri: analysisData.hizmet_paketleri || [],
+              stratejik_yol_haritasi: analysisData.stratejik_yol_haritasi,
+              sektor_ozel_oneriler: analysisData.sektor_ozel_oneriler || [],
+              rekabet_analizi: analysisData.rekabet_analizi,
+              onemli_tespitler: analysisData.onemli_tespitler || [],
+              legal_compliance: analysisData.legal_compliance,
+              sonraki_adim: analysisData.sonraki_adim
             };
+            
+            console.log('[Poll] Transformed result with Turkish fields:', result.guclu_yonler?.length);
             
             setAnalysisResult(result);
             setCurrentStep('results');

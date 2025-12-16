@@ -126,6 +126,15 @@ const ReportDashboard: React.FC<ReportDashboardProps> = ({ report }) => {
   const analysisResult = report.analysis_result;
   const reportContext = generateReportContext(report);
 
+  // DEBUG: Rapor verisini kontrol et
+  console.log('=== REPORT DASHBOARD DEBUG ===');
+  console.log('Full report:', report);
+  console.log('analysis_result:', analysisResult);
+  console.log('guclu_yonler:', analysisResult?.guclu_yonler);
+  console.log('hizmet_paketleri:', analysisResult?.hizmet_paketleri);
+  console.log('firma_tanitimi:', analysisResult?.firma_tanitimi);
+  console.log('===============================');
+
   const handlePdfDownload = async () => {
     await logAnalyticsEvent(report.id, 'pdf_download');
     
