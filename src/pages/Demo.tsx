@@ -603,7 +603,7 @@ ${companyName || "Örnek İnşaat A.Ş."} dijital dönüşüm için acil adımla
 };
 
 // Tab types
-type TabType = 'overview' | 'details' | 'recommendations';
+type TabType = 'overview' | 'details' | 'recommendations' | 'chat';
 
 // LocalStorage key
 const CHAT_HISTORY_KEY = 'digibot_chat_history';
@@ -1716,7 +1716,8 @@ digiBot bu rapora tam erişime sahiptir ve tüm detayları bilmektedir.
                     {[
                       { id: 'overview', label: 'Genel', icon: Home },
                       { id: 'details', label: 'Rapor', icon: FileText },
-                      { id: 'recommendations', label: 'Öneriler', icon: Lightbulb }
+                      { id: 'recommendations', label: 'Öneriler', icon: Lightbulb },
+                      { id: 'chat', label: 'Sohbet', icon: MessageCircle }
                     ].map((tab) => (
                       <button
                         key={tab.id}
@@ -2977,6 +2978,164 @@ digiBot bu rapora tam erişime sahiptir ve tüm detayları bilmektedir.
                       </div>
                     </div>
                   )}
+
+                  {/* Chat Tab - Sohbet Sekmesi */}
+                  {activeTab === 'chat' && (
+                    <div
+                      key="chat"
+                      className="space-y-4"
+                    >
+                      {/* Chat Header */}
+                      <div className="text-center mb-4">
+                        <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-1 flex items-center justify-center gap-2">
+                          <MessageCircle className="w-5 h-5 text-primary" />
+                          DigiBot ile Sohbet
+                        </h2>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">
+                          Raporunuz hakkında sorularınızı sorun, anında yanıt alın
+                        </p>
+                      </div>
+
+                      {/* Inline Chat Panel */}
+                      <div className="bg-white dark:bg-dark-card rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+                        {/* Chat Header */}
+                        <div className="bg-gradient-to-r from-primary to-emerald-600 px-4 py-3 flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <img 
+                              src="https://ctncspdgguclpeijikfp.supabase.co/storage/v1/object/public/Landing%20Page/digibot-logo-02%20(1).webp" 
+                              alt="DigiBot" 
+                              className="w-10 h-10 rounded-full bg-white p-1 shadow-lg" 
+                            />
+                            <div>
+                              <h3 className="text-white font-semibold">DigiBot</h3>
+                              <p className="text-emerald-100 text-xs">Dijital Analiz Asistanı</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="w-2 h-2 bg-green-300 rounded-full animate-pulse" />
+                            <span className="text-emerald-100 text-xs">ÇevrimIçi</span>
+                          </div>
+                        </div>
+
+                        {/* Suggested Questions Grid */}
+                        <div className="p-4 border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50">
+                          <p className="text-xs text-slate-500 dark:text-slate-400 mb-3 font-medium">
+                            💡 Hızlı başlangıç için bir soru seçin:
+                          </p>
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                            {[
+                              { title: 'Genel', icon: '📊', questions: ['Bu raporun özeti nedir?', 'En kritik sorun hangisi?'] },
+                              { title: 'SEO', icon: '🔍', questions: ['SEO skorumu nasıl artırabilirim?', 'Anahtar kelime önerileri'] },
+                              { title: 'Performans', icon: '⚡', questions: ['Site hızımı nasıl artırırım?', 'Mobil performans önerileri'] },
+                              { title: 'Strateji', icon: '🎯', questions: ['Rakiplerden nasıl öne çıkarım?', 'Öncelikli yapılacaklar'] }
+                            ].map((category) => (
+                              <div key={category.title} className="space-y-1.5">
+                                <div className="flex items-center gap-1.5 text-xs font-medium text-slate-700 dark:text-slate-300">
+                                  <span>{category.icon}</span>
+                                  <span>{category.title}</span>
+                                </div>
+                                {category.questions.map((q) => (
+                                  <button
+                                    key={q}
+                                    onClick={() => {
+                                      // Open chat with this question
+                                      setIsChatOpen(true);
+                                      // Add to chat input
+                                      setChatMessages(prev => [
+                                        ...prev,
+                                        {
+                                          id: crypto.randomUUID(),
+                                          role: 'user',
+                                          content: q,
+                                          timestamp: new Date()
+                                        }
+                                      ]);
+                                    }}
+                                    className="w-full text-left text-[11px] px-2.5 py-1.5 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-lg hover:bg-primary/10 hover:text-primary dark:hover:bg-primary/20 dark:hover:text-primary transition-colors border border-slate-200 dark:border-slate-700"
+                                  >
+                                    {q}
+                                  </button>
+                                ))}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Chat Messages Area */}
+                        <div className="h-[300px] overflow-y-auto p-4 space-y-3 bg-slate-50 dark:bg-slate-900/30">
+                          {/* Welcome Message */}
+                          <div className="flex gap-3">
+                            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center">
+                              <img 
+                                src="https://ctncspdgguclpeijikfp.supabase.co/storage/v1/object/public/Landing%20Page/digibot-logo-02%20(1).webp" 
+                                alt="DigiBot" 
+                                className="w-6 h-6 rounded-full" 
+                              />
+                            </div>
+                            <div className="max-w-[80%] rounded-2xl rounded-bl-sm px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm">
+                              <p className="text-sm text-slate-700 dark:text-slate-300">
+                                Merhaba! 👋 Ben <strong>DigiBot</strong>, dijital analiz asistanınız.
+                              </p>
+                              <p className="text-sm text-slate-600 dark:text-slate-400 mt-2">
+                                Raporunuz hakkında her türlü soruyu yanıtlayabilirim. Yukarıdaki hazır sorulardan birini seçebilir veya aşağıdaki sohbet butonuna tıklayarak kendi sorunuzu sorabilirsiniz.
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Recent Chat Messages Preview */}
+                          {chatMessages.slice(-3).map((msg) => (
+                            <div key={msg.id} className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
+                              <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
+                                msg.role === 'user' 
+                                  ? 'bg-blue-100 dark:bg-blue-900' 
+                                  : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700'
+                              }`}>
+                                {msg.role === 'user' ? (
+                                  <User className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                                ) : (
+                                  <img 
+                                    src="https://ctncspdgguclpeijikfp.supabase.co/storage/v1/object/public/Landing%20Page/digibot-logo-02%20(1).webp" 
+                                    alt="DigiBot" 
+                                    className="w-6 h-6 rounded-full" 
+                                  />
+                                )}
+                              </div>
+                              <div className={`max-w-[80%] rounded-2xl px-4 py-2 ${
+                                msg.role === 'user'
+                                  ? 'bg-blue-500 text-white rounded-br-sm'
+                                  : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-bl-sm'
+                              }`}>
+                                <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Open Full Chat Button */}
+                        <div className="p-4 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+                          <button
+                            onClick={() => setIsChatOpen(true)}
+                            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-primary hover:bg-primary-dark text-white rounded-xl font-medium transition-colors"
+                          >
+                            <MessageCircle className="w-5 h-5" />
+                            Sohbete Başla
+                            <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Chat Tips */}
+                      <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-xl p-4 border border-emerald-200 dark:border-emerald-800">
+                        <h4 className="font-medium text-emerald-800 dark:text-emerald-300 mb-2 flex items-center gap-2 text-sm">
+                          <Lightbulb className="w-4 h-4" /> İpucu
+                        </h4>
+                        <p className="text-xs text-emerald-700 dark:text-emerald-400">
+                          DigiBot raporunuzdaki tüm verilere erişebilir. Skorlarınız, öneriler, 
+                          stratejik yol haritası ve hizmet paketleri hakkında detaylı sorular sorabilirsiniz.
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </AnimatePresence>
               </div>
 
@@ -3154,9 +3313,9 @@ digiBot bu rapora tam erişime sahiptir ve tüm detayları bilmektedir.
                 )}
               </AnimatePresence>
 
-              {/* Floating digiBot Button */}
+              {/* Floating digiBot Button - Hide on chat tab */}
               <AnimatePresence>
-                {!isChatOpen && (
+                {!isChatOpen && activeTab !== 'chat' && (
                   <motion.button
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
