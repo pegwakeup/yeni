@@ -32,7 +32,7 @@ const ChatContext = createContext<ChatContextValue | null>(null);
 const WELCOME_MESSAGE: ChatMessage = {
   id: 'welcome',
   role: 'assistant',
-  content: `Merhaba! 👋 Ben **DigiBot**, dijital analiz asistanınız. Raporunuz hakkında her türlü soruyu yanıtlayabilirim.`,
+  content: `Merhaba! Ben **DigiBot**, Unilancer Labs asistanı. Raporunuz hakkında sorularınızı yanıtlayabilirim.`,
   timestamp: new Date(),
 };
 
